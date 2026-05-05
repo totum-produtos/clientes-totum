@@ -14,6 +14,7 @@ import {
   isYesterday,
 } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
+import { differenceInHours } from 'date-fns';
 import {
   CalendarDays,
   Eye,
@@ -27,6 +28,7 @@ import {
   HelpCircle,
   Wrench,
   CheckCircle2,
+  Sparkles,
 } from 'lucide-react';
 
 type Post = {
@@ -317,6 +319,12 @@ export default function FeedPostagensPage() {
                                 {tipo.icon}
                                 {tipo.label}
                               </span>
+                              {differenceInHours(new Date(), parseISO(post.created_at)) <= 24 && (
+                                <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-semibold uppercase bg-purple-100 text-purple-700">
+                                  <Sparkles className="h-3 w-3" />
+                                  Novo
+                                </span>
+                              )}
                               <span className="text-[10px] text-gray-400 flex items-center gap-1">
                                 <Clock className="h-3 w-3" />
                                 {formatarDataCompleta(post.published_at)}

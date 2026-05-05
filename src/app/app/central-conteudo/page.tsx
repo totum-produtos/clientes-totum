@@ -1,5 +1,5 @@
 "use client";
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useMemo } from "react";
 import { createSPASassClient } from "@/lib/supabase/client";
 import {
   CalendarDays,
@@ -10,6 +10,9 @@ import {
   ChevronRight,
   LayoutGrid,
   User,
+  Filter,
+  Download,
+  FileText,
 } from "lucide-react";
 
 interface Cliente {
@@ -38,6 +41,8 @@ export default function CentralConteudoPage() {
   const [search, setSearch] = useState("");
   const [loading, setLoading] = useState(true);
   const [activeTab, setActiveTab] = useState<"posts" | "calendario">("posts");
+  const [filtroTipo, setFiltroTipo] = useState<string>("todos");
+  const [postsCountMap, setPostsCountMap] = useState<Record<string, number>>({});
 
   useEffect(() => {
     fetchClientes();
@@ -52,8 +57,9 @@ export default function CentralConteudoPage() {
   async function fetchClientes() {
     setLoading(true);
     const supabase = await createSPASassClient();
-    const { data } = await supabase
-      .getSupabaseClient()
+    const sb = supabase.getSupabaseClient();
+
+    const { data } = await sb
       .from("portal_clients")
       .select("id, nome, slug, email_responsavel, status, primary_color")
       .order("nome", { ascending: true });
@@ -62,6 +68,25 @@ export default function CentralConteudoPage() {
     if (list.length > 0 && !selectedCliente) {
       setSelectedCliente(list[0]);
     }
+
+    // Buscar contagem de posts do mês atual para cada cliente
+    const inicio = new Date();
+    inicio.setDate(1);
+    inicio.setHours(0, 0, 0, 0);
+    const fim = new Date(inicio.getFullYear(), inicio.getMonth() + 1, 0, 23, 59, 59);
+
+    const { data: countData } = await sb
+      .from("wanda_posts")
+      .select("portal_client_id, id")
+      .gte("published_at", inicio.toISOString())
+      .lte("published_at", fim.toISOString());
+
+    const counts: Record<string, number> = {};
+    (countData || []).forEach((p: any) => {
+      counts[p.portal_client_id] = (counts[p.portal_client_id] || 0) + 1;
+    });
+    setPostsCountMap(counts);
+
     setLoading(false);
   }
 
@@ -79,6 +104,28 @@ export default function CentralConteudoPage() {
   const clientesFiltrados = clientes.filter((c) =>
     c.nome.toLowerCase().includes(search.toLowerCase())
   );
+
+  const postsFiltrados = useMemo(() => {
+    if (filtroTipo === "todos") return posts;
+    return posts.filter((p) => p.tipo === filtroTipo);
+  }, [posts, filtroTipo]);
+
+  const handleExportCSV = () => {
+    const headers = "subject,tipo,published_at,views,likes,engagement_rate\n";
+    const rows = postsFiltrados
+      .map(
+        (p) =>
+          `"${p.subject.replace(/"/g, '""')}",${p.tipo},${p.published_at},${p.views || 0},${p.likes || 0},${p.engagement_rate || 0}`
+      )
+      .join("\n");
+    const blob = new Blob([headers + rows], { type: "text/csv;charset=utf-8;" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = `posts_${selectedCliente?.slug || "cliente"}_${new Date().toISOString().slice(0, 10)}.csv`;
+    a.click();
+    URL.revokeObjectURL(url);
+  };
 
   const tipoColors: Record<string, string> = {
     porque: "bg-red-500",
@@ -126,35 +173,47 @@ export default function CentralConteudoPage() {
         </div>
 
         <div className="flex-1 overflow-y-auto px-2 pb-4 space-y-1">
-          {clientesFiltrados.map((c) => (
-            <button
-              key={c.id}
-              onClick={() => setSelectedCliente(c)}
-              className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-left text-sm transition-colors ${
-                selectedCliente?.id === c.id
-                  ? "bg-gray-900 text-white"
-                  : "text-gray-700 hover:bg-gray-100"
-              }`}
-            >
-              <div
-                className="w-8 h-8 rounded-full flex items-center justify-center text-white text-xs font-bold shrink-0"
-                style={{
-                  backgroundColor: c.primary_color || "#d81220",
-                }}
-              >
-                {c.nome.charAt(0).toUpperCase()}
-              </div>
-              <div className="flex-1 min-w-0">
-                <p className="font-medium truncate">{c.nome}</p>
-                <p className="text-xs opacity-70 truncate">{c.email_responsavel}</p>
-              </div>
-              <ChevronRight
-                className={`h-4 w-4 shrink-0 ${
-                  selectedCliente?.id === c.id ? "text-white" : "text-gray-400"
+          {clientesFiltrados.map((c) => {
+            const count = postsCountMap[c.id] || 0;
+            return (
+              <button
+                key={c.id}
+                onClick={() => setSelectedCliente(c)}
+                className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-left text-sm transition-colors ${
+                  selectedCliente?.id === c.id
+                    ? "bg-gray-900 text-white"
+                    : "text-gray-700 hover:bg-gray-100"
                 }`}
-              />
-            </button>
-          ))}
+              >
+                <div
+                  className="w-8 h-8 rounded-full flex items-center justify-center text-white text-xs font-bold shrink-0"
+                  style={{ backgroundColor: c.primary_color || "#d81220" }}
+                >
+                  {c.nome.charAt(0).toUpperCase()}
+                </div>
+                <div className="flex-1 min-w-0">
+                  <div className="flex items-center justify-between">
+                    <p className="font-medium truncate">{c.nome}</p>
+                    {count > 0 && (
+                      <span className={`text-[10px] px-1.5 py-0.5 rounded-full font-bold ${
+                        selectedCliente?.id === c.id
+                          ? "bg-white/20 text-white"
+                          : "bg-gray-100 text-gray-600"
+                      }`}>
+                        {count}
+                      </span>
+                    )}
+                  </div>
+                  <p className="text-xs opacity-70 truncate">{c.email_responsavel}</p>
+                </div>
+                <ChevronRight
+                  className={`h-4 w-4 shrink-0 ${
+                    selectedCliente?.id === c.id ? "text-white" : "text-gray-400"
+                  }`}
+                />
+              </button>
+            );
+          })}
           {clientesFiltrados.length === 0 && (
             <p className="text-sm text-gray-400 text-center py-4">Nenhum cliente encontrado</p>
           )}
@@ -167,7 +226,7 @@ export default function CentralConteudoPage() {
           <div className="max-w-4xl mx-auto p-6">
             {/* Header do cliente */}
             <div className="bg-white rounded-xl border p-6 mb-6">
-              <div className="flex items-start justify-between">
+              <div className="flex items-start justify-between flex-wrap gap-4">
                 <div className="flex items-center gap-4">
                   <div
                     className="w-14 h-14 rounded-xl flex items-center justify-center text-white text-xl font-bold"
@@ -214,36 +273,67 @@ export default function CentralConteudoPage() {
               </div>
             </div>
 
-            {/* Tabs */}
-            <div className="flex gap-1 mb-4 bg-white rounded-lg border p-1 w-fit">
-              <button
-                onClick={() => setActiveTab("posts")}
-                className={`px-4 py-1.5 rounded-md text-sm font-medium transition-colors ${
-                  activeTab === "posts"
-                    ? "bg-gray-900 text-white"
-                    : "text-gray-600 hover:bg-gray-100"
-                }`}
-              >
-                <List className="h-4 w-4 inline mr-1.5" />
-                Posts ({posts.length})
-              </button>
-              <button
-                onClick={() => setActiveTab("calendario")}
-                className={`px-4 py-1.5 rounded-md text-sm font-medium transition-colors ${
-                  activeTab === "calendario"
-                    ? "bg-gray-900 text-white"
-                    : "text-gray-600 hover:bg-gray-100"
-                }`}
-              >
-                <CalendarDays className="h-4 w-4 inline mr-1.5" />
-                Calendário
-              </button>
+            {/* Tabs + filtros + export */}
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-4">
+              <div className="flex gap-1 bg-white rounded-lg border p-1 w-fit">
+                <button
+                  onClick={() => setActiveTab("posts")}
+                  className={`px-4 py-1.5 rounded-md text-sm font-medium transition-colors ${
+                    activeTab === "posts"
+                      ? "bg-gray-900 text-white"
+                      : "text-gray-600 hover:bg-gray-100"
+                  }`}
+                >
+                  <List className="h-4 w-4 inline mr-1.5" />
+                  Posts ({postsFiltrados.length})
+                </button>
+                <button
+                  onClick={() => setActiveTab("calendario")}
+                  className={`px-4 py-1.5 rounded-md text-sm font-medium transition-colors ${
+                    activeTab === "calendario"
+                      ? "bg-gray-900 text-white"
+                      : "text-gray-600 hover:bg-gray-100"
+                  }`}
+                >
+                  <CalendarDays className="h-4 w-4 inline mr-1.5" />
+                  Calendário
+                </button>
+              </div>
+
+              {activeTab === "posts" && (
+                <div className="flex items-center gap-2">
+                  {/* Filtro por tipo */}
+                  <div className="flex items-center gap-1 bg-white rounded-lg border px-2 py-1">
+                    <Filter className="h-3.5 w-3.5 text-gray-400 ml-1" />
+                    {(["todos", "porque", "o_que", "como"] as const).map((tipo) => (
+                      <button
+                        key={tipo}
+                        onClick={() => setFiltroTipo(tipo)}
+                        className={`px-2 py-1 rounded text-[11px] font-medium transition-colors ${
+                          filtroTipo === tipo
+                            ? "bg-gray-900 text-white"
+                            : "text-gray-500 hover:bg-gray-100"
+                        }`}
+                      >
+                        {tipo === "todos" ? "Todos" : tipoLabels[tipo] || tipo}
+                      </button>
+                    ))}
+                  </div>
+                  <button
+                    onClick={handleExportCSV}
+                    className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg border text-sm hover:bg-gray-50 transition-colors"
+                    title="Exportar posts para CSV"
+                  >
+                    <Download className="h-4 w-4" /> Exportar
+                  </button>
+                </div>
+              )}
             </div>
 
             {/* Lista de posts */}
             {activeTab === "posts" && (
               <div className="space-y-3">
-                {posts.map((post) => (
+                {postsFiltrados.map((post) => (
                   <div
                     key={post.id}
                     className="bg-white rounded-lg border p-4 hover:shadow-sm transition-shadow"
@@ -279,10 +369,18 @@ export default function CentralConteudoPage() {
                     </div>
                   </div>
                 ))}
-                {posts.length === 0 && (
+                {postsFiltrados.length === 0 && (
                   <div className="bg-white rounded-lg border p-8 text-center">
                     <List className="h-8 w-8 text-gray-300 mx-auto mb-2" />
                     <p className="text-sm text-gray-500">Nenhum post para este cliente</p>
+                    {filtroTipo !== "todos" && (
+                      <button
+                        onClick={() => setFiltroTipo("todos")}
+                        className="text-xs text-primary-600 mt-2 hover:underline"
+                      >
+                        Limpar filtro
+                      </button>
+                    )}
                   </div>
                 )}
               </div>
@@ -313,10 +411,7 @@ export default function CentralConteudoPage() {
                     }
                     const dayPosts = posts.filter((p) => {
                       const d = new Date(p.published_at);
-                      return (
-                        d.getDate() === currentDay &&
-                        d.getMonth() === new Date().getMonth()
-                      );
+                      return d.getDate() === currentDay && d.getMonth() === new Date().getMonth();
                     });
                     const isToday = currentDay === new Date().getDate();
                     return (
@@ -326,14 +421,14 @@ export default function CentralConteudoPage() {
                           isToday ? "ring-2 ring-[#d81220] ring-offset-1" : ""
                         } ${dayPosts.length > 0 ? "bg-gray-50" : ""}`}
                       >
-                        <span className={`font-medium ${isToday ? "text-[#d81220]" : "text-gray-700"}`}>{currentDay}</span>
+                        <span className={`font-medium ${isToday ? "text-[#d81220]" : "text-gray-700"}`}>
+                          {currentDay}
+                        </span>
                         <div className="flex flex-wrap gap-0.5 mt-0.5">
                           {dayPosts.map((p) => (
                             <span
                               key={p.id}
-                              className={`w-1.5 h-1.5 rounded-full ${
-                                tipoColors[p.tipo] || "bg-gray-400"
-                              }`}
+                              className={`w-1.5 h-1.5 rounded-full ${tipoColors[p.tipo] || "bg-gray-400"}`}
                               title={p.subject}
                             />
                           ))}

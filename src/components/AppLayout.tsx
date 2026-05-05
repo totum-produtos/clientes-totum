@@ -18,9 +18,12 @@ import {
     Key,
     User,
     LayoutGrid,
+    Moon,
+    Sun,
 } from 'lucide-react';
 import { useGlobal } from "@/lib/context/GlobalContext";
 import { createSPASassClient } from "@/lib/supabase/client";
+import { useDarkMode } from "@/lib/hooks/useDarkMode";
 import Image from "next/image";
 
 export default function AppLayout({ children }: { children: React.ReactNode }) {
@@ -30,6 +33,7 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
     const router = useRouter();
 
     const { user } = useGlobal();
+    const { isDark, toggle } = useDarkMode();
     const isMaster = user?.role === 'master';
 
     const allNavigation = [
@@ -71,7 +75,7 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
     const toggleSidebar = () => setSidebarOpen(!isSidebarOpen);
 
     return (
-        <div className="min-h-screen bg-gray-100">
+        <div className="min-h-screen bg-gray-100 dark:bg-gray-900 transition-colors">
             {isSidebarOpen && (
                 <div
                     className="fixed inset-0 bg-gray-600 bg-opacity-75 z-20 lg:hidden"
@@ -80,7 +84,7 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
             )}
 
             {/* Sidebar */}
-            <div className={`fixed inset-y-0 left-0 w-64 bg-white shadow-lg transform transition-transform duration-200 ease-in-out z-30 
+            <div className={`fixed inset-y-0 left-0 w-64 bg-white dark:bg-gray-800 dark:border-r dark:border-gray-700 shadow-lg transform transition-transform duration-200 ease-in-out z-30 
                 ${isSidebarOpen ? 'translate-x-0' : '-translate-x-full'} lg:translate-x-0`}>
 
                 <div className="h-16 flex items-center justify-between px-4 border-b">
@@ -123,7 +127,7 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
             </div>
 
             <div className="lg:pl-64">
-                <div className="sticky top-0 z-10 flex items-center justify-between h-16 bg-white shadow-sm px-4">
+                <div className="sticky top-0 z-10 flex items-center justify-between h-16 bg-white dark:bg-gray-800 shadow-sm px-4">
                     <button
                         onClick={toggleSidebar}
                         className="lg:hidden text-gray-500 hover:text-gray-700"
@@ -154,6 +158,16 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
                                     </p>
                                 </div>
                                 <div className="py-1">
+                                    <button
+                                        onClick={() => {
+                                            setUserDropdownOpen(false);
+                                            toggle();
+                                        }}
+                                        className="w-full flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-gray-50"
+                                    >
+                                        {isDark ? <Sun className="mr-3 h-4 w-4 text-gray-400" /> : <Moon className="mr-3 h-4 w-4 text-gray-400" />}
+                                        {isDark ? 'Modo claro' : 'Modo escuro'}
+                                    </button>
                                     <button
                                         onClick={() => {
                                             setUserDropdownOpen(false);
