@@ -1,4 +1,10 @@
--- Parte 3: RLS policies
+-- Migration: RLS policies iniciais (SELECT apenas)
+-- Data: 2026-05-04
+-- Depende de: 20260504000002_link_demo_data.sql
+-- Descrição: Ativa RLS e cria policies SELECT para wanda_posts, tarefas, projetos.
+-- ⚠️ Esta migration foi SUPERSEDIDA por 20260504000007_fix_rls_policies.sql,
+--    que adiciona INSERT/UPDATE/DELETE e remove vazamento IS NULL.
+
 ALTER TABLE wanda_posts ENABLE ROW LEVEL SECURITY;
 DROP POLICY IF EXISTS "portal_wanda_posts_view" ON wanda_posts;
 CREATE POLICY "portal_wanda_posts_view" ON wanda_posts FOR SELECT

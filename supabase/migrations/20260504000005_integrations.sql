@@ -1,4 +1,9 @@
--- Adicionar vínculo portal_client_id em wanda_posts
+-- Migration: Integração — vínculo e RLS (versão consolidada)
+-- Data: 2026-05-04
+-- Depende de: 20260504000006_portal_views.sql
+-- Descrição: Adiciona FKs, vincula dados demo e cria policies SELECT.
+-- ⚠️ SUPERSEDIDA por 20260504000007_fix_rls_policies.sql (adiciona INSERT/UPDATE/DELETE).
+
 ALTER TABLE wanda_posts ADD COLUMN IF NOT EXISTS portal_client_id uuid REFERENCES portal_clients(id) ON DELETE SET NULL;
 
 -- Adicionar vínculo portal_client_id em tarefas
