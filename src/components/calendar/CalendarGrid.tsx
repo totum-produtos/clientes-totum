@@ -1,126 +1,80 @@
 "use client";
-import React from 'react';
-import {
-    startOfMonth,
-    endOfMonth,
-    startOfWeek,
-    endOfWeek,
-    addDays,
-    format,
-    isSameMonth,
-    isSameDay,
-    addMonths,
-    subMonths,
-} from 'date-fns';
+import { startOfMonth, endOfMonth, startOfWeek, endOfWeek, eachDayOfInterval, isSameMonth, isSameDay, format } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
-import { ChevronLeft, ChevronRight } from 'lucide-react';
 
-interface CalendarEvent {
-    id: string | number;
-    title: string;
-    date: Date;
-    type: string;
-    color?: string;
-}
-
-interface CalendarGridProps {
-    currentMonth: Date;
-    onMonthChange: (date: Date) => void;
-    events: CalendarEvent[];
-    onDayClick: (date: Date) => void;
-    onEventClick: (event: CalendarEvent) => void;
-}
-
-const typeColors: Record<string, string> = {
-    viral: 'bg-purple-500',
-    conversion: 'bg-green-500',
-    educational: 'bg-blue-500',
-    default: 'bg-gray-400',
+const circuloDouradoColors: Record<string, string> = {
+  porque: 'bg-amber-500',
+  oque: 'bg-emerald-500',
+  como: 'bg-sky-500',
 };
 
-export default function CalendarGrid({ currentMonth, onMonthChange, events, onDayClick, onEventClick }: CalendarGridProps) {
-    const monthStart = startOfMonth(currentMonth);
-    const monthEnd = endOfMonth(monthStart);
-    const calendarStart = startOfWeek(monthStart, { weekStartsOn: 0 });
-    const calendarEnd = endOfWeek(monthEnd, { weekStartsOn: 0 });
+const circuloDouradoLabels: Record<string, string> = {
+  porque: 'P',
+  oque: 'Q',
+  como: 'C',
+};
 
-    const days: Date[] = [];
-    let day = calendarStart;
-    while (day <= calendarEnd) {
-        days.push(day);
-        day = addDays(day, 1);
-    }
+type Post = {
+  id: number;
+  subject: string;
+  tipo: string;
+  published_at: string;
+};
 
-    const weekDays = ['Dom', 'Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sáb'];
+interface Props {
+  month: Date;
+  posts: Post[];
+  onDayClick: (date: Date) => void;
+  onPostClick: (post: Post) => void;
+}
 
-    return (
-        <div className="bg-white rounded-lg shadow border">
-            {/* Header */}
-            <div className="flex items-center justify-between p-4 border-b">
-                <h2 className="text-lg font-semibold text-gray-900 capitalize">
-                    {format(currentMonth, 'MMMM yyyy', { locale: ptBR })}
-                </h2>
-                <div className="flex gap-1">
-                    <button onClick={() => onMonthChange(subMonths(currentMonth, 1))} className="p-2 hover:bg-gray-100 rounded-lg">
-                        <ChevronLeft className="h-5 w-5 text-gray-600" />
-                    </button>
-                    <button onClick={() => onMonthChange(new Date())} className="px-3 py-1.5 text-sm font-medium text-gray-700 hover:bg-gray-100 rounded-lg">
-                        Hoje
-                    </button>
-                    <button onClick={() => onMonthChange(addMonths(currentMonth, 1))} className="p-2 hover:bg-gray-100 rounded-lg">
-                        <ChevronRight className="h-5 w-5 text-gray-600" />
-                    </button>
-                </div>
-            </div>
+export default function CalendarGrid({ month, posts, onDayClick, onPostClick }: Props) {
+  const monthStart = startOfMonth(month);
+  const monthEnd = endOfMonth(monthStart);
+  const calendarStart = startOfWeek(monthStart, { locale: ptBR });
+  const calendarEnd = endOfWeek(monthEnd, { locale: ptBR });
+  const days = eachDayOfInterval({ start: calendarStart, end: calendarEnd });
 
-            {/* Week days */}
-            <div className="grid grid-cols-7 border-b">
-                {weekDays.map((d) => (
-                    <div key={d} className="p-2 text-center text-xs font-medium text-gray-500 uppercase">
-                        {d}
-                    </div>
-                ))}
-            </div>
-
-            {/* Days grid */}
-            <div className="grid grid-cols-7">
-                {days.map((date, idx) => {
-                    const isCurrentMonth = isSameMonth(date, monthStart);
-                    const isToday = isSameDay(date, new Date());
-                    const dayEvents = events.filter((e) => isSameDay(new Date(e.date), date));
-
-                    return (
-                        <div
-                            key={idx}
-                            onClick={() => onDayClick(date)}
-                            className={`min-h-[100px] p-2 border-b border-r cursor-pointer transition-colors hover:bg-gray-50 ${
-                                !isCurrentMonth ? 'bg-gray-50 text-gray-400' : 'text-gray-900'
-                            } ${isToday ? 'bg-primary-50' : ''}`}
-                        >
-                            <div className={`text-sm font-medium mb-1 ${isToday ? 'text-primary-600' : ''}`}>
-                                {format(date, 'd')}
-                            </div>
-                            <div className="space-y-1">
-                                {dayEvents.slice(0, 3).map((event) => (
-                                    <div
-                                        key={event.id}
-                                        onClick={(e) => {
-                                            e.stopPropagation();
-                                            onEventClick(event);
-                                        }}
-                                        className={`text-[10px] px-1.5 py-0.5 rounded text-white truncate ${typeColors[event.type] || typeColors.default}`}
-                                    >
-                                        {event.title}
-                                    </div>
-                                ))}
-                                {dayEvents.length > 3 && (
-                                    <div className="text-[10px] text-gray-500 pl-1">+{dayEvents.length - 3} mais</div>
-                                )}
-                            </div>
-                        </div>
-                    );
-                })}
-            </div>
+  return (
+    <div className="grid grid-cols-7 gap-1">
+      {['Dom', 'Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sáb'].map((d) => (
+        <div key={d} className="text-center text-xs font-medium text-gray-500 py-2 uppercase">
+          {d}
         </div>
-    );
+      ))}
+      {days.map((day) => {
+        const dayPosts = posts.filter((p) => isSameDay(new Date(p.published_at), day));
+        return (
+          <div
+            key={day.toISOString()}
+            onClick={() => onDayClick(day)}
+            className={`min-h-[80px] border rounded-lg p-1.5 cursor-pointer transition-colors hover:bg-gray-50 ${
+              !isSameMonth(day, month) ? 'bg-gray-50/50 opacity-50' : 'bg-white'
+            } ${isSameDay(day, new Date()) ? 'ring-2 ring-[#d81220] ring-offset-1' : ''}`}
+          >
+            <span className={`text-sm font-medium ${isSameDay(day, new Date()) ? 'text-[#d81220]' : 'text-gray-700'}`}>
+              {format(day, 'd')}
+            </span>
+            <div className="flex flex-wrap gap-1 mt-1">
+              {dayPosts.map((p) => (
+                <button
+                  key={p.id}
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    onPostClick(p);
+                  }}
+                  className={`w-5 h-5 rounded-full text-[10px] font-bold text-white flex items-center justify-center ${
+                    circuloDouradoColors[p.tipo] || 'bg-gray-400'
+                  }`}
+                  title={`${p.subject} (${circuloDouradoLabels[p.tipo] || p.tipo})`}
+                >
+                  {circuloDouradoLabels[p.tipo] || '?'}
+                </button>
+              ))}
+            </div>
+          </div>
+        );
+      })}
+    </div>
+  );
 }

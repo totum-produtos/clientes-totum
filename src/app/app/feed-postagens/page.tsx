@@ -7,7 +7,6 @@ import {
   parseISO,
   startOfMonth,
   endOfMonth,
-  isSameMonth,
   subMonths,
   addMonths,
   isToday,
@@ -22,12 +21,12 @@ import {
   BarChart3,
   ChevronLeft,
   ChevronRight,
-  Filter,
   Hash,
-  Clapperboard,
-  Megaphone,
-  BookOpen,
   Clock,
+  Target,
+  HelpCircle,
+  Wrench,
+  CheckCircle2,
 } from 'lucide-react';
 
 type Post = {
@@ -42,24 +41,28 @@ type Post = {
   created_at: string;
 };
 
-const tipoConfig: Record<string, { label: string; color: string; bg: string; icon: React.ReactNode }> = {
-  viral: {
-    label: 'Viral',
-    color: 'text-purple-700',
-    bg: 'bg-purple-100',
-    icon: <Megaphone className="h-3.5 w-3.5" />,
+// Círculo Dourado do Simon Sinek: Porquê → O que → Como
+const circuloDourado: Record<string, { label: string; color: string; bg: string; icon: React.ReactNode; desc: string }> = {
+  porque: {
+    label: 'Porquê',
+    color: 'text-amber-700',
+    bg: 'bg-amber-100',
+    icon: <HelpCircle className="h-3.5 w-3.5" />,
+    desc: 'Propósito, causa, crença',
   },
-  conversion: {
-    label: 'Conversão',
-    color: 'text-green-700',
-    bg: 'bg-green-100',
-    icon: <BarChart3 className="h-3.5 w-3.5" />,
+  oque: {
+    label: 'O que',
+    color: 'text-emerald-700',
+    bg: 'bg-emerald-100',
+    icon: <Target className="h-3.5 w-3.5" />,
+    desc: 'Produto, serviço, resultado',
   },
-  educational: {
-    label: 'Educativo',
-    color: 'text-blue-700',
-    bg: 'bg-blue-100',
-    icon: <BookOpen className="h-3.5 w-3.5" />,
+  como: {
+    label: 'Como',
+    color: 'text-sky-700',
+    bg: 'bg-sky-100',
+    icon: <Wrench className="h-3.5 w-3.5" />,
+    desc: 'Processo, diferencial, método',
   },
 };
 
@@ -117,7 +120,6 @@ export default function FeedPostagensPage() {
     });
   }, [posts, filtroTipo, filtroBusca]);
 
-  // Agrupar posts por data (dia)
   const postsPorDia = useMemo(() => {
     const grupos: Record<string, Post[]> = {};
     postsFiltrados.forEach((post) => {
@@ -125,8 +127,18 @@ export default function FeedPostagensPage() {
       if (!grupos[chave]) grupos[chave] = [];
       grupos[chave].push(post);
     });
-    // Ordenar dias do mais recente para o mais antigo
     return Object.entries(grupos).sort(([a], [b]) => b.localeCompare(a));
+  }, [postsFiltrados]);
+
+  const distribuicaoCD = useMemo(() => {
+    const dist = { porque: 0, oque: 0, como: 0, outros: 0 };
+    postsFiltrados.forEach((p) => {
+      if (p.tipo === 'porque') dist.porque++;
+      else if (p.tipo === 'oque') dist.oque++;
+      else if (p.tipo === 'como') dist.como++;
+      else dist.outros++;
+    });
+    return dist;
   }, [postsFiltrados]);
 
   const totalViews = postsFiltrados.reduce((s, p) => s + (p.views || 0), 0);
@@ -144,21 +156,67 @@ export default function FeedPostagensPage() {
           <p className="text-gray-500">Visão em lista do calendário de conteúdo</p>
         </div>
         <div className="flex items-center gap-2 bg-white rounded-lg border px-3 py-2">
-          <button
-            onClick={() => setMesAtual(subMonths(mesAtual, 1))}
-            className="p-1 hover:bg-gray-100 rounded"
-          >
+          <button onClick={() => setMesAtual(subMonths(mesAtual, 1))} className="p-1 hover:bg-gray-100 rounded">
             <ChevronLeft className="h-4 w-4 text-gray-600" />
           </button>
           <span className="text-sm font-medium min-w-[120px] text-center capitalize">
             {format(mesAtual, 'MMMM yyyy', { locale: ptBR })}
           </span>
-          <button
-            onClick={() => setMesAtual(addMonths(mesAtual, 1))}
-            className="p-1 hover:bg-gray-100 rounded"
-          >
+          <button onClick={() => setMesAtual(addMonths(mesAtual, 1))} className="p-1 hover:bg-gray-100 rounded">
             <ChevronRight className="h-4 w-4 text-gray-600" />
           </button>
+        </div>
+      </div>
+
+      {/* Barra Círculo Dourado - distribuição */}
+      <div className="bg-white border rounded-xl p-4">
+        <div className="flex items-center justify-between mb-3">
+          <h3 className="text-sm font-semibold text-gray-700">Círculo Dourado do Mês</h3>
+          <span className="text-xs text-gray-400">Simon Sinek</span>
+        </div>
+        <div className="flex items-center gap-1 h-3 rounded-full overflow-hidden">
+          {distribuicaoCD.porque > 0 && (
+            <div
+              className="h-full bg-amber-400"
+              style={{ width: `${(distribuicaoCD.porque / postsFiltrados.length) * 100}%` }}
+              title={`Porquê: ${distribuicaoCD.porque}`}
+            />
+          )}
+          {distribuicaoCD.oque > 0 && (
+            <div
+              className="h-full bg-emerald-400"
+              style={{ width: `${(distribuicaoCD.oque / postsFiltrados.length) * 100}%` }}
+              title={`O que: ${distribuicaoCD.oque}`}
+            />
+          )}
+          {distribuicaoCD.como > 0 && (
+            <div
+              className="h-full bg-sky-400"
+              style={{ width: `${(distribuicaoCD.como / postsFiltrados.length) * 100}%` }}
+              title={`Como: ${distribuicaoCD.como}`}
+            />
+          )}
+          {distribuicaoCD.outros > 0 && (
+            <div
+              className="h-full bg-gray-300"
+              style={{ width: `${(distribuicaoCD.outros / postsFiltrados.length) * 100}%` }}
+              title={`Outros: ${distribuicaoCD.outros}`}
+            />
+          )}
+        </div>
+        <div className="flex gap-4 mt-2">
+          <div className="flex items-center gap-1.5 text-xs">
+            <div className="w-2.5 h-2.5 rounded-full bg-amber-400" />
+            <span className="text-gray-600">Porquê ({distribuicaoCD.porque})</span>
+          </div>
+          <div className="flex items-center gap-1.5 text-xs">
+            <div className="w-2.5 h-2.5 rounded-full bg-emerald-400" />
+            <span className="text-gray-600">O que ({distribuicaoCD.oque})</span>
+          </div>
+          <div className="flex items-center gap-1.5 text-xs">
+            <div className="w-2.5 h-2.5 rounded-full bg-sky-400" />
+            <span className="text-gray-600">Como ({distribuicaoCD.como})</span>
+          </div>
         </div>
       </div>
 
@@ -191,7 +249,7 @@ export default function FeedPostagensPage() {
           />
         </div>
         <div className="flex gap-2">
-          {(['todos', 'viral', 'conversion', 'educational'] as const).map((tipo) => (
+          {(['todos', 'porque', 'oque', 'como'] as const).map((tipo) => (
             <button
               key={tipo}
               onClick={() => setFiltroTipo(tipo)}
@@ -201,7 +259,7 @@ export default function FeedPostagensPage() {
                   : 'bg-white border text-gray-600 hover:bg-gray-50'
               }`}
             >
-              {tipo === 'todos' ? 'Todos' : tipoConfig[tipo]?.label || tipo}
+              {tipo === 'todos' ? 'Todos' : circuloDourado[tipo]?.label || tipo}
             </button>
           ))}
         </div>
@@ -217,9 +275,7 @@ export default function FeedPostagensPage() {
           <CalendarDays className="h-12 w-12 text-gray-300 mx-auto mb-3" />
           <p className="text-gray-500">Nenhuma postagem encontrada.</p>
           <p className="text-sm text-gray-400 mt-1">
-            {filtroTipo !== 'todos' || filtroBusca
-              ? 'Tente ajustar os filtros.'
-              : 'Nenhum post agendado para este mês.'}
+            {filtroTipo !== 'todos' || filtroBusca ? 'Tente ajustar os filtros.' : 'Nenhum post agendado para este mês.'}
           </p>
         </div>
       ) : (
@@ -234,12 +290,8 @@ export default function FeedPostagensPage() {
                     {format(data, 'dd')}
                   </div>
                   <div>
-                    <p className="text-sm font-semibold text-gray-900 capitalize">
-                      {formatarData(dataKey)}
-                    </p>
-                    <p className="text-xs text-gray-500">
-                      {format(data, 'EEEE', { locale: ptBR })}
-                    </p>
+                    <p className="text-sm font-semibold text-gray-900 capitalize">{formatarData(dataKey)}</p>
+                    <p className="text-xs text-gray-500">{format(data, 'EEEE', { locale: ptBR })}</p>
                   </div>
                   <div className="flex-1 h-px bg-gray-200" />
                   <span className="text-xs text-gray-400 bg-gray-50 px-2 py-1 rounded-full">
@@ -247,23 +299,20 @@ export default function FeedPostagensPage() {
                   </span>
                 </div>
 
-                {/* Cards do dia */}
                 <div className="space-y-3 pl-2">
                   {postsDoDia.map((post) => {
-                    const tipo = tipoConfig[post.tipo] || {
+                    const tipo = circuloDourado[post.tipo] || {
                       label: post.tipo,
                       color: 'text-gray-700',
                       bg: 'bg-gray-100',
-                      icon: <Clapperboard className="h-3.5 w-3.5" />,
+                      icon: <CheckCircle2 className="h-3.5 w-3.5" />,
+                      desc: '',
                     };
                     return (
-                      <div
-                        key={post.id}
-                        className="bg-white border rounded-xl p-4 hover:shadow-sm transition-shadow"
-                      >
+                      <div key={post.id} className="bg-white border rounded-xl p-4 hover:shadow-sm transition-shadow">
                         <div className="flex items-start justify-between gap-3">
                           <div className="flex-1 min-w-0">
-                            <div className="flex items-center gap-2 mb-2">
+                            <div className="flex items-center gap-2 mb-2 flex-wrap">
                               <span className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-semibold uppercase ${tipo.bg} ${tipo.color}`}>
                                 {tipo.icon}
                                 {tipo.label}
@@ -272,14 +321,14 @@ export default function FeedPostagensPage() {
                                 <Clock className="h-3 w-3" />
                                 {formatarDataCompleta(post.published_at)}
                               </span>
+                              {tipo.desc && (
+                                <span className="text-[10px] text-gray-400 hidden sm:inline">· {tipo.desc}</span>
+                              )}
                             </div>
-                            <h3 className="text-base font-medium text-gray-900 leading-snug">
-                              {post.subject}
-                            </h3>
+                            <h3 className="text-base font-medium text-gray-900 leading-snug">{post.subject}</h3>
                           </div>
                         </div>
 
-                        {/* Métricas */}
                         <div className="flex items-center gap-4 mt-3 pt-3 border-t border-gray-50">
                           <div className="flex items-center gap-1.5 text-sm text-gray-600">
                             <Eye className="h-4 w-4 text-gray-400" />
@@ -298,7 +347,7 @@ export default function FeedPostagensPage() {
                           </div>
                           {post.conversion_rate ? (
                             <div className="flex items-center gap-1.5 text-sm text-gray-600">
-                              <Megaphone className="h-4 w-4 text-gray-400" />
+                              <Target className="h-4 w-4 text-gray-400" />
                               <span className="font-medium">{post.conversion_rate}%</span>
                               <span className="text-xs text-gray-400">conversão</span>
                             </div>
