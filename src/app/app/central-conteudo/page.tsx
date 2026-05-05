@@ -12,8 +12,11 @@ import {
   User,
   Filter,
   Download,
-  FileText,
+  ArrowLeft,
+  ArrowRight,
+  AlertTriangle,
 } from "lucide-react";
+import Toast from "@/components/ui/Toast";
 
 interface Cliente {
   id: string;
@@ -43,6 +46,7 @@ export default function CentralConteudoPage() {
   const [activeTab, setActiveTab] = useState<"posts" | "calendario">("posts");
   const [filtroTipo, setFiltroTipo] = useState<string>("todos");
   const [postsCountMap, setPostsCountMap] = useState<Record<string, number>>({});
+  const [toastMessage, setToastMessage] = useState<string | null>(null);
 
   useEffect(() => {
     fetchClientes();
@@ -53,6 +57,47 @@ export default function CentralConteudoPage() {
       fetchPosts(selectedCliente.id);
     }
   }, [selectedCliente]);
+
+  // Realtime: notificações de novos posts
+  useEffect(() => {
+    if (!selectedCliente) return;
+    let channel: any = null;
+
+    async function setupRealtime() {
+      const supabase = await createSPASassClient();
+      channel = supabase
+        .getSupabaseClient()
+        .channel("central-conteudo-realtime")
+        .on(
+          "postgres_changes",
+          {
+            event: "INSERT",
+            schema: "public",
+            table: "wanda_posts",
+            filter: `portal_client_id=eq.${selectedCliente.id}`,
+          },
+          (payload: any) => {
+            const novoPost = payload.new;
+            setToastMessage(
+              `Novo post: "${novoPost.subject?.slice(0, 40)}${
+                novoPost.subject?.length > 40 ? "..." : ""
+              }"`
+            );
+            fetchPosts(selectedCliente.id);
+          }
+        )
+        .subscribe();
+    }
+    setupRealtime();
+
+    return () => {
+      if (channel) {
+        createSPASassClient().then((s) =>
+          s.getSupabaseClient().removeChannel(channel)
+        );
+      }
+    };
+  }, [selectedCliente?.id]);
 
   async function fetchClientes() {
     setLoading(true);
@@ -101,6 +146,26 @@ export default function CentralConteudoPage() {
     setPosts(data || []);
   }
 
+  async function moverPost(postId: number, dias: number) {
+    const post = posts.find((p) => p.id === postId);
+    if (!post) return;
+    const novaData = new Date(post.published_at);
+    novaData.setDate(novaData.getDate() + dias);
+
+    const supabase = await createSPASassClient();
+    const { error } = await supabase
+      .getSupabaseClient()
+      .from("wanda_posts")
+      .update({ published_at: novaData.toISOString() })
+      .eq("id", postId);
+
+    if (error) {
+      alert("Erro ao mover: " + error.message);
+    } else {
+      fetchPosts(selectedCliente!.id);
+    }
+  }
+
   const clientesFiltrados = clientes.filter((c) =>
     c.nome.toLowerCase().includes(search.toLowerCase())
   );
@@ -127,6 +192,24 @@ export default function CentralConteudoPage() {
     URL.revokeObjectURL(url);
   };
 
+  // Calcular gaps: dias do mês atual sem posts (até hoje)
+  const gapDias = useMemo(() => {
+    const hoje = new Date().getDate();
+    const diasComPost = new Set(
+      posts
+        .filter((p) => {
+          const d = new Date(p.published_at);
+          return d.getMonth() === new Date().getMonth();
+        })
+        .map((p) => new Date(p.published_at).getDate())
+    );
+    const gaps: number[] = [];
+    for (let d = 1; d <= hoje; d++) {
+      if (!diasComPost.has(d)) gaps.push(d);
+    }
+    return gaps;
+  }, [posts]);
+
   const tipoColors: Record<string, string> = {
     porque: "bg-red-500",
     o_que: "bg-blue-500",
@@ -149,6 +232,10 @@ export default function CentralConteudoPage() {
 
   return (
     <div className="flex h-[calc(100vh-4rem)] -m-4">
+      {toastMessage && (
+        <Toast message={toastMessage} onClose={() => setToastMessage(null)} />
+      )}
+
       {/* Sidebar — lista de clientes */}
       <div className="w-72 bg-white border-r flex flex-col">
         <div className="p-4 border-b">
@@ -195,11 +282,13 @@ export default function CentralConteudoPage() {
                   <div className="flex items-center justify-between">
                     <p className="font-medium truncate">{c.nome}</p>
                     {count > 0 && (
-                      <span className={`text-[10px] px-1.5 py-0.5 rounded-full font-bold ${
-                        selectedCliente?.id === c.id
-                          ? "bg-white/20 text-white"
-                          : "bg-gray-100 text-gray-600"
-                      }`}>
+                      <span
+                        className={`text-[10px] px-1.5 py-0.5 rounded-full font-bold ${
+                          selectedCliente?.id === c.id
+                            ? "bg-white/20 text-white"
+                            : "bg-gray-100 text-gray-600"
+                        }`}
+                      >
                         {count}
                       </span>
                     )}
@@ -215,7 +304,9 @@ export default function CentralConteudoPage() {
             );
           })}
           {clientesFiltrados.length === 0 && (
-            <p className="text-sm text-gray-400 text-center py-4">Nenhum cliente encontrado</p>
+            <p className="text-sm text-gray-400 text-center py-4">
+              Nenhum cliente encontrado
+            </p>
           )}
         </div>
       </div>
@@ -235,8 +326,12 @@ export default function CentralConteudoPage() {
                     {selectedCliente.nome.charAt(0).toUpperCase()}
                   </div>
                   <div>
-                    <h2 className="text-xl font-bold text-gray-900">{selectedCliente.nome}</h2>
-                    <p className="text-sm text-gray-500">{selectedCliente.email_responsavel}</p>
+                    <h2 className="text-xl font-bold text-gray-900">
+                      {selectedCliente.nome}
+                    </h2>
+                    <p className="text-sm text-gray-500">
+                      {selectedCliente.email_responsavel}
+                    </p>
                     <span
                       className={`inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium mt-1 ${
                         selectedCliente.status === "ativo"
@@ -249,7 +344,6 @@ export default function CentralConteudoPage() {
                   </div>
                 </div>
 
-                {/* Links rápidos */}
                 <div className="flex gap-2">
                   <a
                     href={`/app/calendario?client=${selectedCliente.id}`}
@@ -272,6 +366,18 @@ export default function CentralConteudoPage() {
                 </div>
               </div>
             </div>
+
+            {/* Alerta de gaps */}
+            {gapDias.length > 0 && activeTab === "calendario" && (
+              <div className="bg-amber-50 border border-amber-200 rounded-lg p-3 mb-4 flex items-center gap-2">
+                <AlertTriangle className="h-4 w-4 text-amber-600 shrink-0" />
+                <p className="text-sm text-amber-800">
+                  <span className="font-semibold">{gapDias.length} dia(s)</span> sem post
+                  neste mês até hoje: {gapDias.slice(0, 10).join(", ")}
+                  {gapDias.length > 10 ? "..." : ""}
+                </p>
+              </div>
+            )}
 
             {/* Tabs + filtros + export */}
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-4">
@@ -302,22 +408,25 @@ export default function CentralConteudoPage() {
 
               {activeTab === "posts" && (
                 <div className="flex items-center gap-2">
-                  {/* Filtro por tipo */}
                   <div className="flex items-center gap-1 bg-white rounded-lg border px-2 py-1">
                     <Filter className="h-3.5 w-3.5 text-gray-400 ml-1" />
-                    {(["todos", "porque", "o_que", "como"] as const).map((tipo) => (
-                      <button
-                        key={tipo}
-                        onClick={() => setFiltroTipo(tipo)}
-                        className={`px-2 py-1 rounded text-[11px] font-medium transition-colors ${
-                          filtroTipo === tipo
-                            ? "bg-gray-900 text-white"
-                            : "text-gray-500 hover:bg-gray-100"
-                        }`}
-                      >
-                        {tipo === "todos" ? "Todos" : tipoLabels[tipo] || tipo}
-                      </button>
-                    ))}
+                    {(["todos", "porque", "o_que", "como"] as const).map(
+                      (tipo) => (
+                        <button
+                          key={tipo}
+                          onClick={() => setFiltroTipo(tipo)}
+                          className={`px-2 py-1 rounded text-[11px] font-medium transition-colors ${
+                            filtroTipo === tipo
+                              ? "bg-gray-900 text-white"
+                              : "text-gray-500 hover:bg-gray-100"
+                          }`}
+                        >
+                          {tipo === "todos"
+                            ? "Todos"
+                            : tipoLabels[tipo] || tipo}
+                        </button>
+                      )
+                    )}
                   </div>
                   <button
                     onClick={handleExportCSV}
@@ -340,7 +449,7 @@ export default function CentralConteudoPage() {
                   >
                     <div className="flex items-start justify-between">
                       <div className="flex-1">
-                        <div className="flex items-center gap-2 mb-1">
+                        <div className="flex items-center gap-2 mb-1 flex-wrap">
                           <span
                             className={`inline-block w-2 h-2 rounded-full ${
                               tipoColors[post.tipo] || "bg-gray-400"
@@ -350,16 +459,21 @@ export default function CentralConteudoPage() {
                             {tipoLabels[post.tipo] || post.tipo}
                           </span>
                           <span className="text-xs text-gray-400">
-                            {new Date(post.published_at).toLocaleDateString("pt-BR", {
-                              day: "2-digit",
-                              month: "short",
-                              year: "numeric",
-                              hour: "2-digit",
-                              minute: "2-digit",
-                            })}
+                            {new Date(post.published_at).toLocaleDateString(
+                              "pt-BR",
+                              {
+                                day: "2-digit",
+                                month: "short",
+                                year: "numeric",
+                                hour: "2-digit",
+                                minute: "2-digit",
+                              }
+                            )}
                           </span>
                         </div>
-                        <h3 className="text-sm font-semibold text-gray-900">{post.subject}</h3>
+                        <h3 className="text-sm font-semibold text-gray-900">
+                          {post.subject}
+                        </h3>
                       </div>
                       <div className="text-right text-xs text-gray-500 space-y-0.5">
                         <p>{post.views?.toLocaleString("pt-BR")} views</p>
@@ -367,12 +481,42 @@ export default function CentralConteudoPage() {
                         <p>{post.engagement_rate}% eng</p>
                       </div>
                     </div>
+
+                    {/* Ações rápidas: mover data */}
+                    <div className="flex items-center gap-2 mt-3 pt-3 border-t border-gray-50">
+                      <span className="text-[11px] text-gray-400 uppercase font-medium">
+                        Mover:
+                      </span>
+                      <button
+                        onClick={() => moverPost(post.id, -1)}
+                        className="flex items-center gap-1 px-2 py-1 rounded text-[11px] border hover:bg-gray-50 transition-colors"
+                        title="Voltar 1 dia"
+                      >
+                        <ArrowLeft className="h-3 w-3" /> -1 dia
+                      </button>
+                      <button
+                        onClick={() => moverPost(post.id, 1)}
+                        className="flex items-center gap-1 px-2 py-1 rounded text-[11px] border hover:bg-gray-50 transition-colors"
+                        title="Avançar 1 dia"
+                      >
+                        <ArrowRight className="h-3 w-3" /> +1 dia
+                      </button>
+                      <button
+                        onClick={() => moverPost(post.id, 7)}
+                        className="flex items-center gap-1 px-2 py-1 rounded text-[11px] border hover:bg-gray-50 transition-colors"
+                        title="Avançar 1 semana"
+                      >
+                        <ArrowRight className="h-3 w-3" /> +1 sem
+                      </button>
+                    </div>
                   </div>
                 ))}
                 {postsFiltrados.length === 0 && (
                   <div className="bg-white rounded-lg border p-8 text-center">
                     <List className="h-8 w-8 text-gray-300 mx-auto mb-2" />
-                    <p className="text-sm text-gray-500">Nenhum post para este cliente</p>
+                    <p className="text-sm text-gray-500">
+                      Nenhum post para este cliente
+                    </p>
                     {filtroTipo !== "todos" && (
                       <button
                         onClick={() => setFiltroTipo("todos")}
@@ -386,18 +530,24 @@ export default function CentralConteudoPage() {
               </div>
             )}
 
-            {/* Calendário simples */}
+            {/* Calendário com gap indicator */}
             {activeTab === "calendario" && (
               <div className="bg-white rounded-lg border p-6">
                 <h3 className="text-sm font-semibold text-gray-900 mb-4">
-                  Posts de {new Date().toLocaleString("pt-BR", { month: "long", year: "numeric" })}
+                  Posts de{" "}
+                  {new Date().toLocaleString("pt-BR", {
+                    month: "long",
+                    year: "numeric",
+                  })}
                 </h3>
                 <div className="grid grid-cols-7 gap-2 text-center text-xs text-gray-500 mb-2">
-                  {["Dom", "Seg", "Ter", "Qua", "Qui", "Sex", "Sáb"].map((d) => (
-                    <div key={d} className="py-1 font-medium">
-                      {d}
-                    </div>
-                  ))}
+                  {["Dom", "Seg", "Ter", "Qua", "Qui", "Sex", "Sáb"].map(
+                    (d) => (
+                      <div key={d} className="py-1 font-medium">
+                        {d}
+                      </div>
+                    )
+                  )}
                 </div>
                 <div className="grid grid-cols-7 gap-2">
                   {Array.from({ length: 35 }).map((_, i) => {
@@ -405,37 +555,81 @@ export default function CentralConteudoPage() {
                     date.setDate(1);
                     const firstDay = date.getDay();
                     const currentDay = i - firstDay + 1;
-                    const daysInMonth = new Date(date.getFullYear(), date.getMonth() + 1, 0).getDate();
+                    const daysInMonth = new Date(
+                      date.getFullYear(),
+                      date.getMonth() + 1,
+                      0
+                    ).getDate();
                     if (currentDay < 1 || currentDay > daysInMonth) {
                       return <div key={i} />;
                     }
                     const dayPosts = posts.filter((p) => {
                       const d = new Date(p.published_at);
-                      return d.getDate() === currentDay && d.getMonth() === new Date().getMonth();
+                      return (
+                        d.getDate() === currentDay &&
+                        d.getMonth() === new Date().getMonth()
+                      );
                     });
                     const isToday = currentDay === new Date().getDate();
+                    const isPast = currentDay < new Date().getDate();
+                    const hasGap = isPast && dayPosts.length === 0;
+
                     return (
                       <div
                         key={i}
                         className={`min-h-[60px] border rounded-lg p-1 text-sm ${
-                          isToday ? "ring-2 ring-[#d81220] ring-offset-1" : ""
-                        } ${dayPosts.length > 0 ? "bg-gray-50" : ""}`}
+                          isToday
+                            ? "ring-2 ring-[#d81220] ring-offset-1"
+                            : ""
+                        } ${
+                          hasGap
+                            ? "border-red-300 bg-red-50"
+                            : dayPosts.length > 0
+                            ? "bg-gray-50"
+                            : ""
+                        }`}
                       >
-                        <span className={`font-medium ${isToday ? "text-[#d81220]" : "text-gray-700"}`}>
+                        <span
+                          className={`font-medium ${
+                            isToday
+                              ? "text-[#d81220]"
+                              : hasGap
+                              ? "text-red-600"
+                              : "text-gray-700"
+                          }`}
+                        >
                           {currentDay}
                         </span>
                         <div className="flex flex-wrap gap-0.5 mt-0.5">
                           {dayPosts.map((p) => (
                             <span
                               key={p.id}
-                              className={`w-1.5 h-1.5 rounded-full ${tipoColors[p.tipo] || "bg-gray-400"}`}
+                              className={`w-1.5 h-1.5 rounded-full ${
+                                tipoColors[p.tipo] || "bg-gray-400"
+                              }`}
                               title={p.subject}
                             />
                           ))}
+                          {hasGap && (
+                            <span
+                              className="w-1.5 h-1.5 rounded-full bg-red-400"
+                              title="Sem post"
+                            />
+                          )}
                         </div>
                       </div>
                     );
                   })}
+                </div>
+                <div className="flex items-center gap-4 mt-4 text-xs text-gray-500">
+                  <span className="flex items-center gap-1">
+                    <span className="w-2 h-2 rounded-full bg-red-400" />
+                    Dia sem post (passado)
+                  </span>
+                  <span className="flex items-center gap-1">
+                    <span className="w-2 h-2 rounded-full bg-gray-300" />
+                    Dia futuro
+                  </span>
                 </div>
               </div>
             )}
@@ -444,7 +638,9 @@ export default function CentralConteudoPage() {
           <div className="flex items-center justify-center h-full">
             <div className="text-center">
               <User className="h-12 w-12 text-gray-300 mx-auto mb-3" />
-              <p className="text-gray-500">Selecione um cliente para visualizar o conteúdo</p>
+              <p className="text-gray-500">
+                Selecione um cliente para visualizar o conteúdo
+              </p>
             </div>
           </div>
         )}
