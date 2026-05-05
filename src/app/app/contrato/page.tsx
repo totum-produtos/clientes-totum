@@ -20,19 +20,48 @@ export default function ContratoPage() {
     const [tarefas, setTarefas] = useState<Tarefa[]>([]);
     const [loading, setLoading] = useState(true);
 
+    async function fetchTarefas() {
+        if (!client) return;
+        const supabase = await createSPASassClient();
+        const { data } = await supabase.getSupabaseClient()
+            .from('tarefas')
+            .select('id, titulo, status, prioridade, data_limite, departamento, descricao')
+            .eq('portal_client_id', client.id)
+            .order('created_at', { ascending: false });
+        setTarefas(data || []);
+        setLoading(false);
+    }
+
     useEffect(() => {
-        async function fetchTarefas() {
-            if (!client) return;
-            const supabase = await createSPASassClient();
-            const { data } = await supabase.getSupabaseClient()
-                .from('tarefas')
-                .select('id, titulo, status, prioridade, data_limite, departamento, descricao')
-                .eq('portal_client_id', client.id)
-                .order('created_at', { ascending: false });
-            setTarefas(data || []);
-            setLoading(false);
-        }
         fetchTarefas();
+    }, [client]);
+
+    // Realtime subscription: atualiza tarefas sem refresh
+    useEffect(() => {
+        if (!client) return;
+        let channel: any = null;
+
+        async function setupRealtime() {
+            const supabase = await createSPASassClient();
+            channel = supabase.getSupabaseClient()
+                .channel('tarefas-realtime-' + client.id)
+                .on('postgres_changes', {
+                    event: '*',
+                    schema: 'public',
+                    table: 'tarefas',
+                    filter: `portal_client_id=eq.${client.id}`,
+                }, () => {
+                    fetchTarefas();
+                })
+                .subscribe();
+        }
+        setupRealtime();
+
+        return () => {
+            if (channel) {
+                createSPASassClient().then(s => s.getSupabaseClient().removeChannel(channel!));
+            }
+        };
     }, [client]);
 
     if (loading) {
