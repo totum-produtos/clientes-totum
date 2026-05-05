@@ -14,6 +14,7 @@ import {
     ChevronDown,
     LogOut,
     Key,
+    User,
 } from 'lucide-react';
 import { useGlobal } from "@/lib/context/GlobalContext";
 import { createSPASassClient } from "@/lib/supabase/client";
