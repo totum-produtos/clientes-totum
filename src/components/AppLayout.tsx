@@ -9,6 +9,7 @@ import {
     Cloud,
     FileText,
     BarChart3,
+    Building2,
     Menu,
     X,
     ChevronDown,
@@ -54,6 +55,7 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
         { name: 'Drive', href: '/app/drive', icon: Cloud },
         { name: 'Contrato', href: '/app/contrato', icon: FileText },
         { name: 'Campanhas', href: '/app/campanhas', icon: BarChart3 },
+        { name: 'Central de Clientes', href: '/app/gestao-clientes', icon: Building2 },
         { name: 'Admin', href: '/app/admin', icon: User },
     ];
 
