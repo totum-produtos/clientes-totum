@@ -1,3 +1,9 @@
+-- Migration: Schema principal do portal de clientes
+-- Data: 2026-05-04
+-- Depende de: -
+-- Descrição: Cria tabelas portal_clients e portal_client_users, ativa RLS e
+--            insere cliente demo. Esta é a FONTE DE VERDADE do portal.
+
 CREATE TABLE IF NOT EXISTS portal_clients (
   id uuid primary key default gen_random_uuid(),
   nome text not null,

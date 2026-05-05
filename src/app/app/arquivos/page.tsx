@@ -14,6 +14,11 @@ const typeIcons: Record<string, React.ReactNode> = {
 export default function ArquivosPage() {
   return (
     <div className="space-y-6 p-2">
+      <div className="bg-yellow-50 border-l-4 border-yellow-400 text-yellow-800 px-4 py-3 text-sm rounded">
+        ⚠️ <strong>Em construção.</strong> Os dados exibidos abaixo são exemplos.
+        A integração com dados reais está prevista para a Fase 2.
+      </div>
+      {/* TODO(phase-2): substituir mock por Supabase Storage bucket 'client_files' com RLS por client_id */}
       <div>
         <h1 className="text-2xl font-bold text-gray-900">Arquivos compartilhados</h1>
         <p className="text-gray-500">Documentos e materiais da sua conta</p>
