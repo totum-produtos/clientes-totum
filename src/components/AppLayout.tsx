@@ -53,6 +53,7 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
         { name: 'Drive', href: '/app/drive', icon: Cloud },
         { name: 'Contrato', href: '/app/contrato', icon: FileText },
         { name: 'Campanhas', href: '/app/campanhas', icon: BarChart3 },
+        { name: 'Admin', href: '/app/admin', icon: User },
     ];
 
     const toggleSidebar = () => setSidebarOpen(!isSidebarOpen);
