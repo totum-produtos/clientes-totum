@@ -15,11 +15,11 @@ interface BulkPostModalProps {
     clientId: string;
 }
 
-const tipos = ['viral', 'conversion', 'educational'];
+const tipos = ['porque', 'o_que', 'como'];
 
 export default function BulkPostModal({ isOpen, onClose, onSave, clientId }: BulkPostModalProps) {
     const [posts, setPosts] = useState<BulkPost[]>([
-        { subject: '', tipo: 'viral', published_at: new Date().toISOString().slice(0, 16) },
+        { subject: '', tipo: 'porque', published_at: new Date().toISOString().slice(0, 16) },
     ]);
     const [csvText, setCsvText] = useState('');
     const [mode, setMode] = useState<'form' | 'csv'>('form');
@@ -27,7 +27,7 @@ export default function BulkPostModal({ isOpen, onClose, onSave, clientId }: Bul
     if (!isOpen) return null;
 
     const addRow = () => {
-        setPosts([...posts, { subject: '', tipo: 'viral', published_at: new Date().toISOString().slice(0, 16) }]);
+        setPosts([...posts, { subject: '', tipo: 'porque', published_at: new Date().toISOString().slice(0, 16) }]);
     };
 
     const removeRow = (idx: number) => {

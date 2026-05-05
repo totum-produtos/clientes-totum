@@ -169,9 +169,9 @@ export default function CalendarioPage() {
 
             {/* Legenda */}
             <div className="flex gap-4 text-xs">
-                <span className="flex items-center gap-1"><span className="w-2 h-2 rounded-full bg-purple-500"></span> viral</span>
-                <span className="flex items-center gap-1"><span className="w-2 h-2 rounded-full bg-green-500"></span> conversion</span>
-                <span className="flex items-center gap-1"><span className="w-2 h-2 rounded-full bg-blue-500"></span> educational</span>
+                <span className="flex items-center gap-1"><span className="w-2 h-2 rounded-full bg-red-500"></span> Porquê</span>
+                <span className="flex items-center gap-1"><span className="w-2 h-2 rounded-full bg-blue-500"></span> O que</span>
+                <span className="flex items-center gap-1"><span className="w-2 h-2 rounded-full bg-green-500"></span> Como</span>
             </div>
 
             {loading ? (

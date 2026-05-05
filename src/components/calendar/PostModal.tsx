@@ -9,6 +9,7 @@ const circuloDouradoOptions = [
 ];
 
 interface Props {
+  isOpen: boolean;
   date: Date | null;
   post: any;
   onSave: (data: any) => void;
@@ -16,7 +17,8 @@ interface Props {
   onClose: () => void;
 }
 
-export default function PostModal({ date, post, onSave, onDelete, onClose }: Props) {
+export default function PostModal({ isOpen, date, post, onSave, onDelete, onClose }: Props) {
+  if (!isOpen) return null;
   const [subject, setSubject] = useState('');
   const [tipo, setTipo] = useState('porque');
   const [publishedAt, setPublishedAt] = useState('');
