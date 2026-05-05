@@ -1,0 +1,34 @@
+-- Migration: Setup de storage para arquivos do portal
+-- Data: 2026-05-04
+-- Descrição:
+--   Cria bucket 'client_files' e policies RLS.
+--   ⚠️ Buckets no Supabase também precisam ser criados via Dashboard ou Storage API.
+--      Esta migration documenta a configuração, mas pode ser necessário
+--      criar o bucket manualmente no Supabase Dashboard > Storage.
+
+-- NOTA: CREATE BUCKET não é suportado diretamente em SQL no Supabase.
+--       Execute no Dashboard ou via CLI:
+--       supabase storage create-bucket client_files --public=false
+
+-- Políticas de storage (aplicáveis após criar o bucket no Dashboard):
+--
+-- SELECT policy: usuário pode listar arquivos se o path começar com seu client_id
+-- INSERT policy: usuário pode fazer upload se o path começar com seu client_id
+-- DELETE policy: usuário pode deletar se o path começar com seu client_id
+
+-- Exemplo de policies (para aplicar manualmente no Dashboard):
+--
+-- SELECT:
+--   (storage.foldername(name))[1] IN (
+--     SELECT client_id::text FROM portal_client_users WHERE user_id = auth.uid()
+--   )
+--
+-- INSERT:
+--   (storage.foldername(name))[1] IN (
+--     SELECT client_id::text FROM portal_client_users WHERE user_id = auth.uid()
+--   )
+--
+-- DELETE:
+--   (storage.foldername(name))[1] IN (
+--     SELECT client_id::text FROM portal_client_users WHERE user_id = auth.uid()
+--   )
