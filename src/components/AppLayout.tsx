@@ -10,6 +10,7 @@ import {
     FileText,
     BarChart3,
     Building2,
+    List,
     Menu,
     X,
     ChevronDown,
@@ -51,6 +52,7 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
     const navigation = [
         { name: 'Início', href: '/app', icon: Home },
         { name: 'Calendário', href: '/app/calendario', icon: CalendarDays },
+        { name: 'Feed de Postagens', href: '/app/feed-postagens', icon: List },
         { name: 'Arquivos', href: '/app/arquivos', icon: FolderOpen },
         { name: 'Drive', href: '/app/drive', icon: Cloud },
         { name: 'Contrato', href: '/app/contrato', icon: FileText },
