@@ -17,6 +17,7 @@ import {
     LogOut,
     Key,
     User,
+    LayoutGrid,
 } from 'lucide-react';
 import { useGlobal } from "@/lib/context/GlobalContext";
 import { createSPASassClient } from "@/lib/supabase/client";
@@ -29,6 +30,22 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
     const router = useRouter();
 
     const { user } = useGlobal();
+    const isMaster = user?.role === 'master';
+
+    const allNavigation = [
+        { name: 'Início', href: '/app', icon: Home, clientOnly: true },
+        { name: 'Calendário', href: '/app/calendario', icon: CalendarDays, clientOnly: true },
+        { name: 'Feed de Postagens', href: '/app/feed-postagens', icon: List, clientOnly: true },
+        { name: 'Arquivos', href: '/app/arquivos', icon: FolderOpen, clientOnly: true },
+        { name: 'Drive', href: '/app/drive', icon: Cloud, clientOnly: true },
+        { name: 'Central de Conteúdo', href: '/app/central-conteudo', icon: LayoutGrid, clientOnly: false },
+        { name: 'Contrato', href: '/app/contrato', icon: FileText, clientOnly: false },
+        { name: 'Campanhas', href: '/app/campanhas', icon: BarChart3, clientOnly: false },
+        { name: 'Central de Clientes', href: '/app/gestao-clientes', icon: Building2, clientOnly: false },
+        { name: 'Admin', href: '/app/admin', icon: User, clientOnly: false },
+    ];
+
+    const navigation = allNavigation.filter(item => isMaster || item.clientOnly);
 
     const handleLogout = async () => {
         try {
@@ -49,17 +66,7 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
             : parts[0].slice(0, 2).toUpperCase();
     };
 
-    const navigation = [
-        { name: 'Início', href: '/app', icon: Home },
-        { name: 'Calendário', href: '/app/calendario', icon: CalendarDays },
-        { name: 'Feed de Postagens', href: '/app/feed-postagens', icon: List },
-        { name: 'Arquivos', href: '/app/arquivos', icon: FolderOpen },
-        { name: 'Drive', href: '/app/drive', icon: Cloud },
-        { name: 'Contrato', href: '/app/contrato', icon: FileText },
-        { name: 'Campanhas', href: '/app/campanhas', icon: BarChart3 },
-        { name: 'Central de Clientes', href: '/app/gestao-clientes', icon: Building2 },
-        { name: 'Admin', href: '/app/admin', icon: User },
-    ];
+
 
     const toggleSidebar = () => setSidebarOpen(!isSidebarOpen);
 

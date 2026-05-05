@@ -1,6 +1,6 @@
 "use client";
 import React, { useState } from 'react';
-import { X, Upload, Save } from 'lucide-react';
+import { X, Upload, Save, Download } from 'lucide-react';
 
 interface BulkPost {
     subject: string;
@@ -85,15 +85,32 @@ export default function BulkPostModal({ isOpen, onClose, onSave, clientId }: Bul
 
                     {mode === 'csv' ? (
                         <div className="space-y-3">
-                            <p className="text-sm text-gray-500">
-                                Cole o CSV no formato: <code className="bg-gray-100 px-1 rounded">assunto,tipo,data</code>
-                            </p>
+                            <div className="flex items-center justify-between">
+                                <p className="text-sm text-gray-500">
+                                    Cole o CSV no formato: <code className="bg-gray-100 px-1 rounded">assunto,tipo,data</code>
+                                </p>
+                                <button
+                                    onClick={() => {
+                                        const template = 'subject,tipo,published_at\nLançamento Produto X,porque,2026-05-10T10:00\nBastidores da Produção,como,2026-05-12T14:00\nResultados da Campanha,o_que,2026-05-15T09:00';
+                                        const blob = new Blob([template], { type: 'text/csv' });
+                                        const url = URL.createObjectURL(blob);
+                                        const a = document.createElement('a');
+                                        a.href = url;
+                                        a.download = 'template_posts_totum.csv';
+                                        a.click();
+                                        URL.revokeObjectURL(url);
+                                    }}
+                                    className="text-xs flex items-center gap-1 text-primary-600 hover:text-primary-700"
+                                >
+                                    <Download className="h-3 w-3" /> Baixar template
+                                </button>
+                            </div>
                             <textarea
                                 value={csvText}
                                 onChange={e => setCsvText(e.target.value)}
                                 rows={8}
                                 className="w-full px-3 py-2 border rounded-lg text-sm font-mono"
-                                placeholder="Lançamento campanha Mães,viral,2026-05-10&#10;Bastidores produção,educational,2026-05-12"
+                                placeholder="Lançamento campanha Mães,porque,2026-05-10&#10;Bastidores produção,como,2026-05-12"
                             />
                             <button onClick={handleCsvParse} className="btn-primary px-4 py-2 rounded-lg text-sm">
                                 <Upload className="h-4 w-4 inline mr-1" /> Analisar CSV

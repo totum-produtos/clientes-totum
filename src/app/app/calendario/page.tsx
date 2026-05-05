@@ -20,7 +20,7 @@ type Post = {
 };
 
 export default function CalendarioPage() {
-    const { client } = useGlobal();
+    const { client, user } = useGlobal();
     const [currentMonth, setCurrentMonth] = useState(new Date());
     const [posts, setPosts] = useState<Post[]>([]);
     const [loading, setLoading] = useState(true);
@@ -79,6 +79,7 @@ export default function CalendarioPage() {
         const payload = {
             ...postData,
             portal_client_id: client.id,
+            creator: user?.id,
             published_at: new Date(postData.published_at).toISOString(),
         };
 

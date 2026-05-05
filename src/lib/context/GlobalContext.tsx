@@ -8,6 +8,7 @@ type User = {
     email: string;
     id: string;
     registered_at: Date;
+    role: string;
 };
 
 type PortalClient = {
