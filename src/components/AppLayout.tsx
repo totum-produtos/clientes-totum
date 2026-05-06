@@ -94,7 +94,7 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
 
                 <div className="h-16 flex items-center justify-between px-4 border-b">
                     <Link href="/app" className="flex items-center gap-2">
-                        <Image src="/logo.png" alt="Totum" width={120} height={32} className="h-8 w-auto" />
+                        <Image src="/logo.png" alt="Totum" width={140} height={64} className="h-10 w-auto" />
                     </Link>
                     <button
                         onClick={toggleSidebar}
