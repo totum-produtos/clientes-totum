@@ -72,10 +72,18 @@ export function GlobalProvider({ children }: { children: React.ReactNode }) {
 
             const { data: { user } } = await client.auth.getUser();
             if (user) {
+                // Buscar role do usuário
+                const { data: roleData } = await client
+                    .from('user_roles')
+                    .select('role')
+                    .eq('user_id', user.id)
+                    .single();
+
                 setUser({
                     email: user.email!,
                     id: user.id,
-                    registered_at: new Date(user.created_at)
+                    registered_at: new Date(user.created_at),
+                    role: roleData?.role || 'cliente'
                 });
 
                 // Buscar cliente vinculado ao usuário
