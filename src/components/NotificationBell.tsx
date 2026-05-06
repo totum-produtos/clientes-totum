@@ -11,7 +11,7 @@ interface Notification {
   message: string;
   type: string;
   read: boolean;
-  created_at: string;
+  created_at: string | null;
   data?: any;
 }
 
@@ -119,7 +119,7 @@ export default function NotificationBell() {
                       <p className={`text-sm ${!n.read ? "font-semibold text-ink" : "text-ink"}`}>{n.title}</p>
                       <p className="text-xs text-muted mt-0.5 line-clamp-2">{n.message}</p>
                       <p className="text-[10px] text-muted-soft mt-1">
-                        {new Date(n.created_at).toLocaleDateString("pt-BR", { day: "2-digit", month: "short", hour: "2-digit", minute: "2-digit" })}
+                        {n.created_at ? new Date(n.created_at).toLocaleDateString("pt-BR", { day: "2-digit", month: "short", hour: "2-digit", minute: "2-digit" }) : "—"}
                       </p>
                     </div>
                     {!n.read && <div className="w-2 h-2 bg-rausch rounded-full mt-1.5 shrink-0" />}

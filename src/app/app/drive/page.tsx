@@ -4,13 +4,17 @@ import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
 import { useGlobal } from '@/lib/context/GlobalContext';
 import { createSPASassClient } from '@/lib/supabase/client';
 import { Folder, ExternalLink, Link2, Unlink, Cloud } from 'lucide-react';
+import { useToast } from "@/components/ui/ToastProvider";
+import ConfirmDialog from "@/components/ConfirmDialog";
 
 export default function DrivePage() {
   const { client } = useGlobal();
+  const { showSuccess, showError } = useToast();
   const [driveUrl, setDriveUrl] = useState('');
   const [folderId, setFolderId] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
+  const [confirmOpen, setConfirmOpen] = useState(false);
 
   useEffect(() => {
     async function loadDriveConfig() {
@@ -47,7 +51,7 @@ export default function DrivePage() {
     if (!client || !driveUrl) return;
     const id = extractFolderId(driveUrl);
     if (!id) {
-      alert('URL inválida. Cole um link de pasta do Google Drive (ex: https://drive.google.com/drive/folders/...)');
+      showError('URL inválida. Cole um link de pasta do Google Drive (ex: https://drive.google.com/drive/folders/...)');
       return;
     }
     setSaving(true);
@@ -58,16 +62,21 @@ export default function DrivePage() {
       .eq('id', client.id);
 
     if (error) {
-      alert('Erro: ' + error.message);
+      showError('Erro: ' + error.message);
     } else {
       setFolderId(id);
-      alert('Pasta do Google Drive vinculada com sucesso!');
+      showSuccess('Pasta do Google Drive vinculada com sucesso!');
     }
     setSaving(false);
   }
 
   async function disconnectDrive() {
-    if (!client || !confirm('Remover vínculo com Google Drive?')) return;
+    if (!client) return;
+    setConfirmOpen(true);
+  }
+
+  const confirmDisconnect = async () => {
+    if (!client) return;
     const supabase = await createSPASassClient();
     await supabase.getSupabaseClient()
       .from('portal_clients')
@@ -75,7 +84,9 @@ export default function DrivePage() {
       .eq('id', client.id);
     setFolderId(null);
     setDriveUrl('');
-  }
+    showSuccess('Vínculo com Google Drive removido');
+    setConfirmOpen(false);
+  };
 
   if (loading) {
     return <div className="flex justify-center p-8"><div className="animate-spin h-8 w-8 border-b-2 border-rausch rounded-full"></div></div>;
@@ -128,7 +139,8 @@ export default function DrivePage() {
                 </span>
                 <button
                   onClick={disconnectDrive}
-                  className="text-xs text-danger-text hover:text-danger-text flex items-center gap-1"
+                  disabled={saving}
+                  className="text-xs text-danger-text hover:text-danger-text flex items-center gap-1 disabled:opacity-50"
                 >
                   <Unlink className="h-3 w-3" /> Remover vínculo
                 </button>
@@ -163,6 +175,14 @@ export default function DrivePage() {
       <p className="text-xs text-muted-soft">
         Dica: se a pré-visualização não carregar, clique em "Abrir no Google Drive" para acessar diretamente.
       </p>
+
+      <ConfirmDialog
+        isOpen={confirmOpen}
+        title="Remover vínculo"
+        message="Remover vínculo com Google Drive?"
+        onConfirm={confirmDisconnect}
+        onCancel={() => setConfirmOpen(false)}
+      />
     </div>
   );
 }

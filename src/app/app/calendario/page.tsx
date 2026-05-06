@@ -6,19 +6,22 @@ import { Plus, Upload, RefreshCw, CalendarDays } from "lucide-react";
 import CalendarGrid from "@/components/calendar/CalendarGrid";
 import PostModal from "@/components/calendar/PostModal";
 import BulkPostModal from "@/components/calendar/BulkPostModal";
+import { useToast } from "@/components/ui/ToastProvider";
+import ConfirmDialog from "@/components/ConfirmDialog";
 
 type Post = {
   id: number;
   subject: string;
   tipo: string;
-  published_at: string;
-  views: number;
-  likes: number;
-  engagement_rate: number;
+  published_at: string | null;
+  views: number | null;
+  likes: number | null;
+  engagement_rate: number | null;
 };
 
 export default function CalendarioPage() {
   const { client, user } = useGlobal();
+  const { showSuccess, showError } = useToast();
   const [currentMonth, setCurrentMonth] = useState(new Date());
   const [posts, setPosts] = useState<Post[]>([]);
   const [loading, setLoading] = useState(true);
@@ -26,6 +29,8 @@ export default function CalendarioPage() {
   const [bulkModalOpen, setBulkModalOpen] = useState(false);
   const [selectedPost, setSelectedPost] = useState<Post | null>(null);
   const [selectedDate, setSelectedDate] = useState<Date | undefined>(undefined);
+  const [confirmOpen, setConfirmOpen] = useState(false);
+  const [pendingDeleteId, setPendingDeleteId] = useState<number | null>(null);
 
   async function fetchPosts() {
     if (!client) return;
@@ -38,6 +43,7 @@ export default function CalendarioPage() {
       .eq("portal_client_id", client.id)
       .order("published_at", { ascending: false });
     if (error) {
+      showError("Erro ao carregar posts");
       console.error("Erro ao carregar posts:", error);
     } else {
       setPosts(data || []);
@@ -49,12 +55,14 @@ export default function CalendarioPage() {
     fetchPosts();
   }, [client]);
 
-  const events = posts.map((p) => ({
-    id: p.id,
-    title: p.subject,
-    date: new Date(p.published_at),
-    type: p.tipo,
-  }));
+  const events = posts
+    .filter((p) => p.published_at)
+    .map((p) => ({
+      id: p.id,
+      title: p.subject,
+      date: new Date(p.published_at!),
+      type: p.tipo,
+    }));
 
   const handleDayClick = (date: Date) => {
     setSelectedDate(date);
@@ -71,7 +79,7 @@ export default function CalendarioPage() {
     const post = posts.find((p) => p.id === event.id);
     if (post) {
       setSelectedPost(post);
-      setSelectedDate(new Date(post.published_at));
+      setSelectedDate(post.published_at ? new Date(post.published_at) : new Date());
       setModalOpen(true);
     }
   };
@@ -93,8 +101,10 @@ export default function CalendarioPage() {
         .update(payload)
         .eq("id", selectedPost.id);
       if (error) {
+        showError("Erro ao atualizar post");
         console.error("Erro ao atualizar:", error);
       } else {
+        showSuccess("Post atualizado com sucesso");
         setModalOpen(false);
         fetchPosts();
       }
@@ -104,8 +114,10 @@ export default function CalendarioPage() {
         .from("wanda_posts")
         .insert({ ...payload, post_id: `post_${Date.now()}` });
       if (error) {
+        showError("Erro ao criar post");
         console.error("Erro ao criar:", error);
       } else {
+        showSuccess("Post criado com sucesso");
         setModalOpen(false);
         fetchPosts();
       }
@@ -113,19 +125,28 @@ export default function CalendarioPage() {
   };
 
   const handleDeletePost = async (id: number) => {
-    if (!confirm("Tem certeza que deseja excluir este post?")) return;
+    setPendingDeleteId(id);
+    setConfirmOpen(true);
+  };
+
+  const confirmDelete = async () => {
+    if (pendingDeleteId == null) return;
     const supabase = await createSPASassClient();
     const { error } = await supabase
       .getSupabaseClient()
       .from("wanda_posts")
       .delete()
-      .eq("id", id);
+      .eq("id", pendingDeleteId);
     if (error) {
+      showError("Erro ao excluir post");
       console.error("Erro ao excluir:", error);
     } else {
+      showSuccess("Post excluído com sucesso");
       setModalOpen(false);
       fetchPosts();
     }
+    setConfirmOpen(false);
+    setPendingDeleteId(null);
   };
 
   const handleBulkSave = async (bulkPosts: any[]) => {
@@ -142,14 +163,17 @@ export default function CalendarioPage() {
       .from("wanda_posts")
       .insert(payload);
     if (error) {
+      showError("Erro ao criar posts em massa");
       console.error("Erro ao criar posts:", error);
     } else {
+      showSuccess("Posts criados com sucesso");
       setBulkModalOpen(false);
       fetchPosts();
     }
   };
 
   const monthPosts = posts.filter((p) => {
+    if (!p.published_at) return false;
     const d = new Date(p.published_at);
     return d.getMonth() === currentMonth.getMonth() && d.getFullYear() === currentMonth.getFullYear();
   });
@@ -172,6 +196,7 @@ export default function CalendarioPage() {
             <div className="flex gap-2">
               <button
                 onClick={fetchPosts}
+                disabled={loading}
                 className="btn-ghost p-2"
                 title="Atualizar"
               >
@@ -179,6 +204,7 @@ export default function CalendarioPage() {
               </button>
               <button
                 onClick={() => setBulkModalOpen(true)}
+                disabled={loading}
                 className="btn-ghost flex items-center gap-2"
               >
                 <Upload className="h-4 w-4" /> Em massa
@@ -189,6 +215,7 @@ export default function CalendarioPage() {
                   setSelectedDate(new Date());
                   setModalOpen(true);
                 }}
+                disabled={loading}
                 className="btn-primary flex items-center gap-2"
               >
                 <Plus className="h-4 w-4" /> Novo post
@@ -250,7 +277,7 @@ export default function CalendarioPage() {
                     handleEventClick({
                       id: p.id,
                       title: p.subject,
-                      date: new Date(p.published_at),
+                      date: p.published_at ? new Date(p.published_at) : new Date(),
                       type: p.tipo,
                     })
                   }
@@ -258,7 +285,7 @@ export default function CalendarioPage() {
                   <div>
                     <p className="font-medium text-sm text-ink">{p.subject}</p>
                     <p className="text-xs text-muted">
-                      {new Date(p.published_at).toLocaleDateString("pt-BR")} • {p.tipo}
+                      {p.published_at ? new Date(p.published_at).toLocaleDateString("pt-BR") : "—"} • {p.tipo}
                     </p>
                   </div>
                   <span className="text-xs text-muted-soft">
@@ -277,8 +304,7 @@ export default function CalendarioPage() {
         onSave={handleSavePost}
         onDelete={handleDeletePost}
         post={selectedPost}
-        selectedDate={selectedDate}
-        clientId={client?.id || ""}
+        date={selectedDate || null}
       />
 
       <BulkPostModal
@@ -286,6 +312,17 @@ export default function CalendarioPage() {
         onClose={() => setBulkModalOpen(false)}
         onSave={handleBulkSave}
         clientId={client?.id || ""}
+      />
+
+      <ConfirmDialog
+        isOpen={confirmOpen}
+        title="Excluir post"
+        message="Tem certeza que deseja excluir este post?"
+        onConfirm={confirmDelete}
+        onCancel={() => {
+          setConfirmOpen(false);
+          setPendingDeleteId(null);
+        }}
       />
     </div>
   );

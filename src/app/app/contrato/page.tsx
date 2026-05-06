@@ -11,8 +11,8 @@ type Tarefa = {
     status: string;
     prioridade: string;
     data_limite: string | null;
-    departamento: string;
-    descricao: string;
+    departamento: string | null;
+    descricao: string | null;
 };
 
 export default function ContratoPage() {
@@ -43,13 +43,14 @@ export default function ContratoPage() {
 
         async function setupRealtime() {
             const supabase = await createSPASassClient();
+            const clientId = client!.id;
             channel = supabase.getSupabaseClient()
-                .channel('tarefas-realtime-' + client.id)
+                .channel('tarefas-realtime-' + clientId)
                 .on('postgres_changes', {
                     event: '*',
                     schema: 'public',
                     table: 'tarefas',
-                    filter: `portal_client_id=eq.${client.id}`,
+                    filter: `portal_client_id=eq.${clientId}`,
                 }, () => {
                     fetchTarefas();
                 })

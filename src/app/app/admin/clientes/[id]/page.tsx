@@ -84,7 +84,7 @@ export default function EditarClientePage() {
         return;
       }
 
-      const pd = data.profile_data || {};
+      const pd = (data.profile_data || {}) as Record<string, any>;
       setForm({
         nome: data.nome || "",
         cnpj: data.cnpj || "",

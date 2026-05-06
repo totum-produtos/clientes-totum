@@ -9,7 +9,7 @@ type PortalClient = {
     nome: string;
     slug: string;
     email_responsavel: string;
-    status: string;
+    status: string | null;
     created_at: string;
 };
 
@@ -58,7 +58,7 @@ export default function AdminPage() {
         const client = supabase.getSupabaseClient();
 
         const { data: clientsData } = await client.from('portal_clients').select('*').order('created_at', { ascending: false });
-        setClients(clientsData || []);
+        setClients((clientsData || []) as PortalClient[]);
 
         const { data: usersData } = await client.from('portal_client_users').select('*');
         setUsers(usersData || []);
@@ -68,7 +68,7 @@ export default function AdminPage() {
         setAuthUsers(authData?.users?.map(u => ({ id: u.id, email: u.email || '', created_at: u.created_at })) || []);
 
         const { data: changesData } = await client.from('client_profile_changes').select('*').eq('status', 'pendente').order('created_at', { ascending: false });
-        setPendingChanges(changesData || []);
+        setPendingChanges((changesData || []) as ProfileChange[]);
 
         setLoading(false);
     }
@@ -123,7 +123,7 @@ export default function AdminPage() {
         if (change.field_path.startsWith('profile_data.')) {
             const field = change.field_path.replace('profile_data.', '');
             const { data: pc } = await client.from('portal_clients').select('profile_data').eq('id', change.portal_client_id).single();
-            const current = pc?.profile_data || {};
+            const current = (pc?.profile_data || {}) as Record<string, any>;
             let newVal: any = change.new_value;
             try { newVal = JSON.parse(newVal); } catch {}
             await client.from('portal_clients').update({ profile_data: { ...current, [field]: newVal } }).eq('id', change.portal_client_id);

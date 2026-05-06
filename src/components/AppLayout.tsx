@@ -105,28 +105,33 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
                 </div>
 
                 {/* Navigation */}
-                <nav className="mt-4 px-2 space-y-1">
-                    {navigation.map((item) => {
-                        const isActive = pathname === item.href;
-                        return (
-                            <Link
-                                key={item.name}
-                                href={item.href}
-                                className={`group flex items-center px-2 py-2 text-sm font-medium rounded-md ${
-                                    isActive
-                                        ? 'bg-rausch/5 text-rausch'
-                                        : 'text-body hover:bg-surface-soft hover:text-ink'
-                                }`}
-                            >
-                                <item.icon
-                                    className={`mr-3 h-5 w-5 ${
-                                        isActive ? 'text-rausch' : 'text-muted-soft group-hover:text-muted'
-                                    }`}
-                                />
-                                {item.name}
-                            </Link>
-                        );
-                    })}
+                <nav className="mt-4 px-2" aria-label="Navegação principal">
+                    <ul className="space-y-1">
+                        {navigation.map((item) => {
+                            const isActive = pathname === item.href;
+                            return (
+                                <li key={item.name}>
+                                    <Link
+                                        href={item.href}
+                                        aria-current={isActive ? "page" : undefined}
+                                        className={`group flex items-center px-2 py-2 text-sm font-medium rounded-md ${
+                                            isActive
+                                                ? 'bg-rausch/5 text-rausch'
+                                                : 'text-body hover:bg-surface-soft hover:text-ink'
+                                        }`}
+                                    >
+                                        <item.icon
+                                            aria-hidden="true"
+                                            className={`mr-3 h-5 w-5 ${
+                                                isActive ? 'text-rausch' : 'text-muted-soft group-hover:text-muted'
+                                            }`}
+                                        />
+                                        {item.name}
+                                    </Link>
+                                </li>
+                            );
+                        })}
+                    </ul>
                 </nav>
 
             </div>
@@ -145,11 +150,14 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
                         <div className="relative">
                         <button
                             onClick={() => setUserDropdownOpen(!isUserDropdownOpen)}
+                            aria-expanded={isUserDropdownOpen}
+                            aria-haspopup="menu"
+                            aria-label="Menu do usuário"
                             className="flex items-center space-x-2 text-sm text-ink hover:text-ink"
                         >
-                            <div className="w-8 h-8 rounded-full bg-rausch/10 flex items-center justify-center overflow-hidden">
+                            <div className="w-8 h-8 rounded-full bg-rausch/10 flex items-center justify-center overflow-hidden" aria-hidden="true">
                                 {profile?.avatar_url ? (
-                                    <img src={profile.avatar_url} alt="Avatar" className="w-full h-full object-cover" />
+                                    <img src={profile.avatar_url} alt="" className="w-full h-full object-cover" />
                                 ) : (
                                     <span className="text-rausch-active font-medium">
                                         {user ? getInitials(user.email) : '??'}

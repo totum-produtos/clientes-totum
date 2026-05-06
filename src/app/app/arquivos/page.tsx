@@ -4,6 +4,8 @@ import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
 import { useGlobal } from '@/lib/context/GlobalContext';
 import { createSPASassClient } from '@/lib/supabase/client';
 import { FileText, Download, Upload, Trash2, FileArchive, FileSpreadsheet, Image, File } from 'lucide-react';
+import { useToast } from "@/components/ui/ToastProvider";
+import ConfirmDialog from "@/components/ConfirmDialog";
 
 const typeIcons: Record<string, React.ReactNode> = {
   PDF: <FileText className="h-5 w-5 text-danger-text" />,
@@ -23,10 +25,13 @@ type Arquivo = {
 
 export default function ArquivosPage() {
   const { client } = useGlobal();
+  const { showSuccess, showError } = useToast();
   const [arquivos, setArquivos] = useState<Arquivo[]>([]);
   const [loading, setLoading] = useState(true);
   const [uploading, setUploading] = useState(false);
   const [error, setError] = useState('');
+  const [confirmOpen, setConfirmOpen] = useState(false);
+  const [pendingDeleteName, setPendingDeleteName] = useState<string | null>(null);
 
   const bucket = 'client_files';
 
@@ -79,12 +84,14 @@ export default function ArquivosPage() {
 
     if (error) {
       setError('Erro no upload: ' + error.message);
+      showError('Erro no upload: ' + error.message);
     } else {
+      showSuccess('Arquivo enviado com sucesso');
       await fetchArquivos();
     }
     setUploading(false);
     e.target.value = '';
-  }, [client]);
+  }, [client, showError, showSuccess]);
 
   async function handleDownload(name: string) {
     if (!client) return;
@@ -95,26 +102,35 @@ export default function ArquivosPage() {
       .createSignedUrl(`${client.id}/${name}`, 60);
 
     if (error || !data?.signedUrl) {
-      alert('Erro ao gerar link: ' + (error?.message || 'unknown'));
+      showError('Erro ao gerar link: ' + (error?.message || 'unknown'));
       return;
     }
     window.open(data.signedUrl, '_blank');
   }
 
   async function handleDelete(name: string) {
-    if (!client || !confirm(`Remover "${name}"?`)) return;
+    if (!client) return;
+    setPendingDeleteName(name);
+    setConfirmOpen(true);
+  }
+
+  const confirmDelete = async () => {
+    if (!client || !pendingDeleteName) return;
     const supabase = await createSPASassClient();
     const { error } = await supabase.getSupabaseClient()
       .storage
       .from(bucket)
-      .remove([`${client.id}/${name}`]);
+      .remove([`${client.id}/${pendingDeleteName}`]);
 
     if (error) {
-      alert('Erro ao remover: ' + error.message);
+      showError('Erro ao remover: ' + error.message);
     } else {
+      showSuccess('Arquivo removido com sucesso');
       await fetchArquivos();
     }
-  }
+    setConfirmOpen(false);
+    setPendingDeleteName(null);
+  };
 
   function formatSize(bytes?: number) {
     if (!bytes) return '-';
@@ -192,6 +208,17 @@ export default function ArquivosPage() {
           )}
         </CardContent>
       </Card>
+
+      <ConfirmDialog
+        isOpen={confirmOpen}
+        title="Remover arquivo"
+        message={pendingDeleteName ? `Remover "${pendingDeleteName}"?` : 'Remover este arquivo?'}
+        onConfirm={confirmDelete}
+        onCancel={() => {
+          setConfirmOpen(false);
+          setPendingDeleteName(null);
+        }}
+      />
     </div>
   );
 }

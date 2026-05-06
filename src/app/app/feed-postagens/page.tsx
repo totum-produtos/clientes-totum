@@ -35,12 +35,12 @@ type Post = {
   id: number;
   subject: string;
   tipo: string;
-  published_at: string;
+  published_at: string | null;
   views: number | null;
   likes: number | null;
   engagement_rate: number | null;
   conversion_rate: number | null;
-  created_at: string;
+  created_at: string | null;
 };
 
 // Círculo Dourado do Simon Sinek: Porquê → O que → Como
@@ -125,6 +125,7 @@ export default function FeedPostagensPage() {
   const postsPorDia = useMemo(() => {
     const grupos: Record<string, Post[]> = {};
     postsFiltrados.forEach((post) => {
+      if (!post.published_at) return;
       const chave = post.published_at.split('T')[0];
       if (!grupos[chave]) grupos[chave] = [];
       grupos[chave].push(post);
@@ -319,7 +320,7 @@ export default function FeedPostagensPage() {
                                 {tipo.icon}
                                 {tipo.label}
                               </span>
-                              {differenceInHours(new Date(), parseISO(post.created_at)) <= 24 && (
+                              {post.created_at && differenceInHours(new Date(), parseISO(post.created_at)) <= 24 && (
                                 <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-semibold uppercase bg-surface-soft text-ink">
                                   <Sparkles className="h-3 w-3" />
                                   Novo
@@ -327,7 +328,7 @@ export default function FeedPostagensPage() {
                               )}
                               <span className="text-[10px] text-muted-soft flex items-center gap-1">
                                 <Clock className="h-3 w-3" />
-                                {formatarDataCompleta(post.published_at)}
+                                {post.published_at ? formatarDataCompleta(post.published_at) : "—"}
                               </span>
                               {tipo.desc && (
                                 <span className="text-[10px] text-muted-soft hidden sm:inline">· {tipo.desc}</span>

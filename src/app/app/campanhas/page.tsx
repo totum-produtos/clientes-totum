@@ -4,35 +4,37 @@ import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
 import { useGlobal } from '@/lib/context/GlobalContext';
 import { createSPASassClient } from '@/lib/supabase/client';
 import { TrendingUp, Eye, Heart, BarChart3, Megaphone, Link2, Unlink, RefreshCw, DollarSign, Target, MousePointerClick } from 'lucide-react';
+import { useToast } from "@/components/ui/ToastProvider";
 import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianGrid } from 'recharts';
 
 type Post = {
     id: number;
     subject: string;
     tipo: string;
-    views: number;
-    likes: number;
-    engagement_rate: number;
-    conversion_rate: number;
-    published_at: string;
+    views: number | null;
+    likes: number | null;
+    engagement_rate: number | null;
+    conversion_rate: number | null;
+    published_at: string | null;
 };
 
 type AdCampaign = {
     id: string;
-    platform: 'meta' | 'google';
+    platform: string;
     name: string;
-    status: string;
-    spend: number;
-    impressions: number;
-    clicks: number;
-    ctr: number;
-    conversions: number;
-    leads_count: number;
-    cost_per_lead: number;
-    roi: number;
+    status: string | null;
+    spend: number | null;
+    impressions: number | null;
+    clicks: number | null;
+    ctr: number | null;
+    conversions: number | null;
+    leads_count: number | null;
+    cost_per_lead: number | null;
+    roi: number | null;
 };
 
 export default function CampanhasPage() {
+  const { showSuccess, showError } = useToast();
     const { client } = useGlobal();
     const [posts, setPosts] = useState<Post[]>([]);
     const [campaigns, setCampaigns] = useState<AdCampaign[]>([]);
@@ -86,9 +88,9 @@ export default function CampanhasPage() {
         if (!error) {
             setMetaAccountId('');
             setMetaToken('');
-            alert('Meta Ads conectado! A sincronização ocorre em background.');
+            showSuccess('Meta Ads conectado! A sincronização ocorre em background.');
         } else {
-            alert('Erro: ' + error.message);
+            showError('Erro: ' + error.message);
         }
     }
 
@@ -107,9 +109,9 @@ export default function CampanhasPage() {
         if (!error) {
             setGoogleCustomerId('');
             setGoogleDevToken('');
-            alert('Google Ads conectado! A sincronização ocorre em background.');
+            showSuccess('Google Ads conectado! A sincronização ocorre em background.');
         } else {
-            alert('Erro: ' + error.message);
+            showError('Erro: ' + error.message);
         }
     }
 
@@ -144,12 +146,14 @@ export default function CampanhasPage() {
             <div className="flex gap-2 border-b border-hairline">
                 <button
                     onClick={() => setActiveTab('organic')}
+                    disabled={loading}
                     className={`px-4 py-2 text-sm font-medium border-b-2 transition-colors ${activeTab === 'organic' ? 'border-rausch text-rausch' : 'border-transparent text-muted hover:text-ink'}`}
                 >
                     Conteúdo Orgânico
                 </button>
                 <button
                     onClick={() => setActiveTab('paid')}
+                    disabled={loading}
                     className={`px-4 py-2 text-sm font-medium border-b-2 transition-colors ${activeTab === 'paid' ? 'border-rausch text-rausch' : 'border-transparent text-muted hover:text-ink'}`}
                 >
                     Campanhas Pagas
@@ -209,7 +213,7 @@ export default function CampanhasPage() {
                                 <div key={p.id} className="flex items-center gap-4 p-4 border rounded-lg hover:bg-surface-soft transition-colors">
                                     <div className="flex-1 min-w-0">
                                         <p className="font-medium text-sm">{p.subject}</p>
-                                        <p className="text-xs text-muted">{p.tipo} • {new Date(p.published_at).toLocaleDateString('pt-BR')}</p>
+                                        <p className="text-xs text-muted">{p.tipo} • {p.published_at ? new Date(p.published_at).toLocaleDateString('pt-BR') : '—'}</p>
                                     </div>
                                     <span className="text-xs text-muted shrink-0">{p.views} views</span>
                                     <span className="text-xs text-muted shrink-0">{p.engagement_rate}% eng</span>

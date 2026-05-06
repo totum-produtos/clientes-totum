@@ -12,7 +12,7 @@ interface Notification {
   message: string;
   type: string;
   read: boolean;
-  created_at: string;
+  created_at: string | null;
   data?: any;
 }
 
@@ -142,7 +142,7 @@ export default function NotificacoesPage() {
                   </div>
                   <p className="text-sm text-muted">{n.message}</p>
                   <p className="text-xs text-muted-soft mt-2">
-                    {new Date(n.created_at).toLocaleDateString("pt-BR", { day: "2-digit", month: "long", year: "numeric", hour: "2-digit", minute: "2-digit" })}
+                    {n.created_at ? new Date(n.created_at).toLocaleDateString("pt-BR", { day: "2-digit", month: "long", year: "numeric", hour: "2-digit", minute: "2-digit" }) : "—"}
                   </p>
                 </div>
                 <div className="flex items-center gap-1">

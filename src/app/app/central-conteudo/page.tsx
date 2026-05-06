@@ -17,24 +17,25 @@ import {
   AlertTriangle,
 } from "lucide-react";
 import Toast from "@/components/ui/Toast";
+import { useToast } from "@/components/ui/ToastProvider";
 
 interface Cliente {
   id: string;
   nome: string;
   slug: string;
   email_responsavel: string;
-  status: string;
-  primary_color: string | null;
+  status: string | null;
+  cor_primaria: string | null;
 }
 
 interface Post {
   id: number;
   subject: string;
   tipo: string;
-  published_at: string;
-  views: number;
-  likes: number;
-  engagement_rate: number;
+  published_at: string | null;
+  views: number | null;
+  likes: number | null;
+  engagement_rate: number | null;
 }
 
 export default function CentralConteudoPage() {
@@ -47,6 +48,7 @@ export default function CentralConteudoPage() {
   const [filtroTipo, setFiltroTipo] = useState<string>("todos");
   const [postsCountMap, setPostsCountMap] = useState<Record<string, number>>({});
   const [toastMessage, setToastMessage] = useState<string | null>(null);
+  const { showError, showSuccess } = useToast();
 
   useEffect(() => {
     fetchClientes();
@@ -74,7 +76,7 @@ export default function CentralConteudoPage() {
             event: "INSERT",
             schema: "public",
             table: "wanda_posts",
-            filter: `portal_client_id=eq.${selectedCliente.id}`,
+            filter: selectedCliente ? `portal_client_id=eq.${selectedCliente.id}` : undefined,
           },
           (payload: any) => {
             const novoPost = payload.new;
@@ -83,7 +85,7 @@ export default function CentralConteudoPage() {
                 novoPost.subject?.length > 40 ? "..." : ""
               }"`
             );
-            fetchPosts(selectedCliente.id);
+            if (selectedCliente) fetchPosts(selectedCliente.id);
           }
         )
         .subscribe();
@@ -106,7 +108,7 @@ export default function CentralConteudoPage() {
 
     const { data } = await sb
       .from("portal_clients")
-      .select("id, nome, slug, email_responsavel, status, primary_color")
+      .select("id, nome, slug, email_responsavel, status, cor_primaria")
       .order("nome", { ascending: true });
     const list = data || [];
     setClientes(list);
@@ -148,7 +150,7 @@ export default function CentralConteudoPage() {
 
   async function moverPost(postId: number, dias: number) {
     const post = posts.find((p) => p.id === postId);
-    if (!post) return;
+    if (!post || !post.published_at) return;
     const novaData = new Date(post.published_at);
     novaData.setDate(novaData.getDate() + dias);
 
@@ -160,8 +162,9 @@ export default function CentralConteudoPage() {
       .eq("id", postId);
 
     if (error) {
-      alert("Erro ao mover: " + error.message);
+      showError("Erro ao mover: " + error.message);
     } else {
+      showSuccess("Post movido com sucesso");
       fetchPosts(selectedCliente!.id);
     }
   }
@@ -198,10 +201,11 @@ export default function CentralConteudoPage() {
     const diasComPost = new Set(
       posts
         .filter((p) => {
+          if (!p.published_at) return false;
           const d = new Date(p.published_at);
           return d.getMonth() === new Date().getMonth();
         })
-        .map((p) => new Date(p.published_at).getDate())
+        .map((p) => p.published_at ? new Date(p.published_at).getDate() : 0)
     );
     const gaps: number[] = [];
     for (let d = 1; d <= hoje; d++) {
@@ -274,7 +278,7 @@ export default function CentralConteudoPage() {
               >
                 <div
                   className="w-8 h-8 rounded-full flex items-center justify-center text-white text-xs font-bold shrink-0"
-                  style={{ backgroundColor: c.primary_color || "rausch" }}
+                  style={{ backgroundColor: c.cor_primaria || "rausch" }}
                 >
                   {c.nome.charAt(0).toUpperCase()}
                 </div>
@@ -321,7 +325,7 @@ export default function CentralConteudoPage() {
                 <div className="flex items-center gap-4">
                   <div
                     className="w-14 h-14 rounded-md flex items-center justify-center text-white text-xl font-bold"
-                    style={{ backgroundColor: selectedCliente.primary_color || "rausch" }}
+                    style={{ backgroundColor: selectedCliente.cor_primaria || "rausch" }}
                   >
                     {selectedCliente.nome.charAt(0).toUpperCase()}
                   </div>
@@ -459,7 +463,7 @@ export default function CentralConteudoPage() {
                             {tipoLabels[post.tipo] || post.tipo}
                           </span>
                           <span className="text-xs text-muted-soft">
-                            {new Date(post.published_at).toLocaleDateString(
+                            {post.published_at ? new Date(post.published_at).toLocaleDateString(
                               "pt-BR",
                               {
                                 day: "2-digit",
@@ -468,7 +472,7 @@ export default function CentralConteudoPage() {
                                 hour: "2-digit",
                                 minute: "2-digit",
                               }
-                            )}
+                            ) : "—"}
                           </span>
                         </div>
                         <h3 className="text-sm font-semibold text-ink">
@@ -564,6 +568,7 @@ export default function CentralConteudoPage() {
                       return <div key={i} />;
                     }
                     const dayPosts = posts.filter((p) => {
+                      if (!p.published_at) return false;
                       const d = new Date(p.published_at);
                       return (
                         d.getDate() === currentDay &&

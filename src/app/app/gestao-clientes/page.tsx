@@ -39,8 +39,8 @@ type Cliente = {
   slug: string;
   email_responsavel: string;
   contato_principal: string | null;
-  status: string;
-  created_at: string;
+  status: string | null;
+  created_at: string | null;
   meta_ad_account_id: string | null;
   google_customer_id: string | null;
   drive_folder_cliente_id: string | null;
@@ -71,47 +71,48 @@ export default function GestaoClientesPage() {
   const [deleteLoading, setDeleteLoading] = useState(false);
   const [actionMessage, setActionMessage] = useState('');
 
-  useEffect(() => {
-    async function fetchClientes() {
-      const supabase = await createSPASassClient();
-      const sb = supabase.getSupabaseClient();
+  async function fetchClientes() {
+    setLoading(true);
+    const supabase = await createSPASassClient();
+    const sb = supabase.getSupabaseClient();
 
-      const { data: clientesData, error } = await sb
-        .from('portal_clients')
-        .select('*')
-        .order('created_at', { ascending: false });
+    const { data: clientesData, error } = await sb
+      .from('portal_clients')
+      .select('*')
+      .order('created_at', { ascending: false });
 
-      if (error || !clientesData) {
-        setLoading(false);
-        return;
-      }
-
-      const clientesComStats = await Promise.all(
-        clientesData.map(async (cliente: Cliente) => {
-          const [posts, tarefas, projetos, campanhas] = await Promise.all([
-            sb.from('wanda_posts').select('id', { count: 'exact', head: true }).eq('portal_client_id', cliente.id),
-            sb.from('tarefas').select('id', { count: 'exact', head: true }).eq('portal_client_id', cliente.id),
-            sb.from('projetos').select('id', { count: 'exact', head: true }).eq('portal_client_id', cliente.id),
-            sb.from('ad_campaigns').select('id', { count: 'exact', head: true }).eq('portal_client_id', cliente.id),
-          ]);
-
-          return {
-            ...cliente,
-            stats: {
-              totalPosts: posts.count || 0,
-              totalTarefas: tarefas.count || 0,
-              totalProjetos: projetos.count || 0,
-              totalCampanhas: campanhas.count || 0,
-            },
-          };
-        })
-      );
-
-      setClientes(clientesComStats);
+    if (error || !clientesData) {
       setLoading(false);
-      setActionMessage('');
+      return;
     }
 
+    const clientesComStats = await Promise.all(
+      clientesData.map(async (cliente: Cliente) => {
+        const [posts, tarefas, projetos, campanhas] = await Promise.all([
+          sb.from('wanda_posts').select('id', { count: 'exact', head: true }).eq('portal_client_id', cliente.id),
+          sb.from('tarefas').select('id', { count: 'exact', head: true }).eq('portal_client_id', cliente.id),
+          sb.from('projetos').select('id', { count: 'exact', head: true }).eq('portal_client_id', cliente.id),
+          sb.from('ad_campaigns').select('id', { count: 'exact', head: true }).eq('portal_client_id', cliente.id),
+        ]);
+
+        return {
+          ...cliente,
+          stats: {
+            totalPosts: posts.count || 0,
+            totalTarefas: tarefas.count || 0,
+            totalProjetos: projetos.count || 0,
+            totalCampanhas: campanhas.count || 0,
+          },
+        };
+      })
+    );
+
+    setClientes(clientesComStats);
+    setLoading(false);
+    setActionMessage('');
+  }
+
+  useEffect(() => {
     fetchClientes();
   }, []);
 
@@ -293,7 +294,7 @@ export default function GestaoClientesPage() {
       {viewMode === 'grid' && (
         <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
           {clientesFiltrados.map((cliente) => {
-            const statusCfg = STATUS_CONFIG[cliente.status] || STATUS_CONFIG.inactive;
+            const statusCfg = STATUS_CONFIG[cliente.status || 'inactive'];
             return (
               <Card
                 key={cliente.id}
@@ -332,7 +333,7 @@ export default function GestaoClientesPage() {
                     )}
                     <div className="flex items-center gap-2 text-sm text-body">
                       <CalendarDays className="h-3.5 w-3.5 text-muted-soft shrink-0" />
-                      <span>{new Date(cliente.created_at).toLocaleDateString('pt-BR')}</span>
+                      <span>{cliente.created_at ? new Date(cliente.created_at).toLocaleDateString('pt-BR') : '—'}</span>
                     </div>
                   </div>
 
@@ -407,7 +408,7 @@ export default function GestaoClientesPage() {
             <div className="col-span-2 text-right">Ações</div>
           </div>
           {clientesFiltrados.map((cliente) => {
-            const statusCfg = STATUS_CONFIG[cliente.status] || STATUS_CONFIG.inactive;
+            const statusCfg = STATUS_CONFIG[cliente.status || 'inactive'];
             return (
               <div
                 key={cliente.id}
