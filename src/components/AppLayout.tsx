@@ -20,11 +20,14 @@ import {
     LayoutGrid,
     Moon,
     Sun,
+    ClipboardList,
+    Bell,
 } from 'lucide-react';
 import { useGlobal } from "@/lib/context/GlobalContext";
 import { createSPASassClient } from "@/lib/supabase/client";
 import { useDarkMode } from "@/lib/hooks/useDarkMode";
 import Image from "next/image";
+import NotificationBell from "./NotificationBell";
 
 export default function AppLayout({ children }: { children: React.ReactNode }) {
     const [isSidebarOpen, setSidebarOpen] = useState(false);
@@ -42,6 +45,8 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
         { name: 'Feed de Postagens', href: '/app/feed-postagens', icon: List, clientOnly: true },
         { name: 'Arquivos do Cliente', href: '/app/arquivos', icon: FolderOpen, clientOnly: true },
         { name: 'Totum Drive', href: '/app/drive', icon: Cloud, clientOnly: true },
+        { name: 'Meu Cadastro', href: '/app/meu-cadastro', icon: ClipboardList, clientOnly: true },
+        { name: 'Notificações', href: '/app/notificacoes', icon: Bell, clientOnly: false },
         { name: 'Central de Conteúdo', href: '/app/central-conteudo', icon: LayoutGrid, clientOnly: false },
         { name: 'Contrato', href: '/app/contrato', icon: FileText, clientOnly: false },
         { name: 'Campanhas', href: '/app/campanhas', icon: BarChart3, clientOnly: false },
@@ -135,7 +140,9 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
                         <Menu className="h-6 w-6" />
                     </button>
 
-                    <div className="relative ml-auto">
+                    <div className="flex items-center gap-3 ml-auto">
+                        <NotificationBell />
+                        <div className="relative">
                         <button
                             onClick={() => setUserDropdownOpen(!isUserDropdownOpen)}
                             className="flex items-center space-x-2 text-sm text-gray-700 hover:text-gray-900"
@@ -150,7 +157,7 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
                         </button>
 
                         {isUserDropdownOpen && (
-                            <div className="absolute right-0 mt-2 w-64 bg-white rounded-md shadow-lg border">
+                            <div className="absolute right-0 mt-2 w-64 bg-white rounded-md shadow-lg border z-50">
                                 <div className="p-2 border-b border-gray-100">
                                     <p className="text-xs text-gray-500">Logado como</p>
                                     <p className="text-sm font-medium text-gray-900 truncate">
@@ -191,6 +198,7 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
                                 </div>
                             </div>
                         )}
+                        </div>
                     </div>
                 </div>
 

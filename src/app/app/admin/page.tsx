@@ -2,7 +2,7 @@
 import React, { useEffect, useState } from 'react';
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
 import { createSPASassClient } from '@/lib/supabase/client';
-import { Plus, Link2, Users, Building2 } from 'lucide-react';
+import { Plus, Link2, Users, Building2, Clock, CheckCircle, XCircle } from 'lucide-react';
 
 type PortalClient = {
     id: string;
@@ -26,10 +26,24 @@ type AuthUser = {
     created_at: string;
 };
 
+type ProfileChange = {
+    id: string;
+    portal_client_id: string;
+    requested_by: string;
+    field_path: string;
+    old_value: string;
+    new_value: string;
+    status: string;
+    created_at: string;
+    reviewed_by?: string;
+    reviewed_at?: string;
+};
+
 export default function AdminPage() {
     const [clients, setClients] = useState<PortalClient[]>([]);
     const [users, setUsers] = useState<PortalUser[]>([]);
     const [authUsers, setAuthUsers] = useState<AuthUser[]>([]);
+    const [pendingChanges, setPendingChanges] = useState<ProfileChange[]>([]);
     const [loading, setLoading] = useState(true);
     const [formOpen, setFormOpen] = useState(false);
     const [linkOpen, setLinkOpen] = useState(false);
@@ -52,6 +66,9 @@ export default function AdminPage() {
         // Buscar auth users via admin API (service role)
         const { data: authData } = await client.auth.admin.listUsers();
         setAuthUsers(authData?.users?.map(u => ({ id: u.id, email: u.email || '', created_at: u.created_at })) || []);
+
+        const { data: changesData } = await client.from('client_profile_changes').select('*').eq('status', 'pendente').order('created_at', { ascending: false });
+        setPendingChanges(changesData || []);
 
         setLoading(false);
     }
@@ -98,6 +115,64 @@ export default function AdminPage() {
         }
     }
 
+    async function handleApprove(change: ProfileChange) {
+        const supabase = await createSPASassClient();
+        const client = supabase.getSupabaseClient();
+
+        // Aplicar a alteração
+        if (change.field_path.startsWith('profile_data.')) {
+            const field = change.field_path.replace('profile_data.', '');
+            const { data: pc } = await client.from('portal_clients').select('profile_data').eq('id', change.portal_client_id).single();
+            const current = pc?.profile_data || {};
+            let newVal: any = change.new_value;
+            try { newVal = JSON.parse(newVal); } catch {}
+            await client.from('portal_clients').update({ profile_data: { ...current, [field]: newVal } }).eq('id', change.portal_client_id);
+        } else {
+            await client.from('portal_clients').update({ [change.field_path]: change.new_value }).eq('id', change.portal_client_id);
+        }
+
+        // Atualizar status
+        await client.from('client_profile_changes').update({
+            status: 'aprovado',
+            reviewed_at: new Date().toISOString()
+        }).eq('id', change.id);
+
+        // Notificar cliente
+        await client.from('notifications').insert({
+            user_id: change.requested_by,
+            type: 'alteracao_aprovada',
+            title: 'Alteração aprovada',
+            message: `Sua alteração no campo "${change.field_path}" foi aprovada.`,
+            data: { change_id: change.id },
+            read: false
+        });
+
+        setMessage('Alteração aprovada com sucesso!');
+        fetchData();
+    }
+
+    async function handleReject(change: ProfileChange) {
+        const supabase = await createSPASassClient();
+        const client = supabase.getSupabaseClient();
+
+        await client.from('client_profile_changes').update({
+            status: 'rejeitado',
+            reviewed_at: new Date().toISOString()
+        }).eq('id', change.id);
+
+        await client.from('notifications').insert({
+            user_id: change.requested_by,
+            type: 'alteracao_rejeitada',
+            title: 'Alteração rejeitada',
+            message: `Sua alteração no campo "${change.field_path}" foi rejeitada.`,
+            data: { change_id: change.id },
+            read: false
+        });
+
+        setMessage('Alteração rejeitada.');
+        fetchData();
+    }
+
     if (loading) {
         return <div className="flex justify-center p-8"><div className="animate-spin h-8 w-8 border-b-2 border-primary-600 rounded-full"></div></div>;
     }
@@ -113,6 +188,57 @@ export default function AdminPage() {
                 <div className={`p-3 rounded-lg text-sm ${message.includes('sucesso') ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'}`}>
                     {message}
                 </div>
+            )}
+
+            {/* Alterações Pendentes */}
+            {pendingChanges.length > 0 && (
+                <Card className="border-amber-200">
+                    <CardHeader>
+                        <CardTitle className="flex items-center gap-2 text-amber-700">
+                            <Clock className="h-5 w-5" />
+                            Alterações pendentes de aprovação ({pendingChanges.length})
+                        </CardTitle>
+                    </CardHeader>
+                    <CardContent className="space-y-3">
+                        {pendingChanges.map(change => {
+                            const client = clients.find(c => c.id === change.portal_client_id);
+                            const requester = authUsers.find(u => u.id === change.requested_by);
+                            return (
+                                <div key={change.id} className="p-4 bg-amber-50 rounded-xl border border-amber-100">
+                                    <div className="flex items-center justify-between mb-2">
+                                        <div>
+                                            <p className="font-medium text-sm text-gray-900">{client?.nome || 'Cliente desconhecido'}</p>
+                                            <p className="text-xs text-gray-500">Solicitado por: {requester?.email || change.requested_by} • {new Date(change.created_at).toLocaleDateString('pt-BR')}</p>
+                                        </div>
+                                        <span className="text-xs px-2 py-1 rounded-full bg-amber-100 text-amber-700 font-medium">Pendente</span>
+                                    </div>
+                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-3 mb-3">
+                                        <div className="p-2 bg-white rounded-lg text-sm">
+                                            <span className="text-xs text-gray-400 uppercase">Campo</span>
+                                            <p className="font-medium text-gray-700">{change.field_path}</p>
+                                        </div>
+                                        <div className="p-2 bg-white rounded-lg text-sm">
+                                            <span className="text-xs text-gray-400 uppercase">Valor atual → Novo</span>
+                                            <p className="text-gray-700">
+                                                <span className="text-red-500 line-through">{change.old_value || '—'}</span>
+                                                <span className="mx-2 text-gray-400">→</span>
+                                                <span className="text-green-600 font-medium">{change.new_value || '—'}</span>
+                                            </p>
+                                        </div>
+                                    </div>
+                                    <div className="flex items-center gap-2">
+                                        <button onClick={() => handleApprove(change)} className="flex items-center gap-1.5 px-4 py-2 bg-green-600 text-white rounded-lg text-sm font-medium hover:bg-green-700 transition-colors">
+                                            <CheckCircle className="w-4 h-4" /> Aprovar
+                                        </button>
+                                        <button onClick={() => handleReject(change)} className="flex items-center gap-1.5 px-4 py-2 bg-red-600 text-white rounded-lg text-sm font-medium hover:bg-red-700 transition-colors">
+                                            <XCircle className="w-4 h-4" /> Rejeitar
+                                        </button>
+                                    </div>
+                                </div>
+                            );
+                        })}
+                    </CardContent>
+                </Card>
             )}
 
             {/* Clientes */}
