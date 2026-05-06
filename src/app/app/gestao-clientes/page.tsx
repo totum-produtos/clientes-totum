@@ -306,7 +306,7 @@ export default function GestaoClientesPage() {
                     <div className="flex items-center gap-3">
                       <div
                         className="w-12 h-12 rounded-lg flex items-center justify-center text-white font-bold text-lg"
-                        style={{ backgroundColor: 'rausch' }}
+                        style={{ backgroundColor: '#ff385c' }}
                       >
                         {cliente.nome.charAt(0).toUpperCase()}
                       </div>

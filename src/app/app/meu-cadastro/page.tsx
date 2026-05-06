@@ -344,7 +344,7 @@ function ColorField({ label, editMode, value, onChange, readValue }: any) {
       <label className="block text-sm font-medium text-ink mb-2">{label}</label>
       {editMode ? (
         <div className="flex items-center gap-3">
-          <input type="color" value={value || "rausch"} onChange={e => onChange(e.target.value)} className="w-12 h-12 rounded-md border cursor-pointer" />
+          <input type="color" value={value || "rausch"} onChange={e => onChange(e.target.value)} className="w-12 h-12 rounded-sm border cursor-pointer" />
           <input value={value || ""} onChange={e => onChange(e.target.value)} className="input-field font-mono" />
         </div>
       ) : (

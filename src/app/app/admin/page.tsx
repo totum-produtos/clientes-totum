@@ -256,9 +256,9 @@ export default function AdminPage() {
                     {formOpen && (
                         <form onSubmit={handleCreateClient} className="mb-4 p-4 bg-surface-soft rounded-lg space-y-3">
                             <h3 className="font-medium text-sm">Novo cliente</h3>
-                            <input required placeholder="Nome do cliente" value={newClient.nome} onChange={e => setNewClient({...newClient, nome: e.target.value})} className="w-full px-3 py-2 border rounded-lg text-sm" />
-                            <input required placeholder="Slug (ex: cliente-xyz)" value={newClient.slug} onChange={e => setNewClient({...newClient, slug: e.target.value})} className="w-full px-3 py-2 border rounded-lg text-sm" />
-                            <input required type="email" placeholder="Email responsável" value={newClient.email_responsavel} onChange={e => setNewClient({...newClient, email_responsavel: e.target.value})} className="w-full px-3 py-2 border rounded-lg text-sm" />
+                            <input required placeholder="Nome do cliente" value={newClient.nome} onChange={e => setNewClient({...newClient, nome: e.target.value})} className="w-full px-3 py-2 border rounded-sm text-sm" />
+                            <input required placeholder="Slug (ex: cliente-xyz)" value={newClient.slug} onChange={e => setNewClient({...newClient, slug: e.target.value})} className="w-full px-3 py-2 border rounded-sm text-sm" />
+                            <input required type="email" placeholder="Email responsável" value={newClient.email_responsavel} onChange={e => setNewClient({...newClient, email_responsavel: e.target.value})} className="w-full px-3 py-2 border rounded-sm text-sm" />
                             <div className="flex gap-2">
                                 <button type="submit" className="btn-primary px-4 py-2 rounded-lg text-sm">Criar</button>
                                 <button type="button" onClick={() => setFormOpen(false)} className="px-4 py-2 rounded-lg text-sm border">Cancelar</button>
@@ -297,11 +297,11 @@ export default function AdminPage() {
                     {linkOpen && (
                         <form onSubmit={handleLinkUser} className="mb-4 p-4 bg-surface-soft rounded-lg space-y-3">
                             <h3 className="font-medium text-sm">Vincular usuário a cliente</h3>
-                            <select required value={selectedClient} onChange={e => setSelectedClient(e.target.value)} className="w-full px-3 py-2 border rounded-lg text-sm">
+                            <select required value={selectedClient} onChange={e => setSelectedClient(e.target.value)} className="w-full px-3 py-2 border rounded-sm text-sm">
                                 <option value="">Selecione o cliente</option>
                                 {clients.map(c => <option key={c.id} value={c.id}>{c.nome}</option>)}
                             </select>
-                            <select required value={selectedUser} onChange={e => setSelectedUser(e.target.value)} className="w-full px-3 py-2 border rounded-lg text-sm">
+                            <select required value={selectedUser} onChange={e => setSelectedUser(e.target.value)} className="w-full px-3 py-2 border rounded-sm text-sm">
                                 <option value="">Selecione o usuário</option>
                                 {authUsers.filter(u => !users.some(vu => vu.user_id === u.id)).map(u => <option key={u.id} value={u.id}>{u.email}</option>)}
                             </select>

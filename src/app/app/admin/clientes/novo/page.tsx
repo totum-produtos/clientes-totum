@@ -299,13 +299,13 @@ export default function NovoClientePage() {
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
                     <Field label="Cor primária">
                       <div className="flex items-center gap-3">
-                        <input type="color" value={form.cor_primaria} onChange={e => update("cor_primaria", e.target.value)} className="w-12 h-12 rounded-md border cursor-pointer" />
+                        <input type="color" value={form.cor_primaria} onChange={e => update("cor_primaria", e.target.value)} className="w-12 h-12 rounded-sm border cursor-pointer" />
                         <input value={form.cor_primaria} onChange={e => update("cor_primaria", e.target.value)} className="input-field font-mono uppercase" />
                       </div>
                     </Field>
                     <Field label="Cor secundária">
                       <div className="flex items-center gap-3">
-                        <input type="color" value={form.cor_secundaria} onChange={e => update("cor_secundaria", e.target.value)} className="w-12 h-12 rounded-md border cursor-pointer" />
+                        <input type="color" value={form.cor_secundaria} onChange={e => update("cor_secundaria", e.target.value)} className="w-12 h-12 rounded-sm border cursor-pointer" />
                         <input value={form.cor_secundaria} onChange={e => update("cor_secundaria", e.target.value)} className="input-field font-mono uppercase" />
                       </div>
                     </Field>
