@@ -1,18 +1,20 @@
-// src/app/auth/login/page.tsx
 'use client';
 
 import { createSPASassClient } from '@/lib/supabase/client';
-import {useEffect, useState} from 'react';
+import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import SSOButtons from '@/components/SSOButtons';
+import { Eye, EyeOff, Lock, Mail, ArrowRight, Sparkles } from 'lucide-react';
 
 export default function LoginPage() {
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
+    const [showPassword, setShowPassword] = useState(false);
     const [error, setError] = useState('');
     const [loading, setLoading] = useState(false);
     const [showMFAPrompt, setShowMFAPrompt] = useState(false);
+    const [focusedField, setFocusedField] = useState<string | null>(null);
     const router = useRouter();
 
     const handleSubmit = async (e: React.FormEvent) => {
@@ -26,7 +28,6 @@ export default function LoginPage() {
 
             if (signInError) throw signInError;
 
-            // Check if MFA is required
             const supabase = client.getSupabaseClient();
             const { data: mfaData, error: mfaError } = await supabase.auth.mfa.getAuthenticatorAssuranceLevel();
 
@@ -42,93 +43,168 @@ export default function LoginPage() {
             if (err instanceof Error) {
                 setError(err.message);
             } else {
-                setError('An unknown error occurred');
+                setError('Ocorreu um erro inesperado');
             }
         } finally {
             setLoading(false);
         }
     };
 
-
     useEffect(() => {
-        if(showMFAPrompt) {
+        if (showMFAPrompt) {
             router.push('/auth/2fa');
         }
     }, [showMFAPrompt, router]);
 
-
     return (
-        <div className="bg-white py-8 px-4 shadow sm:rounded-lg sm:px-10">
-            {error && (
-                <div className="mb-4 p-4 text-sm text-red-700 bg-red-100 rounded-lg">
-                    {error}
+        <div className="animate-fade-in-up">
+            {/* Logo */}
+            <div className="text-center mb-8">
+                <div className="inline-flex items-center justify-center w-16 h-16 rounded-2xl bg-gradient-to-br from-[#d81220] to-[#b91c1c] mb-6 shadow-lg shadow-[#d81220]/20">
+                    <Sparkles className="w-8 h-8 text-white" />
                 </div>
-            )}
+                <h1 className="text-2xl font-bold text-white tracking-tight">
+                    Portal do Cliente
+                </h1>
+                <p className="text-sm text-gray-400 mt-2">
+                    Acesse sua central de conteúdo
+                </p>
+            </div>
 
-            <form onSubmit={handleSubmit} className="space-y-6">
-                <div>
-                    <label htmlFor="email" className="block text-sm font-medium text-gray-700">
-                        Email address
-                    </label>
-                    <div className="mt-1">
-                        <input
-                            id="email"
-                            name="email"
-                            type="email"
-                            autoComplete="email"
-                            required
-                            value={email}
-                            onChange={(e) => setEmail(e.target.value)}
-                            className="block w-full appearance-none rounded-md border border-gray-300 px-3 py-2 shadow-sm focus:border-primary-500 focus:outline-none focus:ring-primary-500"
-                        />
+            {/* Card */}
+            <div className="bg-white/[0.03] backdrop-blur-xl border border-white/[0.08] rounded-2xl p-8 shadow-2xl">
+                {error && (
+                    <div className="mb-6 p-4 text-sm text-red-300 bg-red-500/10 border border-red-500/20 rounded-xl animate-shake">
+                        {error}
                     </div>
-                </div>
+                )}
 
-                <div>
-                    <label htmlFor="password" className="block text-sm font-medium text-gray-700">
-                        Password
-                    </label>
-                    <div className="mt-1">
-                        <input
-                            id="password"
-                            name="password"
-                            type="password"
-                            autoComplete="current-password"
-                            required
-                            value={password}
-                            onChange={(e) => setPassword(e.target.value)}
-                            className="block w-full appearance-none rounded-md border border-gray-300 px-3 py-2 shadow-sm focus:border-primary-500 focus:outline-none focus:ring-primary-500"
-                        />
+                <form onSubmit={handleSubmit} className="space-y-5">
+                    {/* Email */}
+                    <div className="space-y-2">
+                        <label htmlFor="email" className="block text-sm font-medium text-gray-300">
+                            Email
+                        </label>
+                        <div className="relative">
+                            <Mail 
+                                className={`absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 transition-colors duration-200 ${
+                                    focusedField === 'email' ? 'text-[#d81220]' : 'text-gray-500'
+                                }`}
+                            />
+                            <input
+                                id="email"
+                                name="email"
+                                type="email"
+                                autoComplete="email"
+                                required
+                                value={email}
+                                onChange={(e) => setEmail(e.target.value)}
+                                onFocus={() => setFocusedField('email')}
+                                onBlur={() => setFocusedField(null)}
+                                placeholder="seu@email.com"
+                                className="w-full bg-white/[0.05] border border-white/[0.1] rounded-xl pl-11 pr-4 py-3 text-sm text-white placeholder-gray-500 
+                                    focus:outline-none focus:border-[#d81220]/50 focus:ring-2 focus:ring-[#d81220]/20 
+                                    transition-all duration-200"
+                            />
+                        </div>
                     </div>
-                </div>
 
-                <div className="flex items-center justify-between">
-                    <div className="text-sm">
-                        <Link href="/auth/forgot-password" className="font-medium text-primary-600 hover:text-primary-500">
-                            Forgot your password?
+                    {/* Password */}
+                    <div className="space-y-2">
+                        <label htmlFor="password" className="block text-sm font-medium text-gray-300">
+                            Senha
+                        </label>
+                        <div className="relative">
+                            <Lock 
+                                className={`absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 transition-colors duration-200 ${
+                                    focusedField === 'password' ? 'text-[#d81220]' : 'text-gray-500'
+                                }`}
+                            />
+                            <input
+                                id="password"
+                                name="password"
+                                type={showPassword ? 'text' : 'password'}
+                                autoComplete="current-password"
+                                required
+                                value={password}
+                                onChange={(e) => setPassword(e.target.value)}
+                                onFocus={() => setFocusedField('password')}
+                                onBlur={() => setFocusedField(null)}
+                                placeholder="••••••••"
+                                className="w-full bg-white/[0.05] border border-white/[0.1] rounded-xl pl-11 pr-11 py-3 text-sm text-white placeholder-gray-500 
+                                    focus:outline-none focus:border-[#d81220]/50 focus:ring-2 focus:ring-[#d81220]/20 
+                                    transition-all duration-200"
+                            />
+                            <button
+                                type="button"
+                                onClick={() => setShowPassword(!showPassword)}
+                                className="absolute right-3.5 top-1/2 -translate-y-1/2 text-gray-500 hover:text-gray-300 transition-colors"
+                            >
+                                {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                            </button>
+                        </div>
+                    </div>
+
+                    {/* Forgot password */}
+                    <div className="flex items-center justify-end">
+                        <Link 
+                            href="/auth/forgot-password" 
+                            className="text-sm text-gray-400 hover:text-[#d81220] transition-colors"
+                        >
+                            Esqueceu a senha?
                         </Link>
                     </div>
-                </div>
 
-                <div>
+                    {/* Submit */}
                     <button
                         type="submit"
                         disabled={loading}
-                        className="flex w-full justify-center rounded-md border border-transparent bg-primary-600 py-2 px-4 text-sm font-medium text-white shadow-sm hover:bg-primary-700 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-2 disabled:opacity-50"
+                        className="group w-full flex items-center justify-center gap-2 bg-gradient-to-r from-[#d81220] to-[#b91c1c] hover:from-[#c0111d] hover:to-[#a01919] 
+                            text-white font-medium py-3 px-4 rounded-xl shadow-lg shadow-[#d81220]/25 
+                            focus:outline-none focus:ring-2 focus:ring-[#d81220]/50 focus:ring-offset-2 focus:ring-offset-[#0a0a0a]
+                            disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200"
                     >
-                        {loading ? 'Signing in...' : 'Sign in'}
+                        {loading ? (
+                            <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                        ) : (
+                            <>
+                                Entrar
+                                <ArrowRight className="w-4 h-4 group-hover:translate-x-0.5 transition-transform" />
+                            </>
+                        )}
                     </button>
+                </form>
+
+                {/* Divider */}
+                <div className="relative my-6">
+                    <div className="absolute inset-0 flex items-center">
+                        <div className="w-full border-t border-white/[0.08]" />
+                    </div>
+                    <div className="relative flex justify-center text-xs">
+                        <span className="px-4 bg-[#0f0f0f] text-gray-500">ou continue com</span>
+                    </div>
                 </div>
-            </form>
 
-            <SSOButtons onError={setError} />
+                <SSOButtons onError={setError} compact />
 
-            <div className="mt-6 text-center text-sm">
-                <span className="text-gray-600">Don&#39;t have an account?</span>
-                {' '}
-                <Link href="/auth/register" className="font-medium text-primary-600 hover:text-primary-500">
-                    Sign up
-                </Link>
+                {/* Register link */}
+                <div className="mt-6 text-center">
+                    <span className="text-sm text-gray-500">Não tem uma conta?</span>
+                    {' '}
+                    <Link 
+                        href="/auth/register" 
+                        className="text-sm font-medium text-[#d81220] hover:text-[#ff3344] transition-colors"
+                    >
+                        Criar conta
+                    </Link>
+                </div>
+            </div>
+
+            {/* Footer */}
+            <div className="mt-8 text-center">
+                <p className="text-xs text-gray-600">
+                    © {new Date().getFullYear()} Grupo Totum. Todos os direitos reservados.
+                </p>
             </div>
         </div>
     );
