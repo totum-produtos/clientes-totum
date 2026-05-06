@@ -20,6 +20,17 @@ import {
   MoreHorizontal,
   Trash2,
   ChevronDown,
+  Power,
+  PowerOff,
+  AlertTriangle,
+  X,
+  Target,
+  Palette,
+  Phone,
+  Star,
+  Award,
+  CircleDot,
+  Briefcase,
 } from 'lucide-react';
 
 type Cliente = {
@@ -55,7 +66,10 @@ export default function GestaoClientesPage() {
   const [busca, setBusca] = useState('');
   const [filtroStatus, setFiltroStatus] = useState<string>('todos');
   const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
-  const [clienteSelecionado, setClienteSelecionado] = useState<(Cliente & { stats?: ClienteStats }) | null>(null);
+  const [clienteSelecionado, setClienteSelecionado] = useState<(Cliente & { stats?: ClienteStats; profile_data?: any }) | null>(null);
+  const [clienteParaDeletar, setClienteParaDeletar] = useState<Cliente | null>(null);
+  const [deleteLoading, setDeleteLoading] = useState(false);
+  const [actionMessage, setActionMessage] = useState('');
 
   useEffect(() => {
     async function fetchClientes() {
@@ -95,6 +109,7 @@ export default function GestaoClientesPage() {
 
       setClientes(clientesComStats);
       setLoading(false);
+      setActionMessage('');
     }
 
     fetchClientes();
@@ -115,6 +130,54 @@ export default function GestaoClientesPage() {
   const totalInativos = clientes.filter((c) => c.status === 'inactive').length;
   const totalPendentes = clientes.filter((c) => c.status === 'pending').length;
   const totalComAds = clientes.filter((c) => c.meta_ad_account_id || c.google_customer_id).length;
+
+  async function handleToggleStatus(cliente: Cliente) {
+    const novoStatus = cliente.status === 'inactive' ? 'active' : 'inactive';
+    const supabase = await createSPASassClient();
+    const { error } = await supabase.getSupabaseClient()
+      .from('portal_clients')
+      .update({ status: novoStatus })
+      .eq('id', cliente.id);
+    if (error) {
+      setActionMessage('Erro ao alterar status: ' + error.message);
+    } else {
+      setActionMessage(`Cliente ${novoStatus === 'active' ? 'ativado' : 'inativado'} com sucesso!`);
+      fetchClientes();
+    }
+  }
+
+  async function handleDeletar(cliente: Cliente) {
+    setDeleteLoading(true);
+    const supabase = await createSPASassClient();
+    const sb = supabase.getSupabaseClient();
+
+    // Deleta dados relacionados (nao deleta drive_folder_cliente_id no Google Drive)
+    await sb.from('wanda_posts').delete().eq('portal_client_id', cliente.id);
+    await sb.from('tarefas').delete().eq('portal_client_id', cliente.id);
+    await sb.from('projetos').delete().eq('portal_client_id', cliente.id);
+    await sb.from('ad_campaigns').delete().eq('portal_client_id', cliente.id);
+    await sb.from('client_profile_changes').delete().eq('portal_client_id', cliente.id);
+    await sb.from('notifications').delete().eq('data->>client_id', cliente.id);
+    await sb.from('portal_client_users').delete().eq('client_id', cliente.id);
+
+    // Deleta arquivos do storage
+    const { data: files } = await sb.storage.from('client_files').list(cliente.id);
+    if (files && files.length > 0) {
+      await sb.storage.from('client_files').remove(files.map(f => `${cliente.id}/${f.name}`));
+    }
+
+    // Deleta o cliente
+    const { error } = await sb.from('portal_clients').delete().eq('id', cliente.id);
+
+    if (error) {
+      setActionMessage('Erro ao deletar: ' + error.message);
+    } else {
+      setActionMessage('Cliente deletado com sucesso!');
+      setClienteParaDeletar(null);
+      fetchClientes();
+    }
+    setDeleteLoading(false);
+  }
 
   if (loading) {
     return (
@@ -303,6 +366,27 @@ export default function GestaoClientesPage() {
                       <span className="text-[10px] px-2 py-0.5 bg-yellow-100 text-yellow-700 rounded-full">Drive</span>
                     )}
                   </div>
+
+                  {/* Actions */}
+                  <div className="flex gap-2 mt-3 pt-3 border-t border-gray-100">
+                    <button
+                      onClick={(e) => { e.stopPropagation(); handleToggleStatus(cliente); }}
+                      className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium transition-colors ${
+                        cliente.status === 'inactive'
+                          ? 'bg-green-50 text-green-700 hover:bg-green-100'
+                          : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+                      }`}
+                    >
+                      {cliente.status === 'inactive' ? <Power className="w-3 h-3" /> : <PowerOff className="w-3 h-3" />}
+                      {cliente.status === 'inactive' ? 'Ativar' : 'Inativar'}
+                    </button>
+                    <button
+                      onClick={(e) => { e.stopPropagation(); setClienteParaDeletar(cliente); }}
+                      className="flex items-center gap-1.5 px-3 py-1.5 bg-red-50 text-red-700 rounded-lg text-xs font-medium hover:bg-red-100 transition-colors"
+                    >
+                      <Trash2 className="w-3 h-3" /> Deletar
+                    </button>
+                  </div>
                 </CardContent>
               </Card>
             );
@@ -352,6 +436,20 @@ export default function GestaoClientesPage() {
                 <div className="col-span-1 text-center text-sm font-medium">{cliente.stats?.totalProjetos || 0}</div>
                 <div className="col-span-2 flex justify-end gap-1">
                   <button
+                    onClick={(e) => { e.stopPropagation(); handleToggleStatus(cliente); }}
+                    className="p-1.5 hover:bg-gray-100 rounded"
+                    title={cliente.status === 'inactive' ? 'Ativar' : 'Inativar'}
+                  >
+                    {cliente.status === 'inactive' ? <Power className="h-4 w-4 text-green-500" /> : <PowerOff className="h-4 w-4 text-gray-400" />}
+                  </button>
+                  <button
+                    onClick={(e) => { e.stopPropagation(); setClienteParaDeletar(cliente); }}
+                    className="p-1.5 hover:bg-red-50 rounded"
+                    title="Deletar"
+                  >
+                    <Trash2 className="h-4 w-4 text-red-400" />
+                  </button>
+                  <button
                     onClick={(e) => { e.stopPropagation(); setClienteSelecionado(cliente); }}
                     className="p-1.5 hover:bg-gray-100 rounded"
                   >
@@ -372,78 +470,235 @@ export default function GestaoClientesPage() {
         </div>
       )}
 
-      {/* Detail Modal */}
-      {clienteSelecionado && (
-        <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4" onClick={() => setClienteSelecionado(null)}>
-          <div className="bg-white rounded-xl max-w-lg w-full max-h-[90vh] overflow-y-auto" onClick={(e) => e.stopPropagation()}>
+      {/* Delete Confirmation Modal */}
+      {clienteParaDeletar && (
+        <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4" onClick={() => setClienteParaDeletar(null)}>
+          <div className="bg-white rounded-xl max-w-md w-full" onClick={(e) => e.stopPropagation()}>
             <div className="p-6">
-              <div className="flex items-center justify-between mb-4">
-                <div className="flex items-center gap-3">
-                  <div className="w-14 h-14 rounded-xl bg-[#d81220] flex items-center justify-center text-white font-bold text-xl">
-                    {clienteSelecionado.nome.charAt(0).toUpperCase()}
-                  </div>
-                  <div>
-                    <h2 className="text-xl font-bold">{clienteSelecionado.nome}</h2>
-                    <p className="text-sm text-gray-500">@{clienteSelecionado.slug}</p>
-                  </div>
-                </div>
-                <button onClick={() => setClienteSelecionado(null)} className="text-gray-400 hover:text-gray-600">
-                  <MoreHorizontal className="h-5 w-5" />
+              <div className="w-12 h-12 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                <AlertTriangle className="w-6 h-6 text-red-600" />
+              </div>
+              <h3 className="text-lg font-bold text-center text-gray-900 mb-2">Deletar cliente?</h3>
+              <p className="text-sm text-gray-500 text-center mb-4">
+                Você está prestes a deletar <strong>{clienteParaDeletar.nome}</strong> e <strong>todos os dados</strong> associados (posts, tarefas, projetos, campanhas, arquivos).<br /><br />
+                <span className="text-amber-600 font-medium">A pasta no Google Drive NÃO será removida.</span>
+              </p>
+              <div className="bg-amber-50 border border-amber-200 rounded-lg p-3 mb-4">
+                <p className="text-xs text-amber-700">Esta ação não pode ser desfeita.</p>
+              </div>
+              <div className="flex gap-3">
+                <button onClick={() => setClienteParaDeletar(null)} className="flex-1 py-2.5 px-4 border rounded-lg text-sm font-medium text-gray-600 hover:bg-gray-50 transition-colors">
+                  Cancelar
                 </button>
-              </div>
-
-              <div className="space-y-2 mb-6">
-                <div className="flex items-center gap-2 text-sm">
-                  <Mail className="h-4 w-4 text-gray-400" />
-                  <span className="text-gray-600">{clienteSelecionado.email_responsavel}</span>
-                </div>
-                {clienteSelecionado.contato_principal && (
-                  <div className="flex items-center gap-2 text-sm">
-                    <Users className="h-4 w-4 text-gray-400" />
-                    <span className="text-gray-600">{clienteSelecionado.contato_principal}</span>
-                  </div>
-                )}
-                <div className="flex items-center gap-2 text-sm">
-                  <CalendarDays className="h-4 w-4 text-gray-400" />
-                  <span className="text-gray-600">Cliente desde {new Date(clienteSelecionado.created_at).toLocaleDateString('pt-BR')}</span>
-                </div>
-              </div>
-
-              <div className="grid grid-cols-2 gap-3 mb-6">
-                <div className="bg-gray-50 p-4 rounded-lg text-center">
-                  <FileText className="h-5 w-5 text-[#d81220] mx-auto mb-1" />
-                  <p className="text-2xl font-bold">{clienteSelecionado.stats?.totalPosts || 0}</p>
-                  <p className="text-xs text-gray-500">Posts publicados</p>
-                </div>
-                <div className="bg-gray-50 p-4 rounded-lg text-center">
-                  <CheckCircle2 className="h-5 w-5 text-green-600 mx-auto mb-1" />
-                  <p className="text-2xl font-bold">{clienteSelecionado.stats?.totalTarefas || 0}</p>
-                  <p className="text-xs text-gray-500">Tarefas</p>
-                </div>
-                <div className="bg-gray-50 p-4 rounded-lg text-center">
-                  <FolderOpen className="h-5 w-5 text-blue-600 mx-auto mb-1" />
-                  <p className="text-2xl font-bold">{clienteSelecionado.stats?.totalProjetos || 0}</p>
-                  <p className="text-xs text-gray-500">Projetos</p>
-                </div>
-                <div className="bg-gray-50 p-4 rounded-lg text-center">
-                  <TrendingUp className="h-5 w-5 text-purple-600 mx-auto mb-1" />
-                  <p className="text-2xl font-bold">{clienteSelecionado.stats?.totalCampanhas || 0}</p>
-                  <p className="text-xs text-gray-500">Campanhas</p>
-                </div>
-              </div>
-
-              <div className="flex gap-2">
-                <button
-                  onClick={() => { setClienteSelecionado(null); router.push('/app/admin'); }}
-                  className="flex-1 py-2.5 px-4 bg-[#d81220] text-white rounded-lg text-sm font-medium hover:bg-[#b91c1c] transition-colors"
-                >
-                  Gerenciar no Admin
+                <button onClick={() => handleDeletar(clienteParaDeletar)} disabled={deleteLoading} className="flex-1 py-2.5 px-4 bg-red-600 text-white rounded-lg text-sm font-medium hover:bg-red-700 disabled:opacity-50 transition-colors">
+                  {deleteLoading ? 'Deletando...' : 'Sim, deletar'}
                 </button>
               </div>
             </div>
           </div>
         </div>
       )}
+
+      {/* Detail Modal / Dashboard */}
+      {clienteSelecionado && <ClienteDashboard cliente={clienteSelecionado} onClose={() => setClienteSelecionado(null)} />}
+    </div>
+  );
+}
+
+function ClienteDashboard({ cliente, onClose }: { cliente: any; onClose: () => void }) {
+  const [fullData, setFullData] = useState<any>(null);
+  const [loading, setLoading] = useState(true);
+  const pd = fullData?.profile_data || {};
+
+  useEffect(() => {
+    async function load() {
+      const supabase = await createSPASassClient();
+      const { data } = await supabase.getSupabaseClient()
+        .from('portal_clients')
+        .select('*')
+        .eq('id', cliente.id)
+        .single();
+      setFullData(data);
+      setLoading(false);
+    }
+    load();
+  }, [cliente.id]);
+
+  const statusCfg = STATUS_CONFIG[cliente.status] || STATUS_CONFIG.inactive;
+
+  return (
+    <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4" onClick={onClose}>
+      <div className="bg-white rounded-2xl max-w-3xl w-full max-h-[90vh] overflow-y-auto" onClick={(e) => e.stopPropagation()}>
+        {/* Header */}
+        <div className="sticky top-0 bg-white border-b px-6 py-4 flex items-center justify-between z-10">
+          <div className="flex items-center gap-3">
+            <div className="w-12 h-12 rounded-xl bg-[#d81220] flex items-center justify-center text-white font-bold text-lg">
+              {cliente.nome.charAt(0).toUpperCase()}
+            </div>
+            <div>
+              <h2 className="text-lg font-bold text-gray-900">{cliente.nome}</h2>
+              <div className="flex items-center gap-2">
+                <span className={`text-xs px-2 py-0.5 rounded-full ${statusCfg.bg} ${statusCfg.text}`}>{statusCfg.label}</span>
+                <span className="text-xs text-gray-400">@{cliente.slug}</span>
+              </div>
+            </div>
+          </div>
+          <button onClick={onClose} className="p-2 hover:bg-gray-100 rounded-lg transition-colors">
+            <X className="h-5 w-5 text-gray-400" />
+          </button>
+        </div>
+
+        {loading ? (
+          <div className="flex justify-center py-20">
+            <div className="w-8 h-8 border-4 border-[#d81220] border-t-transparent rounded-full animate-spin" />
+          </div>
+        ) : (
+          <div className="p-6 space-y-6">
+            {/* Stats */}
+            <div className="grid grid-cols-4 gap-3">
+              <div className="bg-gray-50 p-4 rounded-xl text-center">
+                <FileText className="h-5 w-5 text-[#d81220] mx-auto mb-1" />
+                <p className="text-2xl font-bold">{cliente.stats?.totalPosts || 0}</p>
+                <p className="text-[10px] text-gray-500 uppercase">Posts</p>
+              </div>
+              <div className="bg-gray-50 p-4 rounded-xl text-center">
+                <CheckCircle2 className="h-5 w-5 text-green-600 mx-auto mb-1" />
+                <p className="text-2xl font-bold">{cliente.stats?.totalTarefas || 0}</p>
+                <p className="text-[10px] text-gray-500 uppercase">Tarefas</p>
+              </div>
+              <div className="bg-gray-50 p-4 rounded-xl text-center">
+                <FolderOpen className="h-5 w-5 text-blue-600 mx-auto mb-1" />
+                <p className="text-2xl font-bold">{cliente.stats?.totalProjetos || 0}</p>
+                <p className="text-[10px] text-gray-500 uppercase">Projetos</p>
+              </div>
+              <div className="bg-gray-50 p-4 rounded-xl text-center">
+                <TrendingUp className="h-5 w-5 text-purple-600 mx-auto mb-1" />
+                <p className="text-2xl font-bold">{cliente.stats?.totalCampanhas || 0}</p>
+                <p className="text-[10px] text-gray-500 uppercase">Campanhas</p>
+              </div>
+            </div>
+
+            {/* Info sections */}
+            <div className="space-y-4">
+              <DashSection icon={Building2} title="Informações da Empresa">
+                <DashGrid items={[
+                  { label: 'Nome', value: fullData?.nome },
+                  { label: 'CNPJ', value: fullData?.cnpj },
+                  { label: 'Responsável', value: fullData?.nome_responsavel },
+                  { label: 'Email', value: fullData?.email_responsavel },
+                  { label: 'Telefone', value: fullData?.telefone },
+                  { label: 'Site', value: fullData?.site },
+                ]} />
+              </DashSection>
+
+              <DashSection icon={Briefcase} title="Sobre o Negócio">
+                <DashGrid items={[
+                  { label: 'Ramo', value: fullData?.ramo_atuacao },
+                  { label: 'Tempo de mercado', value: fullData?.tempo_mercado },
+                  { label: 'Tamanho', value: fullData?.tamanho_empresa },
+                  { label: 'Faturamento', value: fullData?.faturamento_mensal },
+                ]} />
+                <DashText label="Descrição" value={fullData?.descricao_negocio} />
+                <DashText label="Produtos/Serviços" value={fullData?.produtos_servicos} />
+              </DashSection>
+
+              <DashSection icon={Target} title="Público-Alvo">
+                <DashGrid items={[
+                  { label: 'Nicho', value: pd.nicho_principal },
+                  { label: 'Gênero', value: pd.genero_alvo },
+                  { label: 'Localização', value: pd.localizacao_alvo },
+                  { label: 'Tom de voz', value: pd.tom_voz },
+                ]} />
+                <DashText label="Dores principais" value={pd.dores_principais} />
+                <DashText label="Desejos/Objetivos" value={pd.desejos_objetivos} />
+              </DashSection>
+
+              <DashSection icon={Palette} title="Identidade Visual">
+                <div className="grid grid-cols-2 gap-3 mb-3">
+                  <div>
+                    <span className="text-xs text-gray-400 uppercase">Cor primária</span>
+                    <div className="flex items-center gap-2 mt-1">
+                      <div className="w-8 h-8 rounded-lg border" style={{ backgroundColor: fullData?.cor_primaria || '#d81220' }} />
+                      <span className="text-sm font-mono text-gray-700">{fullData?.cor_primaria || '—'}</span>
+                    </div>
+                  </div>
+                  <div>
+                    <span className="text-xs text-gray-400 uppercase">Cor secundária</span>
+                    <div className="flex items-center gap-2 mt-1">
+                      <div className="w-8 h-8 rounded-lg border" style={{ backgroundColor: fullData?.cor_secundaria || '#1a1a2e' }} />
+                      <span className="text-sm font-mono text-gray-700">{fullData?.cor_secundaria || '—'}</span>
+                    </div>
+                  </div>
+                </div>
+                <DashText label="Fontes" value={pd.fontes} />
+                <DashText label="Personalidade visual" value={pd.personalidade_visual} />
+              </DashSection>
+
+              <DashSection icon={Phone} title="Operação e Contatos">
+                <DashGrid items={[
+                  { label: 'CRM', value: pd.crm_utilizado },
+                  { label: 'SLA', value: pd.sla_resposta },
+                  { label: 'Horário', value: pd.horario_inicio && pd.horario_fim ? `${pd.horario_inicio} - ${pd.horario_fim}` : '' },
+                  { label: 'Dias', value: pd.dias_atendimento?.join(', ') },
+                ]} />
+                <DashText label="Informações adicionais" value={pd.informacoes_adicionais} />
+              </DashSection>
+
+              <DashSection icon={CircleDot} title="Círculo Dourado">
+                <DashText label="Porquê" value={pd.circulo_dourado?.porque} />
+                <DashText label="O que" value={pd.circulo_dourado?.o_que} />
+                <DashText label="Como" value={pd.circulo_dourado?.como} />
+              </DashSection>
+
+              <DashSection icon={Star} title="Características da Marca">
+                <DashText label="Missão" value={pd.caracteristicas_marca?.missao} />
+                <DashText label="Visão" value={pd.caracteristicas_marca?.visao} />
+                <DashText label="Valores" value={pd.caracteristicas_marca?.valores} />
+                <DashText label="Personalidade" value={pd.caracteristicas_marca?.personalidade} />
+              </DashSection>
+
+              <DashSection icon={Award} title="Proposta Única de Valor">
+                <DashText label="PUV" value={pd.puv} />
+              </DashSection>
+            </div>
+          </div>
+        )}
+      </div>
+    </div>
+  );
+}
+
+function DashSection({ icon: Icon, title, children }: any) {
+  return (
+    <div className="border rounded-xl overflow-hidden">
+      <div className="flex items-center gap-2 px-4 py-3 bg-gray-50 border-b">
+        <Icon className="w-4 h-4 text-[#d81220]" />
+        <h3 className="text-sm font-semibold text-gray-900">{title}</h3>
+      </div>
+      <div className="p-4">{children}</div>
+    </div>
+  );
+}
+
+function DashGrid({ items }: { items: { label: string; value: any }[] }) {
+  return (
+    <div className="grid grid-cols-2 gap-3 mb-3">
+      {items.map((item, i) => (
+        <div key={i}>
+          <span className="text-xs text-gray-400 uppercase">{item.label}</span>
+          <p className="text-sm text-gray-700">{item.value || <span className="text-gray-300">—</span>}</p>
+        </div>
+      ))}
+    </div>
+  );
+}
+
+function DashText({ label, value }: { label: string; value: any }) {
+  if (!value) return null;
+  return (
+    <div className="mb-3 last:mb-0">
+      <span className="text-xs text-gray-400 uppercase">{label}</span>
+      <p className="text-sm text-gray-700 mt-0.5 whitespace-pre-wrap">{value}</p>
     </div>
   );
 }
