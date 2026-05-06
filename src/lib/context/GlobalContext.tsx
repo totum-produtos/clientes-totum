@@ -3,6 +3,7 @@
 
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import { createSPASassClientAuthenticated as createSPASassClient } from '@/lib/supabase/client';
+import { Tables } from '@/lib/types';
 
 type User = {
     email: string;
@@ -10,6 +11,8 @@ type User = {
     registered_at: Date;
     role: string;
 };
+
+type Profile = Tables<'profiles'> | null;
 
 type PortalClient = {
     id: string;
@@ -19,35 +22,16 @@ type PortalClient = {
     status: string;
 } | null;
 
-type WandaPost = {
-    id: number;
-    subject: string;
-    tipo: string;
-    published_at: string;
-    views: number;
-    likes: number;
-    engagement_rate: number;
-};
+type WandaPost = Tables<'wanda_posts'>;
 
-type Tarefa = {
-    id: string;
-    titulo: string;
-    status: string;
-    prioridade: string;
-    data_limite: string | null;
-    departamento: string;
-};
+type Tarefa = Tables<'tarefas'>;
 
-type Projeto = {
-    id: string;
-    nome: string;
-    descricao: string;
-    cor: string;
-};
+type Projeto = Tables<'projetos'>;
 
 interface GlobalContextType {
     loading: boolean;
     user: User | null;
+    profile: Profile;
     client: PortalClient;
     posts: WandaPost[];
     tarefas: Tarefa[];
@@ -64,6 +48,7 @@ export function GlobalProvider({ children }: { children: React.ReactNode }) {
     const [posts, setPosts] = useState<WandaPost[]>([]);
     const [tarefas, setTarefas] = useState<Tarefa[]>([]);
     const [projetos, setProjetos] = useState<Projeto[]>([]);
+    const [profile, setProfile] = useState<Profile>(null);
 
     async function loadData() {
         try {
@@ -85,6 +70,14 @@ export function GlobalProvider({ children }: { children: React.ReactNode }) {
                     registered_at: new Date(user.created_at),
                     role: roleData?.role || 'cliente'
                 });
+
+                // Buscar perfil do usuário
+                const { data: profileData } = await client
+                    .from('profiles')
+                    .select('id, display_name, avatar_url, bio, telefone, cargo, timezone, idioma, updated_at')
+                    .eq('id', user.id)
+                    .single();
+                setProfile((profileData as Profile) || null);
 
                 // Buscar cliente vinculado ao usuário
                 const { data: clientData } = await client
@@ -114,7 +107,7 @@ export function GlobalProvider({ children }: { children: React.ReactNode }) {
                         .eq('portal_client_id', clientId)
                         .order('published_at', { ascending: false })
                         .limit(10);
-                    setPosts(postsData || []);
+                    setPosts((postsData || []) as WandaPost[]);
 
                     const { data: tarefasData } = await client
                         .from('tarefas')
@@ -122,13 +115,13 @@ export function GlobalProvider({ children }: { children: React.ReactNode }) {
                         .eq('portal_client_id', clientId)
                         .order('created_at', { ascending: false })
                         .limit(10);
-                    setTarefas(tarefasData || []);
+                    setTarefas((tarefasData || []) as Tarefa[]);
 
                     const { data: projetosData } = await client
                         .from('projetos')
                         .select('id, nome, descricao, cor')
                         .eq('portal_client_id', clientId);
-                    setProjetos(projetosData || []);
+                    setProjetos((projetosData || []) as Projeto[]);
                 }
             } else {
                 throw new Error('User not found');
@@ -145,7 +138,7 @@ export function GlobalProvider({ children }: { children: React.ReactNode }) {
     }, []);
 
     return (
-        <GlobalContext.Provider value={{ loading, user, client, posts, tarefas, projetos, refreshData: loadData }}>
+        <GlobalContext.Provider value={{ loading, user, profile, client, posts, tarefas, projetos, refreshData: loadData }}>
             {children}
         </GlobalContext.Provider>
     );

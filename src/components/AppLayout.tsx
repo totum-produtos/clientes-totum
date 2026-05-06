@@ -35,7 +35,7 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
     const pathname = usePathname();
     const router = useRouter();
 
-    const { user } = useGlobal();
+    const { user, profile } = useGlobal();
     const { isDark, toggle } = useDarkMode();
     const isMaster = user?.role === 'master';
 
@@ -64,8 +64,8 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
             console.error('Erro ao sair:', error);
         }
     };
-    const handleChangePassword = async () => {
-        router.push('/app/configuracoes')
+    const handleGoToProfile = async () => {
+        router.push('/app/perfil')
     };
 
     const getInitials = (email: string) => {
@@ -147,10 +147,14 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
                             onClick={() => setUserDropdownOpen(!isUserDropdownOpen)}
                             className="flex items-center space-x-2 text-sm text-ink hover:text-ink"
                         >
-                            <div className="w-8 h-8 rounded-full bg-rausch/10 flex items-center justify-center">
-                                <span className="text-rausch-active font-medium">
-                                    {user ? getInitials(user.email) : '??'}
-                                </span>
+                            <div className="w-8 h-8 rounded-full bg-rausch/10 flex items-center justify-center overflow-hidden">
+                                {profile?.avatar_url ? (
+                                    <img src={profile.avatar_url} alt="Avatar" className="w-full h-full object-cover" />
+                                ) : (
+                                    <span className="text-rausch-active font-medium">
+                                        {user ? getInitials(user.email) : '??'}
+                                    </span>
+                                )}
                             </div>
                             <span>{user?.email || 'Carregando...'}</span>
                             <ChevronDown className="h-4 w-4" />
@@ -159,10 +163,23 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
                         {isUserDropdownOpen && (
                             <div className="absolute right-0 mt-2 w-64 bg-canvas rounded-md shadow-airbnb border z-50">
                                 <div className="p-2 border-b border-hairline-soft">
-                                    <p className="text-xs text-muted">Logado como</p>
-                                    <p className="text-sm font-medium text-ink truncate">
-                                        {user?.email}
-                                    </p>
+                                    <div className="flex items-center gap-2">
+                                        <div className="w-9 h-9 rounded-full bg-rausch/10 flex items-center justify-center overflow-hidden shrink-0">
+                                            {profile?.avatar_url ? (
+                                                <img src={profile.avatar_url} alt="Avatar" className="w-full h-full object-cover" />
+                                            ) : (
+                                                <span className="text-rausch-active font-medium text-sm">
+                                                    {user ? getInitials(user.email) : '??'}
+                                                </span>
+                                            )}
+                                        </div>
+                                        <div className="min-w-0">
+                                            <p className="text-sm font-medium text-ink truncate">
+                                                {profile?.display_name || user?.email?.split('@')[0] || 'Usuário'}
+                                            </p>
+                                            <p className="text-xs text-muted truncate">{user?.email}</p>
+                                        </div>
+                                    </div>
                                 </div>
                                 <div className="py-1">
                                     <button
@@ -178,12 +195,12 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
                                     <button
                                         onClick={() => {
                                             setUserDropdownOpen(false);
-                                            handleChangePassword()
+                                            handleGoToProfile()
                                         }}
                                         className="w-full flex items-center px-4 py-2 text-sm text-ink hover:bg-surface-soft"
                                     >
-                                        <Key className="mr-3 h-4 w-4 text-muted-soft" />
-                                        Configurações
+                                        <User className="mr-3 h-4 w-4 text-muted-soft" />
+                                        Meu Perfil
                                     </button>
                                     <button
                                         onClick={() => {
