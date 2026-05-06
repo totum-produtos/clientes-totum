@@ -146,7 +146,7 @@ export default function NovoClientePage() {
       <div className="max-w-7xl mx-auto px-6 py-6">
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
           {/* Sidebar Steps */}
-          <div className="lg:col-span-3">
+          <div className="lg:col-span-4">
             <div className="bg-white rounded-2xl border shadow-sm p-4 sticky top-6">
               <div className="space-y-1">
                 {STEPS.map((s) => {
@@ -190,7 +190,7 @@ export default function NovoClientePage() {
           </div>
 
           {/* Form */}
-          <div className="lg:col-span-6">
+          <div className="lg:col-span-8">
             <div className="bg-white rounded-2xl border shadow-sm p-8">
               <div className="flex items-center gap-3 mb-8">
                 <div className="w-10 h-10 rounded-xl bg-blue-50 flex items-center justify-center">
@@ -489,44 +489,6 @@ export default function NovoClientePage() {
             </div>
           </div>
 
-          {/* Preview */}
-          <div className="lg:col-span-3">
-            <div className="bg-white rounded-2xl border shadow-sm p-6 sticky top-6">
-              <h3 className="text-sm font-semibold text-gray-900 mb-6">Preview do Cliente</h3>
-              <div className="flex flex-col items-center">
-                <div className="w-20 h-20 rounded-2xl flex items-center justify-center text-white text-2xl font-bold mb-4 shadow-lg" style={{ backgroundColor: form.cor_primaria || "#d81220" }}>
-                  {form.nome ? form.nome.charAt(0).toUpperCase() : "?"}
-                </div>
-                <h4 className="text-base font-semibold text-gray-900 text-center">{form.nome || "Nome da Empresa"}</h4>
-                <span className="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-blue-50 text-blue-600 mt-2">Criando...</span>
-                <div className="flex items-center gap-2 mt-4">
-                  <div className="w-8 h-8 rounded-full border-2 border-white shadow" style={{ backgroundColor: form.cor_primaria || "#d81220" }} />
-                  <div className="w-8 h-8 rounded-full border-2 border-white shadow" style={{ backgroundColor: form.cor_secundaria || "#1a1a2e" }} />
-                </div>
-                <div className="w-full mt-6">
-                  <div className="flex items-center justify-between text-xs text-gray-500 mb-2">
-                    <span>Etapa {step} de {STEPS.length}</span>
-                    <span>{Math.round((step / STEPS.length) * 100)}%</span>
-                  </div>
-                  <div className="flex gap-1">
-                    {STEPS.map((_, i) => (
-                      <div key={i} className={`h-1.5 flex-1 rounded-full transition-all ${i < step ? "bg-[#3b82f6]" : "bg-gray-200"}`} />
-                    ))}
-                  </div>
-                </div>
-                {form.ramo_atuacao && (
-                  <div className="w-full mt-4 pt-4 border-t space-y-2">
-                    <div className="flex justify-between text-xs"><span className="text-gray-500">Ramo</span><span className="font-medium text-gray-700">{form.ramo_atuacao}</span></div>
-                    <div className="flex justify-between text-xs"><span className="text-gray-500">Tamanho</span><span className="font-medium text-gray-700">{form.tamanho_empresa || "—"}</span></div>
-                    <div className="flex justify-between text-xs"><span className="text-gray-500">Responsável</span><span className="font-medium text-gray-700">{form.nome_responsavel || "—"}</span></div>
-                    {form.personas.length > 0 && form.personas[0].nome && (
-                      <div className="flex justify-between text-xs"><span className="text-gray-500">Personas</span><span className="font-medium text-gray-700">{form.personas.length}</span></div>
-                    )}
-                  </div>
-                )}
-              </div>
-            </div>
-          </div>
         </div>
       </div>
     </div>
