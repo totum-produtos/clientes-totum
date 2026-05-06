@@ -152,14 +152,14 @@ export default function CalendarioPage() {
         <div className="space-y-4 p-2">
             <div className="flex items-center justify-between">
                 <div>
-                    <h1 className="text-2xl font-bold text-gray-900">Calendário de postagens</h1>
-                    <p className="text-gray-500">Visualize e gerencie o conteúdo</p>
+                    <h1 className="text-2xl font-bold text-ink">Calendário de postagens</h1>
+                    <p className="text-muted">Visualize e gerencie o conteúdo</p>
                 </div>
                 <div className="flex gap-2">
-                    <button onClick={fetchPosts} className="p-2 hover:bg-gray-100 rounded-lg border">
-                        <RefreshCw className="h-4 w-4 text-gray-600" />
+                    <button onClick={fetchPosts} className="p-2 hover:bg-surface-strong rounded-lg border">
+                        <RefreshCw className="h-4 w-4 text-body" />
                     </button>
-                    <button onClick={() => setBulkModalOpen(true)} className="px-3 py-2 rounded-lg border text-sm flex items-center gap-2 hover:bg-gray-50">
+                    <button onClick={() => setBulkModalOpen(true)} className="px-3 py-2 rounded-lg border text-sm flex items-center gap-2 hover:bg-surface-soft">
                         <Upload className="h-4 w-4" /> Em massa
                     </button>
                     <button onClick={() => { setSelectedPost(null); setSelectedDate(new Date()); setModalOpen(true); }} className="btn-primary px-3 py-2 rounded-lg text-sm flex items-center gap-2">
@@ -170,9 +170,9 @@ export default function CalendarioPage() {
 
             {/* Legenda */}
             <div className="flex gap-4 text-xs">
-                <span className="flex items-center gap-1"><span className="w-2 h-2 rounded-full bg-red-500"></span> Porquê</span>
-                <span className="flex items-center gap-1"><span className="w-2 h-2 rounded-full bg-blue-500"></span> O que</span>
-                <span className="flex items-center gap-1"><span className="w-2 h-2 rounded-full bg-green-500"></span> Como</span>
+                <span className="flex items-center gap-1"><span className="w-2 h-2 rounded-full bg-danger-bg0"></span> Porquê</span>
+                <span className="flex items-center gap-1"><span className="w-2 h-2 rounded-full bg-surface-soft0"></span> O que</span>
+                <span className="flex items-center gap-1"><span className="w-2 h-2 rounded-full bg-success-bg0"></span> Como</span>
             </div>
 
             {loading ? (
@@ -199,18 +199,18 @@ export default function CalendarioPage() {
                             return d.getMonth() === currentMonth.getMonth() && d.getFullYear() === currentMonth.getFullYear();
                         })
                         .map(p => (
-                            <div key={p.id} className="flex items-center justify-between p-3 border rounded-lg hover:bg-gray-50 cursor-pointer" onClick={() => handleEventClick({ id: p.id, title: p.subject, date: new Date(p.published_at), type: p.tipo })}>
+                            <div key={p.id} className="flex items-center justify-between p-3 border rounded-lg hover:bg-surface-soft cursor-pointer" onClick={() => handleEventClick({ id: p.id, title: p.subject, date: new Date(p.published_at), type: p.tipo })}>
                                 <div>
                                     <p className="font-medium text-sm">{p.subject}</p>
-                                    <p className="text-xs text-gray-500">{new Date(p.published_at).toLocaleDateString('pt-BR')} • {p.tipo}</p>
+                                    <p className="text-xs text-muted">{new Date(p.published_at).toLocaleDateString('pt-BR')} • {p.tipo}</p>
                                 </div>
-                                <span className="text-xs text-gray-500">{p.views} views • {p.engagement_rate}% eng</span>
+                                <span className="text-xs text-muted">{p.views} views • {p.engagement_rate}% eng</span>
                             </div>
                         ))}
                     {posts.filter(p => {
                         const d = new Date(p.published_at);
                         return d.getMonth() === currentMonth.getMonth() && d.getFullYear() === currentMonth.getFullYear();
-                    }).length === 0 && <p className="text-sm text-gray-400">Nenhum post neste mês.</p>}
+                    }).length === 0 && <p className="text-sm text-muted-soft">Nenhum post neste mês.</p>}
                 </CardContent>
             </Card>
 

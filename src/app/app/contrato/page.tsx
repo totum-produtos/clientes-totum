@@ -74,8 +74,8 @@ export default function ContratoPage() {
     return (
         <div className="space-y-6 p-2">
             <div>
-                <h1 className="text-2xl font-bold text-gray-900">Contrato e entregas</h1>
-                <p className="text-gray-500">Acompanhamento de tarefas e entregas</p>
+                <h1 className="text-2xl font-bold text-ink">Contrato e entregas</h1>
+                <p className="text-muted">Acompanhamento de tarefas e entregas</p>
             </div>
 
             <div className="grid gap-4 md:grid-cols-3">
@@ -85,29 +85,29 @@ export default function ContratoPage() {
                             <FileText className="h-5 w-5 text-primary-600" />
                         </div>
                         <div>
-                            <p className="text-sm text-gray-500">Total de tarefas</p>
+                            <p className="text-sm text-muted">Total de tarefas</p>
                             <p className="text-lg font-bold">{tarefas.length}</p>
                         </div>
                     </CardContent>
                 </Card>
                 <Card>
                     <CardContent className="p-4 flex items-center gap-4">
-                        <div className="p-3 bg-green-50 rounded-lg">
-                            <CheckCircle2 className="h-5 w-5 text-green-600" />
+                        <div className="p-3 bg-success-bg rounded-lg">
+                            <CheckCircle2 className="h-5 w-5 text-success-text" />
                         </div>
                         <div>
-                            <p className="text-sm text-gray-500">Concluídas</p>
+                            <p className="text-sm text-muted">Concluídas</p>
                             <p className="text-lg font-bold">{concluidas}</p>
                         </div>
                     </CardContent>
                 </Card>
                 <Card>
                     <CardContent className="p-4 flex items-center gap-4">
-                        <div className="p-3 bg-yellow-50 rounded-lg">
+                        <div className="p-3 bg-warning-bg rounded-lg">
                             <Clock className="h-5 w-5 text-yellow-600" />
                         </div>
                         <div>
-                            <p className="text-sm text-gray-500">Pendentes</p>
+                            <p className="text-sm text-muted">Pendentes</p>
                             <p className="text-lg font-bold">{pendentes}</p>
                         </div>
                     </CardContent>
@@ -123,7 +123,7 @@ export default function ContratoPage() {
                 </CardHeader>
                 <CardContent className="space-y-3">
                     {tarefas.map((t) => (
-                        <div key={t.id} className="flex items-start gap-3 p-3 bg-gray-50 rounded-lg">
+                        <div key={t.id} className="flex items-start gap-3 p-3 bg-surface-soft rounded-lg">
                             {t.status === 'concluido' ? (
                                 <CheckCircle2 className="h-4 w-4 text-green-500 mt-0.5 shrink-0" />
                             ) : (
@@ -131,15 +131,15 @@ export default function ContratoPage() {
                             )}
                             <div className="flex-1">
                                 <p className="text-sm font-medium">{t.titulo}</p>
-                                {t.descricao && <p className="text-xs text-gray-500">{t.descricao}</p>}
-                                <p className="text-xs text-gray-400 mt-1">{t.departamento} • {t.prioridade}{t.data_limite ? ` • até ${new Date(t.data_limite).toLocaleDateString('pt-BR')}` : ''}</p>
+                                {t.descricao && <p className="text-xs text-muted">{t.descricao}</p>}
+                                <p className="text-xs text-muted-soft mt-1">{t.departamento} • {t.prioridade}{t.data_limite ? ` • até ${new Date(t.data_limite).toLocaleDateString('pt-BR')}` : ''}</p>
                             </div>
-                            <span className={`text-xs px-2 py-1 rounded-full shrink-0 ${t.status === 'concluido' ? 'bg-green-100 text-green-700' : 'bg-yellow-100 text-yellow-700'}`}>
+                            <span className={`text-xs px-2 py-1 rounded-full shrink-0 ${t.status === 'concluido' ? 'bg-success-bg text-success-text' : 'bg-warning-bg text-yellow-700'}`}>
                                 {t.status}
                             </span>
                         </div>
                     ))}
-                    {tarefas.length === 0 && <p className="text-sm text-gray-400">Nenhuma tarefa vinculada a este cliente.</p>}
+                    {tarefas.length === 0 && <p className="text-sm text-muted-soft">Nenhuma tarefa vinculada a este cliente.</p>}
                 </CardContent>
             </Card>
         </div>

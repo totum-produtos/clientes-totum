@@ -136,21 +136,21 @@ export default function CampanhasPage() {
     return (
         <div className="space-y-6 p-2">
             <div>
-                <h1 className="text-2xl font-bold text-gray-900">Dashboard de Campanhas</h1>
-                <p className="text-gray-500">Métricas de conteúdo orgânico e campanhas pagas</p>
+                <h1 className="text-2xl font-bold text-ink">Dashboard de Campanhas</h1>
+                <p className="text-muted">Métricas de conteúdo orgânico e campanhas pagas</p>
             </div>
 
             {/* Tabs */}
-            <div className="flex gap-2 border-b border-gray-200">
+            <div className="flex gap-2 border-b border-hairline">
                 <button
                     onClick={() => setActiveTab('organic')}
-                    className={`px-4 py-2 text-sm font-medium border-b-2 transition-colors ${activeTab === 'organic' ? 'border-[#d81220] text-[#d81220]' : 'border-transparent text-gray-500 hover:text-gray-700'}`}
+                    className={`px-4 py-2 text-sm font-medium border-b-2 transition-colors ${activeTab === 'organic' ? 'border-[rausch] text-[rausch]' : 'border-transparent text-muted hover:text-ink'}`}
                 >
                     Conteúdo Orgânico
                 </button>
                 <button
                     onClick={() => setActiveTab('paid')}
-                    className={`px-4 py-2 text-sm font-medium border-b-2 transition-colors ${activeTab === 'paid' ? 'border-[#d81220] text-[#d81220]' : 'border-transparent text-gray-500 hover:text-gray-700'}`}
+                    className={`px-4 py-2 text-sm font-medium border-b-2 transition-colors ${activeTab === 'paid' ? 'border-[rausch] text-[rausch]' : 'border-transparent text-muted hover:text-ink'}`}
                 >
                     Campanhas Pagas
                 </button>
@@ -162,25 +162,25 @@ export default function CampanhasPage() {
                         <Card>
                             <CardContent className="p-4 flex items-center gap-4">
                                 <div className="p-3 bg-primary-50 rounded-lg"><Eye className="h-5 w-5 text-primary-600" /></div>
-                                <div><p className="text-sm text-gray-500">Total Views</p><p className="text-lg font-bold">{totalViews.toLocaleString()}</p></div>
+                                <div><p className="text-sm text-muted">Total Views</p><p className="text-lg font-bold">{totalViews.toLocaleString()}</p></div>
                             </CardContent>
                         </Card>
                         <Card>
                             <CardContent className="p-4 flex items-center gap-4">
                                 <div className="p-3 bg-primary-50 rounded-lg"><Heart className="h-5 w-5 text-primary-600" /></div>
-                                <div><p className="text-sm text-gray-500">Total Likes</p><p className="text-lg font-bold">{totalLikes.toLocaleString()}</p></div>
+                                <div><p className="text-sm text-muted">Total Likes</p><p className="text-lg font-bold">{totalLikes.toLocaleString()}</p></div>
                             </CardContent>
                         </Card>
                         <Card>
                             <CardContent className="p-4 flex items-center gap-4">
                                 <div className="p-3 bg-primary-50 rounded-lg"><BarChart3 className="h-5 w-5 text-primary-600" /></div>
-                                <div><p className="text-sm text-gray-500">Engajamento médio</p><p className="text-lg font-bold">{avgEngagement}%</p></div>
+                                <div><p className="text-sm text-muted">Engajamento médio</p><p className="text-lg font-bold">{avgEngagement}%</p></div>
                             </CardContent>
                         </Card>
                         <Card>
                             <CardContent className="p-4 flex items-center gap-4">
                                 <div className="p-3 bg-primary-50 rounded-lg"><TrendingUp className="h-5 w-5 text-primary-600" /></div>
-                                <div><p className="text-sm text-gray-500">Posts</p><p className="text-lg font-bold">{posts.length}</p></div>
+                                <div><p className="text-sm text-muted">Posts</p><p className="text-lg font-bold">{posts.length}</p></div>
                             </CardContent>
                         </Card>
                     </div>
@@ -195,7 +195,7 @@ export default function CampanhasPage() {
                                         <XAxis dataKey="nome" tick={{ fontSize: 10 }} />
                                         <YAxis tick={{ fontSize: 12 }} />
                                         <Tooltip />
-                                        <Bar dataKey="views" fill="#d81220" radius={[4, 4, 0, 0]} />
+                                        <Bar dataKey="views" fill="rausch" radius={[4, 4, 0, 0]} />
                                     </BarChart>
                                 </ResponsiveContainer>
                             </div>
@@ -206,16 +206,16 @@ export default function CampanhasPage() {
                         <CardHeader><CardTitle>Todos os posts</CardTitle></CardHeader>
                         <CardContent className="space-y-2">
                             {posts.map((p) => (
-                                <div key={p.id} className="flex items-center gap-4 p-4 border rounded-lg hover:bg-gray-50 transition-colors">
+                                <div key={p.id} className="flex items-center gap-4 p-4 border rounded-lg hover:bg-surface-soft transition-colors">
                                     <div className="flex-1 min-w-0">
                                         <p className="font-medium text-sm">{p.subject}</p>
-                                        <p className="text-xs text-gray-500">{p.tipo} • {new Date(p.published_at).toLocaleDateString('pt-BR')}</p>
+                                        <p className="text-xs text-muted">{p.tipo} • {new Date(p.published_at).toLocaleDateString('pt-BR')}</p>
                                     </div>
-                                    <span className="text-xs text-gray-500 shrink-0">{p.views} views</span>
-                                    <span className="text-xs text-gray-500 shrink-0">{p.engagement_rate}% eng</span>
+                                    <span className="text-xs text-muted shrink-0">{p.views} views</span>
+                                    <span className="text-xs text-muted shrink-0">{p.engagement_rate}% eng</span>
                                 </div>
                             ))}
-                            {posts.length === 0 && <p className="text-sm text-gray-400">Nenhum post vinculado.</p>}
+                            {posts.length === 0 && <p className="text-sm text-muted-soft">Nenhum post vinculado.</p>}
                         </CardContent>
                     </Card>
                 </>
@@ -224,26 +224,26 @@ export default function CampanhasPage() {
                     <div className="grid gap-4 md:grid-cols-4">
                         <Card>
                             <CardContent className="p-4 flex items-center gap-4">
-                                <div className="p-3 bg-orange-50 rounded-lg"><DollarSign className="h-5 w-5 text-orange-600" /></div>
-                                <div><p className="text-sm text-gray-500">Investimento</p><p className="text-lg font-bold">R$ {totalAdSpend.toLocaleString()}</p></div>
+                                <div className="p-3 bg-surface-soft rounded-lg"><DollarSign className="h-5 w-5 text-muted" /></div>
+                                <div><p className="text-sm text-muted">Investimento</p><p className="text-lg font-bold">R$ {totalAdSpend.toLocaleString()}</p></div>
                             </CardContent>
                         </Card>
                         <Card>
                             <CardContent className="p-4 flex items-center gap-4">
-                                <div className="p-3 bg-blue-50 rounded-lg"><MousePointerClick className="h-5 w-5 text-blue-600" /></div>
-                                <div><p className="text-sm text-gray-500">Cliques</p><p className="text-lg font-bold">{totalAdClicks.toLocaleString()}</p></div>
+                                <div className="p-3 bg-surface-soft rounded-lg"><MousePointerClick className="h-5 w-5 text-rausch" /></div>
+                                <div><p className="text-sm text-muted">Cliques</p><p className="text-lg font-bold">{totalAdClicks.toLocaleString()}</p></div>
                             </CardContent>
                         </Card>
                         <Card>
                             <CardContent className="p-4 flex items-center gap-4">
-                                <div className="p-3 bg-green-50 rounded-lg"><Target className="h-5 w-5 text-green-600" /></div>
-                                <div><p className="text-sm text-gray-500">Leads</p><p className="text-lg font-bold">{totalAdLeads.toLocaleString()}</p></div>
+                                <div className="p-3 bg-success-bg rounded-lg"><Target className="h-5 w-5 text-success-text" /></div>
+                                <div><p className="text-sm text-muted">Leads</p><p className="text-lg font-bold">{totalAdLeads.toLocaleString()}</p></div>
                             </CardContent>
                         </Card>
                         <Card>
                             <CardContent className="p-4 flex items-center gap-4">
-                                <div className="p-3 bg-purple-50 rounded-lg"><TrendingUp className="h-5 w-5 text-purple-600" /></div>
-                                <div><p className="text-sm text-gray-500">CPL médio</p><p className="text-lg font-bold">R$ {avgCPL}</p></div>
+                                <div className="p-3 bg-surface-soft rounded-lg"><TrendingUp className="h-5 w-5 text-ink" /></div>
+                                <div><p className="text-sm text-muted">CPL médio</p><p className="text-lg font-bold">R$ {avgCPL}</p></div>
                             </CardContent>
                         </Card>
                     </div>
@@ -251,7 +251,7 @@ export default function CampanhasPage() {
                     {/* Conectar contas */}
                     <div className="grid gap-4 md:grid-cols-2">
                         <Card>
-                            <CardHeader><CardTitle className="flex items-center gap-2"><Megaphone className="h-5 w-5 text-blue-600" /> Meta Ads</CardTitle></CardHeader>
+                            <CardHeader><CardTitle className="flex items-center gap-2"><Megaphone className="h-5 w-5 text-rausch" /> Meta Ads</CardTitle></CardHeader>
                             <CardContent className="space-y-3">
                                 <input
                                     placeholder="Ad Account ID (ex: act_123456789)"
@@ -269,7 +269,7 @@ export default function CampanhasPage() {
                                 <button
                                     onClick={connectMeta}
                                     disabled={connecting === 'meta' || !metaAccountId || !metaToken}
-                                    className="w-full py-2 px-4 bg-[#d81220] text-white rounded-lg text-sm font-medium hover:bg-[#b91c1c] disabled:opacity-50"
+                                    className="w-full py-2 px-4 bg-[rausch] text-white rounded-lg text-sm font-medium hover:bg-[rausch-active] disabled:opacity-50"
                                 >
                                     {connecting === 'meta' ? 'Conectando...' : 'Conectar Meta Ads'}
                                 </button>
@@ -277,7 +277,7 @@ export default function CampanhasPage() {
                         </Card>
 
                         <Card>
-                            <CardHeader><CardTitle className="flex items-center gap-2"><Megaphone className="h-5 w-5 text-green-600" /> Google Ads</CardTitle></CardHeader>
+                            <CardHeader><CardTitle className="flex items-center gap-2"><Megaphone className="h-5 w-5 text-success-text" /> Google Ads</CardTitle></CardHeader>
                             <CardContent className="space-y-3">
                                 <input
                                     placeholder="Customer ID (ex: 123-456-7890)"
@@ -295,7 +295,7 @@ export default function CampanhasPage() {
                                 <button
                                     onClick={connectGoogle}
                                     disabled={connecting === 'google' || !googleCustomerId || !googleDevToken}
-                                    className="w-full py-2 px-4 bg-[#d81220] text-white rounded-lg text-sm font-medium hover:bg-[#b91c1c] disabled:opacity-50"
+                                    className="w-full py-2 px-4 bg-[rausch] text-white rounded-lg text-sm font-medium hover:bg-[rausch-active] disabled:opacity-50"
                                 >
                                     {connecting === 'google' ? 'Conectando...' : 'Conectar Google Ads'}
                                 </button>
@@ -307,20 +307,20 @@ export default function CampanhasPage() {
                         <CardHeader><CardTitle>Campanhas sincronizadas</CardTitle></CardHeader>
                         <CardContent className="space-y-2">
                             {campaigns.map((c) => (
-                                <div key={c.id} className="flex items-center gap-4 p-4 border rounded-lg hover:bg-gray-50 transition-colors">
+                                <div key={c.id} className="flex items-center gap-4 p-4 border rounded-lg hover:bg-surface-soft transition-colors">
                                     <div className="flex-1 min-w-0">
                                         <p className="font-medium text-sm">{c.name}</p>
-                                        <p className="text-xs text-gray-500">{c.platform === 'meta' ? 'Meta Ads' : 'Google Ads'} • {c.status}</p>
+                                        <p className="text-xs text-muted">{c.platform === 'meta' ? 'Meta Ads' : 'Google Ads'} • {c.status}</p>
                                     </div>
-                                    <span className="text-xs text-gray-500 shrink-0">R$ {c.spend}</span>
-                                    <span className="text-xs text-gray-500 shrink-0">{c.clicks} cliques</span>
-                                    <span className="text-xs text-gray-500 shrink-0">{c.ctr}% CTR</span>
+                                    <span className="text-xs text-muted shrink-0">R$ {c.spend}</span>
+                                    <span className="text-xs text-muted shrink-0">{c.clicks} cliques</span>
+                                    <span className="text-xs text-muted shrink-0">{c.ctr}% CTR</span>
                                 </div>
                             ))}
                             {campaigns.length === 0 && (
                                 <div className="text-center py-8">
-                                    <p className="text-sm text-gray-400">Nenhuma campanha sincronizada.</p>
-                                    <p className="text-xs text-gray-400 mt-1">Conecte sua conta de anúncios acima para começar.</p>
+                                    <p className="text-sm text-muted-soft">Nenhuma campanha sincronizada.</p>
+                                    <p className="text-xs text-muted-soft mt-1">Conecte sua conta de anúncios acima para começar.</p>
                                 </div>
                             )}
                         </CardContent>

@@ -156,37 +156,37 @@ export default function MeuCadastroPage() {
 
   if (globalLoading || !clientData) {
     return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
-        <div className="w-8 h-8 border-4 border-[#3b82f6] border-t-transparent rounded-full animate-spin" />
+      <div className="min-h-screen bg-surface-soft flex items-center justify-center">
+        <div className="w-8 h-8 border-4 border-[rausch] border-t-transparent rounded-full animate-spin" />
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 pb-12">
-      <div className="bg-white border-b">
+    <div className="min-h-screen bg-surface-soft pb-12">
+      <div className="bg-canvas border-b">
         <div className="max-w-5xl mx-auto px-6 py-6">
           <div className="flex items-center justify-between">
             <div>
-              <h1 className="text-xl font-bold text-gray-900">MEU CADASTRO</h1>
-              <p className="text-sm text-gray-500 mt-1">Visualize e solicite alterações nos dados da sua empresa</p>
+              <h1 className="text-xl font-bold text-ink">MEU CADASTRO</h1>
+              <p className="text-sm text-muted mt-1">Visualize e solicite alterações nos dados da sua empresa</p>
             </div>
             <div className="flex items-center gap-3">
               {pendingCount > 0 && (
-                <span className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-amber-50 text-amber-700 rounded-full text-xs font-medium">
+                <span className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-warning-bg text-warning-text rounded-full text-xs font-medium">
                   <Clock className="w-3.5 h-3.5" /> {pendingCount} pendente{pendingCount > 1 ? "s" : ""}
                 </span>
               )}
               {!editMode ? (
-                <button onClick={() => setEditMode(true)} className="flex items-center gap-2 px-4 py-2 bg-[#3b82f6] text-white rounded-xl text-sm font-medium hover:bg-[#2563eb] transition-colors">
+                <button onClick={() => setEditMode(true)} className="flex items-center gap-2 px-4 py-2 bg-[rausch] text-white rounded-md text-sm font-medium hover:bg-[rausch-active] transition-colors">
                   <Edit3 className="w-4 h-4" /> Editar
                 </button>
               ) : (
                 <div className="flex items-center gap-2">
-                  <button onClick={() => { setEditMode(false); setMessage(""); }} className="flex items-center gap-2 px-4 py-2 text-gray-600 hover:text-gray-900 rounded-xl text-sm font-medium transition-colors">
+                  <button onClick={() => { setEditMode(false); setMessage(""); }} className="flex items-center gap-2 px-4 py-2 text-body hover:text-ink rounded-md text-sm font-medium transition-colors">
                     <X className="w-4 h-4" /> Cancelar
                   </button>
-                  <button onClick={handleSubmitChanges} disabled={loading} className="flex items-center gap-2 px-4 py-2 bg-green-600 text-white rounded-xl text-sm font-medium hover:bg-green-700 disabled:opacity-50 transition-colors">
+                  <button onClick={handleSubmitChanges} disabled={loading} className="flex items-center gap-2 px-4 py-2 bg-success text-white rounded-md text-sm font-medium hover:bg-green-700 disabled:opacity-50 transition-colors">
                     {loading ? <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" /> : <><Save className="w-4 h-4" /> Salvar alterações</>}
                   </button>
                 </div>
@@ -194,7 +194,7 @@ export default function MeuCadastroPage() {
             </div>
           </div>
           {message && (
-            <div className={`mt-4 p-4 rounded-xl text-sm flex items-center gap-2 ${message.startsWith("✅") ? "bg-green-50 text-green-700 border border-green-200" : message.startsWith("❌") ? "bg-red-50 text-red-700 border border-red-200" : "bg-blue-50 text-blue-700 border border-blue-200"}`}>
+            <div className={`mt-4 p-4 rounded-md text-sm flex items-center gap-2 ${message.startsWith("✅") ? "bg-success-bg text-success-text border border-green-200" : message.startsWith("❌") ? "bg-danger-bg text-danger-text border border-danger-bg" : "bg-surface-soft text-rausch border border-hairline"}`}>
               {message.startsWith("✅") ? <CheckCircle className="w-4 h-4" /> : message.startsWith("❌") ? <AlertCircle className="w-4 h-4" /> : <Clock className="w-4 h-4" />}
               {message.replace(/^[✅❌]\s*/, "")}
             </div>
@@ -242,7 +242,7 @@ export default function MeuCadastroPage() {
 
         <Section id="identidade" label="Identidade Visual" icon={Palette} expanded={expanded} toggle={toggleSection}>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4 pt-4">
-            <ColorField label="Cor primária" editMode={editMode} value={getValue("cor_primaria", "#d81220")} onChange={(v: string) => setEditValue("cor_primaria", v)} readValue={clientData.cor_primaria} />
+            <ColorField label="Cor primária" editMode={editMode} value={getValue("cor_primaria", "rausch")} onChange={(v: string) => setEditValue("cor_primaria", v)} readValue={clientData.cor_primaria} />
             <ColorField label="Cor secundária" editMode={editMode} value={getValue("cor_secundaria", "#1a1a2e")} onChange={(v: string) => setEditValue("cor_secundaria", v)} readValue={clientData.cor_secundaria} />
             <Field label="Fontes" editMode={editMode} value={getProfileValue("fontes")} onChange={(v: string) => setEditValue("fontes", v)} />
           </div>
@@ -293,15 +293,15 @@ export default function MeuCadastroPage() {
 function Section({ id, label, icon: Icon, expanded, toggle, children }: any) {
   const isOpen = expanded.includes(id);
   return (
-    <div className="bg-white rounded-2xl border shadow-sm overflow-hidden">
-      <button onClick={() => toggle(id)} className="w-full flex items-center justify-between px-6 py-4 hover:bg-gray-50 transition-colors">
+    <div className="bg-canvas rounded-lg border shadow-airbnb overflow-hidden">
+      <button onClick={() => toggle(id)} className="w-full flex items-center justify-between px-6 py-4 hover:bg-surface-soft transition-colors">
         <div className="flex items-center gap-3">
-          <div className="w-9 h-9 rounded-xl bg-blue-50 flex items-center justify-center">
-            <Icon className="w-4.5 h-4.5 text-[#3b82f6]" />
+          <div className="w-9 h-9 rounded-md bg-surface-soft flex items-center justify-center">
+            <Icon className="w-4.5 h-4.5 text-[rausch]" />
           </div>
-          <h3 className="font-semibold text-gray-900">{label}</h3>
+          <h3 className="font-semibold text-ink">{label}</h3>
         </div>
-        {isOpen ? <ChevronUp className="w-5 h-5 text-gray-400" /> : <ChevronDown className="w-5 h-5 text-gray-400" />}
+        {isOpen ? <ChevronUp className="w-5 h-5 text-muted-soft" /> : <ChevronDown className="w-5 h-5 text-muted-soft" />}
       </button>
       {isOpen && <div className="px-6 pb-6 border-t">{children}</div>}
     </div>
@@ -311,12 +311,12 @@ function Section({ id, label, icon: Icon, expanded, toggle, children }: any) {
 function Field({ label, editMode, value, onChange }: any) {
   return (
     <div>
-      <label className="block text-sm font-medium text-gray-700 mb-2">{label}</label>
+      <label className="block text-sm font-medium text-ink mb-2">{label}</label>
       {editMode ? (
         <input value={value || ""} onChange={e => onChange(e.target.value)} className="input-field" />
       ) : (
-        <div className="px-4 py-3 bg-gray-50 rounded-xl text-sm text-gray-700 min-h-[44px] flex items-center">
-          {value || <span className="text-gray-400 italic">—</span>}
+        <div className="px-4 py-3 bg-surface-soft rounded-md text-sm text-ink min-h-[44px] flex items-center">
+          {value || <span className="text-muted-soft italic">—</span>}
         </div>
       )}
     </div>
@@ -326,12 +326,12 @@ function Field({ label, editMode, value, onChange }: any) {
 function TextArea({ label, editMode, value, onChange }: any) {
   return (
     <div>
-      <label className="block text-sm font-medium text-gray-700 mb-2">{label}</label>
+      <label className="block text-sm font-medium text-ink mb-2">{label}</label>
       {editMode ? (
         <textarea value={value || ""} onChange={e => onChange(e.target.value)} rows={3} className="input-field resize-none" />
       ) : (
-        <div className="px-4 py-3 bg-gray-50 rounded-xl text-sm text-gray-700 min-h-[80px]">
-          {value || <span className="text-gray-400 italic">—</span>}
+        <div className="px-4 py-3 bg-surface-soft rounded-md text-sm text-ink min-h-[80px]">
+          {value || <span className="text-muted-soft italic">—</span>}
         </div>
       )}
     </div>
@@ -341,16 +341,16 @@ function TextArea({ label, editMode, value, onChange }: any) {
 function ColorField({ label, editMode, value, onChange, readValue }: any) {
   return (
     <div>
-      <label className="block text-sm font-medium text-gray-700 mb-2">{label}</label>
+      <label className="block text-sm font-medium text-ink mb-2">{label}</label>
       {editMode ? (
         <div className="flex items-center gap-3">
-          <input type="color" value={value || "#d81220"} onChange={e => onChange(e.target.value)} className="w-12 h-12 rounded-xl border cursor-pointer" />
+          <input type="color" value={value || "rausch"} onChange={e => onChange(e.target.value)} className="w-12 h-12 rounded-md border cursor-pointer" />
           <input value={value || ""} onChange={e => onChange(e.target.value)} className="input-field font-mono" />
         </div>
       ) : (
         <div className="flex items-center gap-3">
-          <div className="w-10 h-10 rounded-xl border" style={{ backgroundColor: readValue || "#d81220" }} />
-          <span className="text-sm text-gray-600 font-mono">{readValue || "—"}</span>
+          <div className="w-10 h-10 rounded-md border" style={{ backgroundColor: readValue || "rausch" }} />
+          <span className="text-sm text-body font-mono">{readValue || "—"}</span>
         </div>
       )}
     </div>

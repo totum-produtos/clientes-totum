@@ -24,8 +24,8 @@ export default function DashboardPage() {
     return (
         <div className="space-y-6 p-2">
             <div>
-                <h1 className="text-2xl font-bold text-gray-900">Olá, {client?.nome || 'Cliente'}! 👋</h1>
-                <p className="text-gray-500">Bem-vindo à sua Central de Conteúdo Totum</p>
+                <h1 className="text-2xl font-bold text-ink">Olá, {client?.nome || 'Cliente'}! 👋</h1>
+                <p className="text-muted">Bem-vindo à sua Central de Conteúdo Totum</p>
             </div>
 
             {/* KPIs */}
@@ -36,7 +36,7 @@ export default function DashboardPage() {
                             <TrendingUp className="h-5 w-5 text-primary-600" />
                         </div>
                         <div>
-                            <p className="text-sm text-gray-500">Posts publicados</p>
+                            <p className="text-sm text-muted">Posts publicados</p>
                             <p className="text-lg font-bold">{posts.length}</p>
                         </div>
                     </CardContent>
@@ -47,7 +47,7 @@ export default function DashboardPage() {
                             <Users className="h-5 w-5 text-primary-600" />
                         </div>
                         <div>
-                            <p className="text-sm text-gray-500">Total de views</p>
+                            <p className="text-sm text-muted">Total de views</p>
                             <p className="text-lg font-bold">{totalViews.toLocaleString()}</p>
                         </div>
                     </CardContent>
@@ -58,7 +58,7 @@ export default function DashboardPage() {
                             <BarChart3 className="h-5 w-5 text-primary-600" />
                         </div>
                         <div>
-                            <p className="text-sm text-gray-500">Engajamento médio</p>
+                            <p className="text-sm text-muted">Engajamento médio</p>
                             <p className="text-lg font-bold">{avgEngagement}%</p>
                         </div>
                     </CardContent>
@@ -69,7 +69,7 @@ export default function DashboardPage() {
                             <CheckCircle2 className="h-5 w-5 text-primary-600" />
                         </div>
                         <div>
-                            <p className="text-sm text-gray-500">Tarefas pendentes</p>
+                            <p className="text-sm text-muted">Tarefas pendentes</p>
                             <p className="text-lg font-bold">{tarefasPendentes}</p>
                         </div>
                     </CardContent>
@@ -87,17 +87,17 @@ export default function DashboardPage() {
                     </CardHeader>
                     <CardContent className="space-y-3">
                         {tarefas.slice(0, 4).map((t) => (
-                            <div key={t.id} className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+                            <div key={t.id} className="flex items-center justify-between p-3 bg-surface-soft rounded-lg">
                                 <div>
                                     <p className="font-medium text-sm">{t.titulo}</p>
-                                    <p className="text-xs text-gray-500">{t.departamento} • {t.prioridade}</p>
+                                    <p className="text-xs text-muted">{t.departamento} • {t.prioridade}</p>
                                 </div>
-                                <span className={`text-xs px-2 py-1 rounded-full ${t.status === 'concluido' ? 'bg-green-100 text-green-700' : 'bg-yellow-100 text-yellow-700'}`}>
+                                <span className={`text-xs px-2 py-1 rounded-full ${t.status === 'concluido' ? 'bg-success-bg text-success-text' : 'bg-warning-bg text-yellow-700'}`}>
                                     {t.status}
                                 </span>
                             </div>
                         ))}
-                        {tarefas.length === 0 && <p className="text-sm text-gray-400">Nenhuma tarefa vinculada.</p>}
+                        {tarefas.length === 0 && <p className="text-sm text-muted-soft">Nenhuma tarefa vinculada.</p>}
                         <Link href="/app/contrato" className="text-sm text-primary-600 hover:underline block mt-2">Ver todas →</Link>
                     </CardContent>
                 </Card>
@@ -112,15 +112,15 @@ export default function DashboardPage() {
                     </CardHeader>
                     <CardContent className="space-y-3">
                         {posts.slice(0, 4).map((p) => (
-                            <div key={p.id} className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+                            <div key={p.id} className="flex items-center justify-between p-3 bg-surface-soft rounded-lg">
                                 <div className="min-w-0">
                                     <p className="font-medium text-sm truncate">{p.subject}</p>
-                                    <p className="text-xs text-gray-500">{p.tipo} • {p.views} views</p>
+                                    <p className="text-xs text-muted">{p.tipo} • {p.views} views</p>
                                 </div>
-                                <span className="text-xs text-gray-500 shrink-0">{p.engagement_rate}%</span>
+                                <span className="text-xs text-muted shrink-0">{p.engagement_rate}%</span>
                             </div>
                         ))}
-                        {posts.length === 0 && <p className="text-sm text-gray-400">Nenhum post vinculado.</p>}
+                        {posts.length === 0 && <p className="text-sm text-muted-soft">Nenhum post vinculado.</p>}
                         <Link href="/app/calendario" className="text-sm text-primary-600 hover:underline block mt-2">Ver calendário →</Link>
                     </CardContent>
                 </Card>
@@ -133,7 +133,7 @@ export default function DashboardPage() {
                     </CardHeader>
                     <CardContent className="flex gap-3 flex-wrap">
                         {projetos.map((p) => (
-                            <div key={p.id} className="px-4 py-2 rounded-lg text-white text-sm font-medium" style={{ backgroundColor: p.cor || '#d81220' }}>
+                            <div key={p.id} className="px-4 py-2 rounded-lg text-white text-sm font-medium" style={{ backgroundColor: p.cor || 'rausch' }}>
                                 {p.nome}
                             </div>
                         ))}

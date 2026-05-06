@@ -165,13 +165,13 @@ export function MFASetup({ onStatusChange }: MFASetupProps) {
                                     {factor.status === 'verified' ? (
                                         <CheckCircle className="h-5 w-5 text-green-500" />
                                     ) : (
-                                        <XCircle className="h-5 w-5 text-red-500" />
+                                        <XCircle className="h-5 w-5 text-danger-text" />
                                     )}
                                     <div>
                                         <p className="font-medium">
                                             {factor.friendly_name || 'Authenticator App'}
                                         </p>
-                                        <p className="text-sm text-gray-500">
+                                        <p className="text-sm text-muted">
                                             Added on {new Date(factor.created_at).toLocaleDateString()}
                                         </p>
                                     </div>
@@ -179,7 +179,7 @@ export function MFASetup({ onStatusChange }: MFASetupProps) {
                                 <button
                                     onClick={() => unenrollFactor(factor.id)}
                                     disabled={actionInProgress}
-                                    className="px-3 py-1 text-sm text-red-600 hover:text-red-700 disabled:opacity-50"
+                                    className="px-3 py-1 text-sm text-danger-text hover:text-danger-text disabled:opacity-50"
                                 >
                                     Remove
                                 </button>
@@ -191,7 +191,7 @@ export function MFASetup({ onStatusChange }: MFASetupProps) {
                 {step === 'name' && (
                     <div className="space-y-4">
                         <div className="space-y-2">
-                            <label htmlFor="friendly-name" className="block text-sm font-medium text-gray-700">
+                            <label htmlFor="friendly-name" className="block text-sm font-medium text-ink">
                                 Device Name
                             </label>
                             <input
@@ -199,11 +199,11 @@ export function MFASetup({ onStatusChange }: MFASetupProps) {
                                 type="text"
                                 value={friendlyName}
                                 onChange={(e) => setFriendlyName(e.target.value)}
-                                className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-primary-500 focus:ring-primary-500 sm:text-sm"
+                                className="mt-1 block w-full rounded-md border-hairline shadow-airbnb focus:border-primary-500 focus:ring-primary-500 sm:text-sm"
                                 placeholder="e.g., Work Phone, Personal iPhone"
                                 autoFocus
                             />
-                            <p className="text-sm text-gray-500">
+                            <p className="text-sm text-muted">
                                 Give this authentication method a name to help you identify it later
                             </p>
                         </div>
@@ -212,14 +212,14 @@ export function MFASetup({ onStatusChange }: MFASetupProps) {
                             <button
                                 onClick={resetEnrollment}
                                 disabled={actionInProgress}
-                                className="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50 disabled:opacity-50"
+                                className="px-4 py-2 text-sm font-medium text-ink bg-canvas border border-hairline rounded-md hover:bg-surface-soft disabled:opacity-50"
                             >
                                 Cancel
                             </button>
                             <button
                                 onClick={startEnrollment}
                                 disabled={actionInProgress || !friendlyName.trim()}
-                                className="flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-primary-600 hover:bg-primary-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500 disabled:opacity-50"
+                                className="flex justify-center py-2 px-4 border border-transparent rounded-md shadow-airbnb text-sm font-medium text-white bg-primary-600 hover:bg-primary-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500 disabled:opacity-50"
                             >
                                 {actionInProgress ? 'Processing...' : 'Continue'}
                             </button>
@@ -240,7 +240,7 @@ export function MFASetup({ onStatusChange }: MFASetupProps) {
                         </div>
 
                         <div className="space-y-2">
-                            <label htmlFor="verify-code" className="block text-sm font-medium text-gray-700">
+                            <label htmlFor="verify-code" className="block text-sm font-medium text-ink">
                                 Verification Code
                             </label>
                             <input
@@ -248,7 +248,7 @@ export function MFASetup({ onStatusChange }: MFASetupProps) {
                                 type="text"
                                 value={verifyCode}
                                 onChange={(e) => setVerifyCode(e.target.value.trim())}
-                                className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-primary-500 focus:ring-primary-500 sm:text-sm"
+                                className="mt-1 block w-full rounded-md border-hairline shadow-airbnb focus:border-primary-500 focus:ring-primary-500 sm:text-sm"
                                 placeholder="Enter code from your authenticator app"
                             />
                         </div>
@@ -257,14 +257,14 @@ export function MFASetup({ onStatusChange }: MFASetupProps) {
                             <button
                                 onClick={resetEnrollment}
                                 disabled={actionInProgress}
-                                className="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50 disabled:opacity-50"
+                                className="px-4 py-2 text-sm font-medium text-ink bg-canvas border border-hairline rounded-md hover:bg-surface-soft disabled:opacity-50"
                             >
                                 Cancel
                             </button>
                             <button
                                 onClick={verifyFactor}
                                 disabled={actionInProgress || verifyCode.length === 0}
-                                className="flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-primary-600 hover:bg-primary-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500 disabled:opacity-50"
+                                className="flex justify-center py-2 px-4 border border-transparent rounded-md shadow-airbnb text-sm font-medium text-white bg-primary-600 hover:bg-primary-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500 disabled:opacity-50"
                             >
                                 {actionInProgress ? 'Verifying...' : 'Verify'}
                             </button>
@@ -274,7 +274,7 @@ export function MFASetup({ onStatusChange }: MFASetupProps) {
 
                 {step === 'list' && (
                     <div className="space-y-4">
-                        <p className="text-sm text-gray-600">
+                        <p className="text-sm text-body">
                             {factors.length === 0
                                 ? 'Protect your account with two-factor authentication. When enabled, you\'ll need to enter a code from your authenticator app in addition to your password when signing in.'
                                 : 'You can add additional authentication methods or remove existing ones.'}
@@ -282,7 +282,7 @@ export function MFASetup({ onStatusChange }: MFASetupProps) {
                         <button
                             onClick={() => setStep('name')}
                             disabled={actionInProgress}
-                            className="w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-primary-600 hover:bg-primary-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500 disabled:opacity-50"
+                            className="w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-airbnb text-sm font-medium text-white bg-primary-600 hover:bg-primary-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500 disabled:opacity-50"
                         >
                             {actionInProgress ? 'Processing...' : 'Add New Authentication Method'}
                         </button>

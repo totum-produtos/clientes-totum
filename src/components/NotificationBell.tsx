@@ -70,8 +70,8 @@ export default function NotificationBell() {
     switch (type) {
       case "alteracao_pendente": return <Clock className="w-4 h-4 text-amber-500" />;
       case "alteracao_aprovada": return <CheckCircle className="w-4 h-4 text-green-500" />;
-      case "alteracao_rejeitada": return <XCircle className="w-4 h-4 text-red-500" />;
-      default: return <FileText className="w-4 h-4 text-gray-400" />;
+      case "alteracao_rejeitada": return <XCircle className="w-4 h-4 text-danger-text" />;
+      default: return <FileText className="w-4 h-4 text-muted-soft" />;
     }
   };
 
@@ -79,22 +79,22 @@ export default function NotificationBell() {
     <div className="relative" ref={dropdownRef}>
       <button
         onClick={() => setOpen(!open)}
-        className="relative p-2 text-gray-500 hover:text-gray-700 hover:bg-gray-100 rounded-xl transition-colors"
+        className="relative p-2 text-muted hover:text-ink hover:bg-surface-strong rounded-md transition-colors"
       >
         <Bell className="w-5 h-5" />
         {unreadCount > 0 && (
-          <span className="absolute top-0 right-0 w-4 h-4 bg-red-500 text-white text-[10px] font-bold rounded-full flex items-center justify-center">
+          <span className="absolute top-0 right-0 w-4 h-4 bg-danger-bg0 text-white text-[10px] font-bold rounded-full flex items-center justify-center">
             {unreadCount > 9 ? "9+" : unreadCount}
           </span>
         )}
       </button>
 
       {open && (
-        <div className="absolute right-0 mt-2 w-96 bg-white rounded-2xl border shadow-xl z-50 overflow-hidden">
+        <div className="absolute right-0 mt-2 w-96 bg-canvas rounded-lg border shadow-xl z-50 overflow-hidden">
           <div className="flex items-center justify-between px-4 py-3 border-b">
-            <h3 className="text-sm font-semibold text-gray-900">Notificações</h3>
+            <h3 className="text-sm font-semibold text-ink">Notificações</h3>
             {unreadCount > 0 && (
-              <button onClick={markAllAsRead} className="text-xs text-[#3b82f6] hover:underline font-medium">
+              <button onClick={markAllAsRead} className="text-xs text-[rausch] hover:underline font-medium">
                 Marcar todas como lidas
               </button>
             )}
@@ -102,7 +102,7 @@ export default function NotificationBell() {
 
           <div className="max-h-[400px] overflow-y-auto">
             {notifications.length === 0 ? (
-              <div className="px-4 py-8 text-center text-sm text-gray-400">
+              <div className="px-4 py-8 text-center text-sm text-muted-soft">
                 <Bell className="w-8 h-8 mx-auto mb-2 opacity-30" />
                 Nenhuma notificação
               </div>
@@ -111,28 +111,28 @@ export default function NotificationBell() {
                 <div
                   key={n.id}
                   onClick={() => { markAsRead(n.id); }}
-                  className={`px-4 py-3 border-b last:border-b-0 cursor-pointer hover:bg-gray-50 transition-colors ${!n.read ? "bg-blue-50/50" : ""}`}
+                  className={`px-4 py-3 border-b last:border-b-0 cursor-pointer hover:bg-surface-soft transition-colors ${!n.read ? "bg-surface-soft/50" : ""}`}
                 >
                   <div className="flex items-start gap-3">
                     <div className="mt-0.5">{getIcon(n.type)}</div>
                     <div className="flex-1 min-w-0">
-                      <p className={`text-sm ${!n.read ? "font-semibold text-gray-900" : "text-gray-700"}`}>{n.title}</p>
-                      <p className="text-xs text-gray-500 mt-0.5 line-clamp-2">{n.message}</p>
-                      <p className="text-[10px] text-gray-400 mt-1">
+                      <p className={`text-sm ${!n.read ? "font-semibold text-ink" : "text-ink"}`}>{n.title}</p>
+                      <p className="text-xs text-muted mt-0.5 line-clamp-2">{n.message}</p>
+                      <p className="text-[10px] text-muted-soft mt-1">
                         {new Date(n.created_at).toLocaleDateString("pt-BR", { day: "2-digit", month: "short", hour: "2-digit", minute: "2-digit" })}
                       </p>
                     </div>
-                    {!n.read && <div className="w-2 h-2 bg-[#3b82f6] rounded-full mt-1.5 shrink-0" />}
+                    {!n.read && <div className="w-2 h-2 bg-[rausch] rounded-full mt-1.5 shrink-0" />}
                   </div>
                 </div>
               ))
             )}
           </div>
 
-          <div className="px-4 py-2.5 border-t bg-gray-50">
+          <div className="px-4 py-2.5 border-t bg-surface-soft">
             <button
               onClick={() => { setOpen(false); router.push("/app/notificacoes"); }}
-              className="w-full text-center text-xs text-[#3b82f6] hover:underline font-medium py-1"
+              className="w-full text-center text-xs text-[rausch] hover:underline font-medium py-1"
             >
               Ver todas as notificações
             </button>

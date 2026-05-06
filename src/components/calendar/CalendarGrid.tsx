@@ -3,7 +3,7 @@ import { startOfMonth, endOfMonth, startOfWeek, endOfWeek, eachDayOfInterval, is
 import { ptBR } from 'date-fns/locale';
 
 const circuloDouradoColors: Record<string, string> = {
-  porque: 'bg-amber-500',
+  porque: 'bg-warning-bg0',
   oque: 'bg-emerald-500',
   como: 'bg-sky-500',
 };
@@ -38,7 +38,7 @@ export default function CalendarGrid({ month, posts, onDayClick, onPostClick }: 
   return (
     <div className="grid grid-cols-7 gap-1">
       {['Dom', 'Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sáb'].map((d) => (
-        <div key={d} className="text-center text-xs font-medium text-gray-500 py-2 uppercase">
+        <div key={d} className="text-center text-xs font-medium text-muted py-2 uppercase">
           {d}
         </div>
       ))}
@@ -48,11 +48,11 @@ export default function CalendarGrid({ month, posts, onDayClick, onPostClick }: 
           <div
             key={day.toISOString()}
             onClick={() => onDayClick(day)}
-            className={`min-h-[80px] border rounded-lg p-1.5 cursor-pointer transition-colors hover:bg-gray-50 ${
-              !isSameMonth(day, month) ? 'bg-gray-50/50 opacity-50' : 'bg-white'
-            } ${isSameDay(day, new Date()) ? 'ring-2 ring-[#d81220] ring-offset-1' : ''}`}
+            className={`min-h-[80px] border rounded-lg p-1.5 cursor-pointer transition-colors hover:bg-surface-soft ${
+              !isSameMonth(day, month) ? 'bg-surface-soft/50 opacity-50' : 'bg-canvas'
+            } ${isSameDay(day, new Date()) ? 'ring-2 ring-[rausch] ring-offset-1' : ''}`}
           >
-            <span className={`text-sm font-medium ${isSameDay(day, new Date()) ? 'text-[#d81220]' : 'text-gray-700'}`}>
+            <span className={`text-sm font-medium ${isSameDay(day, new Date()) ? 'text-[rausch]' : 'text-ink'}`}>
               {format(day, 'd')}
             </span>
             <div className="flex flex-wrap gap-1 mt-1">

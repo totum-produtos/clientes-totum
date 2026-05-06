@@ -54,9 +54,9 @@ type ClienteStats = {
 };
 
 const STATUS_CONFIG: Record<string, { label: string; bg: string; text: string }> = {
-  active: { label: 'Ativo', bg: 'bg-green-100', text: 'text-green-700' },
-  inactive: { label: 'Inativo', bg: 'bg-gray-100', text: 'text-gray-600' },
-  pending: { label: 'Pendente', bg: 'bg-amber-100', text: 'text-amber-700' },
+  active: { label: 'Ativo', bg: 'bg-success-bg', text: 'text-success-text' },
+  inactive: { label: 'Inativo', bg: 'bg-surface-strong', text: 'text-body' },
+  pending: { label: 'Pendente', bg: 'bg-warning-bg', text: 'text-warning-text' },
 };
 
 export default function GestaoClientesPage() {
@@ -182,7 +182,7 @@ export default function GestaoClientesPage() {
   if (loading) {
     return (
       <div className="flex justify-center items-center h-96">
-        <div className="animate-spin h-10 w-10 border-b-2 border-[#d81220] rounded-full" />
+        <div className="animate-spin h-10 w-10 border-b-2 border-[rausch] rounded-full" />
       </div>
     );
   }
@@ -192,14 +192,14 @@ export default function GestaoClientesPage() {
       {/* Header */}
       <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
         <div>
-          <h1 className="text-2xl font-bold text-gray-900">Central de Clientes</h1>
-          <p className="text-gray-500">
+          <h1 className="text-2xl font-bold text-ink">Central de Clientes</h1>
+          <p className="text-muted">
             {clientes.length} clientes cadastrados · {totalAtivos} ativos
           </p>
         </div>
         <button
           onClick={() => router.push('/app/admin/clientes/novo')}
-          className="inline-flex items-center gap-2 px-4 py-2 bg-[#d81220] text-white rounded-lg text-sm font-medium hover:bg-[#b91c1c] transition-colors"
+          className="inline-flex items-center gap-2 px-4 py-2 bg-[rausch] text-white rounded-lg text-sm font-medium hover:bg-[rausch-active] transition-colors"
         >
           <Building2 className="h-4 w-4" />
           Novo Cliente
@@ -210,36 +210,36 @@ export default function GestaoClientesPage() {
       <div className="grid gap-4 md:grid-cols-4">
         <Card>
           <CardContent className="p-4 flex items-center gap-4">
-            <div className="p-3 bg-blue-50 rounded-lg"><Users className="h-5 w-5 text-blue-600" /></div>
+            <div className="p-3 bg-surface-soft rounded-lg"><Users className="h-5 w-5 text-rausch" /></div>
             <div>
-              <p className="text-sm text-gray-500">Total</p>
+              <p className="text-sm text-muted">Total</p>
               <p className="text-2xl font-bold">{clientes.length}</p>
             </div>
           </CardContent>
         </Card>
         <Card>
           <CardContent className="p-4 flex items-center gap-4">
-            <div className="p-3 bg-green-50 rounded-lg"><CheckCircle2 className="h-5 w-5 text-green-600" /></div>
+            <div className="p-3 bg-success-bg rounded-lg"><CheckCircle2 className="h-5 w-5 text-success-text" /></div>
             <div>
-              <p className="text-sm text-gray-500">Ativos</p>
+              <p className="text-sm text-muted">Ativos</p>
               <p className="text-2xl font-bold">{totalAtivos}</p>
             </div>
           </CardContent>
         </Card>
         <Card>
           <CardContent className="p-4 flex items-center gap-4">
-            <div className="p-3 bg-amber-50 rounded-lg"><AlertCircle className="h-5 w-5 text-amber-600" /></div>
+            <div className="p-3 bg-warning-bg rounded-lg"><AlertCircle className="h-5 w-5 text-warning-text" /></div>
             <div>
-              <p className="text-sm text-gray-500">Pendentes</p>
+              <p className="text-sm text-muted">Pendentes</p>
               <p className="text-2xl font-bold">{totalPendentes}</p>
             </div>
           </CardContent>
         </Card>
         <Card>
           <CardContent className="p-4 flex items-center gap-4">
-            <div className="p-3 bg-purple-50 rounded-lg"><TrendingUp className="h-5 w-5 text-purple-600" /></div>
+            <div className="p-3 bg-surface-soft rounded-lg"><TrendingUp className="h-5 w-5 text-ink" /></div>
             <div>
-              <p className="text-sm text-gray-500">Com anúncios</p>
+              <p className="text-sm text-muted">Com anúncios</p>
               <p className="text-2xl font-bold">{totalComAds}</p>
             </div>
           </CardContent>
@@ -249,13 +249,13 @@ export default function GestaoClientesPage() {
       {/* Filters */}
       <div className="flex flex-col lg:flex-row gap-3">
         <div className="relative flex-1">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-soft" />
           <input
             type="text"
             placeholder="Buscar por nome, email ou slug..."
             value={busca}
             onChange={(e) => setBusca(e.target.value)}
-            className="w-full pl-10 pr-4 py-2 border rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-[#d81220] bg-white"
+            className="w-full pl-10 pr-4 py-2 border rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-[rausch] bg-canvas"
           />
         </div>
         <div className="flex gap-2">
@@ -265,24 +265,24 @@ export default function GestaoClientesPage() {
               onClick={() => setFiltroStatus(status)}
               className={`px-3 py-2 rounded-lg text-sm font-medium capitalize transition-colors ${
                 filtroStatus === status
-                  ? 'bg-[#d81220] text-white'
-                  : 'bg-white border text-gray-600 hover:bg-gray-50'
+                  ? 'bg-[rausch] text-white'
+                  : 'bg-canvas border text-body hover:bg-surface-soft'
               }`}
             >
               {status === 'todos' ? 'Todos' : STATUS_CONFIG[status]?.label || status}
             </button>
           ))}
         </div>
-        <div className="flex gap-1 bg-white border rounded-lg p-1">
+        <div className="flex gap-1 bg-canvas border rounded-lg p-1">
           <button
             onClick={() => setViewMode('grid')}
-            className={`p-1.5 rounded ${viewMode === 'grid' ? 'bg-gray-100 text-gray-900' : 'text-gray-400 hover:text-gray-600'}`}
+            className={`p-1.5 rounded ${viewMode === 'grid' ? 'bg-surface-strong text-ink' : 'text-muted-soft hover:text-body'}`}
           >
             <LayoutGrid className="h-4 w-4" />
           </button>
           <button
             onClick={() => setViewMode('list')}
-            className={`p-1.5 rounded ${viewMode === 'list' ? 'bg-gray-100 text-gray-900' : 'text-gray-400 hover:text-gray-600'}`}
+            className={`p-1.5 rounded ${viewMode === 'list' ? 'bg-surface-strong text-ink' : 'text-muted-soft hover:text-body'}`}
           >
             <List className="h-4 w-4" />
           </button>
@@ -297,7 +297,7 @@ export default function GestaoClientesPage() {
             return (
               <Card
                 key={cliente.id}
-                className="cursor-pointer hover:shadow-md transition-shadow group"
+                className="cursor-pointer hover:shadow-airbnb transition-shadow group"
                 onClick={() => router.push(`/app/admin/clientes/${cliente.id}`)}
               >
                 <CardContent className="p-5">
@@ -305,13 +305,13 @@ export default function GestaoClientesPage() {
                     <div className="flex items-center gap-3">
                       <div
                         className="w-12 h-12 rounded-lg flex items-center justify-center text-white font-bold text-lg"
-                        style={{ backgroundColor: '#d81220' }}
+                        style={{ backgroundColor: 'rausch' }}
                       >
                         {cliente.nome.charAt(0).toUpperCase()}
                       </div>
                       <div className="min-w-0">
-                        <p className="font-semibold text-gray-900 truncate">{cliente.nome}</p>
-                        <p className="text-xs text-gray-500">@{cliente.slug}</p>
+                        <p className="font-semibold text-ink truncate">{cliente.nome}</p>
+                        <p className="text-xs text-muted">@{cliente.slug}</p>
                       </div>
                     </div>
                     <span className={`text-xs px-2 py-1 rounded-full ${statusCfg.bg} ${statusCfg.text}`}>
@@ -320,61 +320,61 @@ export default function GestaoClientesPage() {
                   </div>
 
                   <div className="space-y-1.5 mb-4">
-                    <div className="flex items-center gap-2 text-sm text-gray-600">
-                      <Mail className="h-3.5 w-3.5 text-gray-400 shrink-0" />
+                    <div className="flex items-center gap-2 text-sm text-body">
+                      <Mail className="h-3.5 w-3.5 text-muted-soft shrink-0" />
                       <span className="truncate">{cliente.email_responsavel}</span>
                     </div>
                     {cliente.contato_principal && (
-                      <div className="flex items-center gap-2 text-sm text-gray-600">
-                        <Users className="h-3.5 w-3.5 text-gray-400 shrink-0" />
+                      <div className="flex items-center gap-2 text-sm text-body">
+                        <Users className="h-3.5 w-3.5 text-muted-soft shrink-0" />
                         <span className="truncate">{cliente.contato_principal}</span>
                       </div>
                     )}
-                    <div className="flex items-center gap-2 text-sm text-gray-600">
-                      <CalendarDays className="h-3.5 w-3.5 text-gray-400 shrink-0" />
+                    <div className="flex items-center gap-2 text-sm text-body">
+                      <CalendarDays className="h-3.5 w-3.5 text-muted-soft shrink-0" />
                       <span>{new Date(cliente.created_at).toLocaleDateString('pt-BR')}</span>
                     </div>
                   </div>
 
-                  <div className="grid grid-cols-4 gap-2 pt-3 border-t border-gray-100">
+                  <div className="grid grid-cols-4 gap-2 pt-3 border-t border-hairline-soft">
                     <div className="text-center">
-                      <p className="text-lg font-bold text-gray-900">{cliente.stats?.totalPosts || 0}</p>
-                      <p className="text-[10px] text-gray-500 uppercase">Posts</p>
+                      <p className="text-lg font-bold text-ink">{cliente.stats?.totalPosts || 0}</p>
+                      <p className="text-[10px] text-muted uppercase">Posts</p>
                     </div>
                     <div className="text-center">
-                      <p className="text-lg font-bold text-gray-900">{cliente.stats?.totalTarefas || 0}</p>
-                      <p className="text-[10px] text-gray-500 uppercase">Tarefas</p>
+                      <p className="text-lg font-bold text-ink">{cliente.stats?.totalTarefas || 0}</p>
+                      <p className="text-[10px] text-muted uppercase">Tarefas</p>
                     </div>
                     <div className="text-center">
-                      <p className="text-lg font-bold text-gray-900">{cliente.stats?.totalProjetos || 0}</p>
-                      <p className="text-[10px] text-gray-500 uppercase">Projetos</p>
+                      <p className="text-lg font-bold text-ink">{cliente.stats?.totalProjetos || 0}</p>
+                      <p className="text-[10px] text-muted uppercase">Projetos</p>
                     </div>
                     <div className="text-center">
-                      <p className="text-lg font-bold text-gray-900">{cliente.stats?.totalCampanhas || 0}</p>
-                      <p className="text-[10px] text-gray-500 uppercase">Ads</p>
+                      <p className="text-lg font-bold text-ink">{cliente.stats?.totalCampanhas || 0}</p>
+                      <p className="text-[10px] text-muted uppercase">Ads</p>
                     </div>
                   </div>
 
                   <div className="flex gap-2 mt-3">
                     {cliente.meta_ad_account_id && (
-                      <span className="text-[10px] px-2 py-0.5 bg-blue-100 text-blue-700 rounded-full">Meta</span>
+                      <span className="text-[10px] px-2 py-0.5 bg-surface-soft text-rausch rounded-full">Meta</span>
                     )}
                     {cliente.google_customer_id && (
-                      <span className="text-[10px] px-2 py-0.5 bg-green-100 text-green-700 rounded-full">Google</span>
+                      <span className="text-[10px] px-2 py-0.5 bg-success-bg text-success-text rounded-full">Google</span>
                     )}
                     {cliente.drive_folder_cliente_id && (
-                      <span className="text-[10px] px-2 py-0.5 bg-yellow-100 text-yellow-700 rounded-full">Drive</span>
+                      <span className="text-[10px] px-2 py-0.5 bg-warning-bg text-yellow-700 rounded-full">Drive</span>
                     )}
                   </div>
 
                   {/* Actions */}
-                  <div className="flex gap-2 mt-3 pt-3 border-t border-gray-100">
+                  <div className="flex gap-2 mt-3 pt-3 border-t border-hairline-soft">
                     <button
                       onClick={(e) => { e.stopPropagation(); handleToggleStatus(cliente); }}
                       className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium transition-colors ${
                         cliente.status === 'inactive'
-                          ? 'bg-green-50 text-green-700 hover:bg-green-100'
-                          : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+                          ? 'bg-success-bg text-success-text hover:bg-success-bg'
+                          : 'bg-surface-strong text-body hover:bg-surface-strong'
                       }`}
                     >
                       {cliente.status === 'inactive' ? <Power className="w-3 h-3" /> : <PowerOff className="w-3 h-3" />}
@@ -382,7 +382,7 @@ export default function GestaoClientesPage() {
                     </button>
                     <button
                       onClick={(e) => { e.stopPropagation(); setClienteParaDeletar(cliente); }}
-                      className="flex items-center gap-1.5 px-3 py-1.5 bg-red-50 text-red-700 rounded-lg text-xs font-medium hover:bg-red-100 transition-colors"
+                      className="flex items-center gap-1.5 px-3 py-1.5 bg-danger-bg text-danger-text rounded-lg text-xs font-medium hover:bg-danger-bg transition-colors"
                     >
                       <Trash2 className="w-3 h-3" /> Deletar
                     </button>
@@ -396,8 +396,8 @@ export default function GestaoClientesPage() {
 
       {/* List View */}
       {viewMode === 'list' && (
-        <div className="bg-white border rounded-xl overflow-hidden">
-          <div className="grid grid-cols-12 gap-4 px-4 py-3 bg-gray-50 text-xs font-medium text-gray-500 uppercase border-b">
+        <div className="bg-canvas border rounded-md overflow-hidden">
+          <div className="grid grid-cols-12 gap-4 px-4 py-3 bg-surface-soft text-xs font-medium text-muted uppercase border-b">
             <div className="col-span-3">Cliente</div>
             <div className="col-span-2">Status</div>
             <div className="col-span-2">Contato</div>
@@ -411,16 +411,16 @@ export default function GestaoClientesPage() {
             return (
               <div
                 key={cliente.id}
-                className="grid grid-cols-12 gap-4 px-4 py-3 border-b last:border-0 hover:bg-gray-50 transition-colors items-center cursor-pointer"
+                className="grid grid-cols-12 gap-4 px-4 py-3 border-b last:border-0 hover:bg-surface-soft transition-colors items-center cursor-pointer"
                 onClick={() => router.push(`/app/admin/clientes/${cliente.id}`)}
               >
                 <div className="col-span-3 flex items-center gap-3">
-                  <div className="w-8 h-8 rounded bg-[#d81220] flex items-center justify-center text-white font-bold text-sm shrink-0">
+                  <div className="w-8 h-8 rounded bg-[rausch] flex items-center justify-center text-white font-bold text-sm shrink-0">
                     {cliente.nome.charAt(0).toUpperCase()}
                   </div>
                   <div className="min-w-0">
-                    <p className="text-sm font-medium text-gray-900 truncate">{cliente.nome}</p>
-                    <p className="text-xs text-gray-500">@{cliente.slug}</p>
+                    <p className="text-sm font-medium text-ink truncate">{cliente.nome}</p>
+                    <p className="text-xs text-muted">@{cliente.slug}</p>
                   </div>
                 </div>
                 <div className="col-span-2">
@@ -428,7 +428,7 @@ export default function GestaoClientesPage() {
                     {statusCfg.label}
                   </span>
                 </div>
-                <div className="col-span-2 text-sm text-gray-600 truncate">
+                <div className="col-span-2 text-sm text-body truncate">
                   {cliente.email_responsavel}
                 </div>
                 <div className="col-span-1 text-center text-sm font-medium">{cliente.stats?.totalPosts || 0}</div>
@@ -437,23 +437,23 @@ export default function GestaoClientesPage() {
                 <div className="col-span-2 flex justify-end gap-1">
                   <button
                     onClick={(e) => { e.stopPropagation(); handleToggleStatus(cliente); }}
-                    className="p-1.5 hover:bg-gray-100 rounded"
+                    className="p-1.5 hover:bg-surface-strong rounded"
                     title={cliente.status === 'inactive' ? 'Ativar' : 'Inativar'}
                   >
-                    {cliente.status === 'inactive' ? <Power className="h-4 w-4 text-green-500" /> : <PowerOff className="h-4 w-4 text-gray-400" />}
+                    {cliente.status === 'inactive' ? <Power className="h-4 w-4 text-green-500" /> : <PowerOff className="h-4 w-4 text-muted-soft" />}
                   </button>
                   <button
                     onClick={(e) => { e.stopPropagation(); setClienteParaDeletar(cliente); }}
-                    className="p-1.5 hover:bg-red-50 rounded"
+                    className="p-1.5 hover:bg-danger-bg rounded"
                     title="Deletar"
                   >
                     <Trash2 className="h-4 w-4 text-red-400" />
                   </button>
                   <button
                     onClick={(e) => { e.stopPropagation(); router.push(`/app/admin/clientes/${cliente.id}`); }}
-                    className="p-1.5 hover:bg-gray-100 rounded"
+                    className="p-1.5 hover:bg-surface-strong rounded"
                   >
-                    <ExternalLink className="h-4 w-4 text-gray-400" />
+                    <ExternalLink className="h-4 w-4 text-muted-soft" />
                   </button>
                 </div>
               </div>
@@ -464,33 +464,33 @@ export default function GestaoClientesPage() {
 
       {clientesFiltrados.length === 0 && (
         <div className="text-center py-12">
-          <Building2 className="h-12 w-12 text-gray-300 mx-auto mb-3" />
-          <p className="text-gray-500">Nenhum cliente encontrado.</p>
-          <p className="text-sm text-gray-400">Tente ajustar os filtros ou cadastre um novo cliente.</p>
+          <Building2 className="h-12 w-12 text-muted-soft mx-auto mb-3" />
+          <p className="text-muted">Nenhum cliente encontrado.</p>
+          <p className="text-sm text-muted-soft">Tente ajustar os filtros ou cadastre um novo cliente.</p>
         </div>
       )}
 
       {/* Delete Confirmation Modal */}
       {clienteParaDeletar && (
         <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4" onClick={() => setClienteParaDeletar(null)}>
-          <div className="bg-white rounded-xl max-w-md w-full" onClick={(e) => e.stopPropagation()}>
+          <div className="bg-canvas rounded-md max-w-md w-full" onClick={(e) => e.stopPropagation()}>
             <div className="p-6">
-              <div className="w-12 h-12 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-4">
-                <AlertTriangle className="w-6 h-6 text-red-600" />
+              <div className="w-12 h-12 bg-danger-bg rounded-full flex items-center justify-center mx-auto mb-4">
+                <AlertTriangle className="w-6 h-6 text-danger-text" />
               </div>
-              <h3 className="text-lg font-bold text-center text-gray-900 mb-2">Deletar cliente?</h3>
-              <p className="text-sm text-gray-500 text-center mb-4">
+              <h3 className="text-lg font-bold text-center text-ink mb-2">Deletar cliente?</h3>
+              <p className="text-sm text-muted text-center mb-4">
                 Você está prestes a deletar <strong>{clienteParaDeletar.nome}</strong> e <strong>todos os dados</strong> associados (posts, tarefas, projetos, campanhas, arquivos).<br /><br />
-                <span className="text-amber-600 font-medium">A pasta no Google Drive NÃO será removida.</span>
+                <span className="text-warning-text font-medium">A pasta no Google Drive NÃO será removida.</span>
               </p>
-              <div className="bg-amber-50 border border-amber-200 rounded-lg p-3 mb-4">
-                <p className="text-xs text-amber-700">Esta ação não pode ser desfeita.</p>
+              <div className="bg-warning-bg border border-warning-bg rounded-lg p-3 mb-4">
+                <p className="text-xs text-warning-text">Esta ação não pode ser desfeita.</p>
               </div>
               <div className="flex gap-3">
-                <button onClick={() => setClienteParaDeletar(null)} className="flex-1 py-2.5 px-4 border rounded-lg text-sm font-medium text-gray-600 hover:bg-gray-50 transition-colors">
+                <button onClick={() => setClienteParaDeletar(null)} className="flex-1 py-2.5 px-4 border rounded-lg text-sm font-medium text-body hover:bg-surface-soft transition-colors">
                   Cancelar
                 </button>
-                <button onClick={() => handleDeletar(clienteParaDeletar)} disabled={deleteLoading} className="flex-1 py-2.5 px-4 bg-red-600 text-white rounded-lg text-sm font-medium hover:bg-red-700 disabled:opacity-50 transition-colors">
+                <button onClick={() => handleDeletar(clienteParaDeletar)} disabled={deleteLoading} className="flex-1 py-2.5 px-4 bg-danger text-white rounded-lg text-sm font-medium hover:bg-red-700 disabled:opacity-50 transition-colors">
                   {deleteLoading ? 'Deletando...' : 'Sim, deletar'}
                 </button>
               </div>
@@ -528,53 +528,53 @@ function ClienteDashboard({ cliente, onClose }: { cliente: any; onClose: () => v
 
   return (
     <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4" onClick={onClose}>
-      <div className="bg-white rounded-2xl max-w-3xl w-full max-h-[90vh] overflow-y-auto" onClick={(e) => e.stopPropagation()}>
+      <div className="bg-canvas rounded-lg max-w-3xl w-full max-h-[90vh] overflow-y-auto" onClick={(e) => e.stopPropagation()}>
         {/* Header */}
-        <div className="sticky top-0 bg-white border-b px-6 py-4 flex items-center justify-between z-10">
+        <div className="sticky top-0 bg-canvas border-b px-6 py-4 flex items-center justify-between z-10">
           <div className="flex items-center gap-3">
-            <div className="w-12 h-12 rounded-xl bg-[#d81220] flex items-center justify-center text-white font-bold text-lg">
+            <div className="w-12 h-12 rounded-md bg-[rausch] flex items-center justify-center text-white font-bold text-lg">
               {cliente.nome.charAt(0).toUpperCase()}
             </div>
             <div>
-              <h2 className="text-lg font-bold text-gray-900">{cliente.nome}</h2>
+              <h2 className="text-lg font-bold text-ink">{cliente.nome}</h2>
               <div className="flex items-center gap-2">
                 <span className={`text-xs px-2 py-0.5 rounded-full ${statusCfg.bg} ${statusCfg.text}`}>{statusCfg.label}</span>
-                <span className="text-xs text-gray-400">@{cliente.slug}</span>
+                <span className="text-xs text-muted-soft">@{cliente.slug}</span>
               </div>
             </div>
           </div>
-          <button onClick={onClose} className="p-2 hover:bg-gray-100 rounded-lg transition-colors">
-            <X className="h-5 w-5 text-gray-400" />
+          <button onClick={onClose} className="p-2 hover:bg-surface-strong rounded-lg transition-colors">
+            <X className="h-5 w-5 text-muted-soft" />
           </button>
         </div>
 
         {loading ? (
           <div className="flex justify-center py-20">
-            <div className="w-8 h-8 border-4 border-[#d81220] border-t-transparent rounded-full animate-spin" />
+            <div className="w-8 h-8 border-4 border-[rausch] border-t-transparent rounded-full animate-spin" />
           </div>
         ) : (
           <div className="p-6 space-y-6">
             {/* Stats */}
             <div className="grid grid-cols-4 gap-3">
-              <div className="bg-gray-50 p-4 rounded-xl text-center">
-                <FileText className="h-5 w-5 text-[#d81220] mx-auto mb-1" />
+              <div className="bg-surface-soft p-4 rounded-md text-center">
+                <FileText className="h-5 w-5 text-[rausch] mx-auto mb-1" />
                 <p className="text-2xl font-bold">{cliente.stats?.totalPosts || 0}</p>
-                <p className="text-[10px] text-gray-500 uppercase">Posts</p>
+                <p className="text-[10px] text-muted uppercase">Posts</p>
               </div>
-              <div className="bg-gray-50 p-4 rounded-xl text-center">
-                <CheckCircle2 className="h-5 w-5 text-green-600 mx-auto mb-1" />
+              <div className="bg-surface-soft p-4 rounded-md text-center">
+                <CheckCircle2 className="h-5 w-5 text-success-text mx-auto mb-1" />
                 <p className="text-2xl font-bold">{cliente.stats?.totalTarefas || 0}</p>
-                <p className="text-[10px] text-gray-500 uppercase">Tarefas</p>
+                <p className="text-[10px] text-muted uppercase">Tarefas</p>
               </div>
-              <div className="bg-gray-50 p-4 rounded-xl text-center">
-                <FolderOpen className="h-5 w-5 text-blue-600 mx-auto mb-1" />
+              <div className="bg-surface-soft p-4 rounded-md text-center">
+                <FolderOpen className="h-5 w-5 text-rausch mx-auto mb-1" />
                 <p className="text-2xl font-bold">{cliente.stats?.totalProjetos || 0}</p>
-                <p className="text-[10px] text-gray-500 uppercase">Projetos</p>
+                <p className="text-[10px] text-muted uppercase">Projetos</p>
               </div>
-              <div className="bg-gray-50 p-4 rounded-xl text-center">
-                <TrendingUp className="h-5 w-5 text-purple-600 mx-auto mb-1" />
+              <div className="bg-surface-soft p-4 rounded-md text-center">
+                <TrendingUp className="h-5 w-5 text-ink mx-auto mb-1" />
                 <p className="text-2xl font-bold">{cliente.stats?.totalCampanhas || 0}</p>
-                <p className="text-[10px] text-gray-500 uppercase">Campanhas</p>
+                <p className="text-[10px] text-muted uppercase">Campanhas</p>
               </div>
             </div>
 
@@ -616,17 +616,17 @@ function ClienteDashboard({ cliente, onClose }: { cliente: any; onClose: () => v
               <DashSection icon={Palette} title="Identidade Visual">
                 <div className="grid grid-cols-2 gap-3 mb-3">
                   <div>
-                    <span className="text-xs text-gray-400 uppercase">Cor primária</span>
+                    <span className="text-xs text-muted-soft uppercase">Cor primária</span>
                     <div className="flex items-center gap-2 mt-1">
-                      <div className="w-8 h-8 rounded-lg border" style={{ backgroundColor: fullData?.cor_primaria || '#d81220' }} />
-                      <span className="text-sm font-mono text-gray-700">{fullData?.cor_primaria || '—'}</span>
+                      <div className="w-8 h-8 rounded-lg border" style={{ backgroundColor: fullData?.cor_primaria || 'rausch' }} />
+                      <span className="text-sm font-mono text-ink">{fullData?.cor_primaria || '—'}</span>
                     </div>
                   </div>
                   <div>
-                    <span className="text-xs text-gray-400 uppercase">Cor secundária</span>
+                    <span className="text-xs text-muted-soft uppercase">Cor secundária</span>
                     <div className="flex items-center gap-2 mt-1">
                       <div className="w-8 h-8 rounded-lg border" style={{ backgroundColor: fullData?.cor_secundaria || '#1a1a2e' }} />
-                      <span className="text-sm font-mono text-gray-700">{fullData?.cor_secundaria || '—'}</span>
+                      <span className="text-sm font-mono text-ink">{fullData?.cor_secundaria || '—'}</span>
                     </div>
                   </div>
                 </div>
@@ -670,10 +670,10 @@ function ClienteDashboard({ cliente, onClose }: { cliente: any; onClose: () => v
 
 function DashSection({ icon: Icon, title, children }: any) {
   return (
-    <div className="border rounded-xl overflow-hidden">
-      <div className="flex items-center gap-2 px-4 py-3 bg-gray-50 border-b">
-        <Icon className="w-4 h-4 text-[#d81220]" />
-        <h3 className="text-sm font-semibold text-gray-900">{title}</h3>
+    <div className="border rounded-md overflow-hidden">
+      <div className="flex items-center gap-2 px-4 py-3 bg-surface-soft border-b">
+        <Icon className="w-4 h-4 text-[rausch]" />
+        <h3 className="text-sm font-semibold text-ink">{title}</h3>
       </div>
       <div className="p-4">{children}</div>
     </div>
@@ -685,8 +685,8 @@ function DashGrid({ items }: { items: { label: string; value: any }[] }) {
     <div className="grid grid-cols-2 gap-3 mb-3">
       {items.map((item, i) => (
         <div key={i}>
-          <span className="text-xs text-gray-400 uppercase">{item.label}</span>
-          <p className="text-sm text-gray-700">{item.value || <span className="text-gray-300">—</span>}</p>
+          <span className="text-xs text-muted-soft uppercase">{item.label}</span>
+          <p className="text-sm text-ink">{item.value || <span className="text-muted-soft">—</span>}</p>
         </div>
       ))}
     </div>
@@ -697,8 +697,8 @@ function DashText({ label, value }: { label: string; value: any }) {
   if (!value) return null;
   return (
     <div className="mb-3 last:mb-0">
-      <span className="text-xs text-gray-400 uppercase">{label}</span>
-      <p className="text-sm text-gray-700 mt-0.5 whitespace-pre-wrap">{value}</p>
+      <span className="text-xs text-muted-soft uppercase">{label}</span>
+      <p className="text-sm text-ink mt-0.5 whitespace-pre-wrap">{value}</p>
     </div>
   );
 }

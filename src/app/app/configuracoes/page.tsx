@@ -30,8 +30,8 @@ export default function ConfiguracoesPage() {
     return (
         <div className="space-y-6 p-2">
             <div>
-                <h1 className="text-2xl font-bold text-gray-900">Configurações</h1>
-                <p className="text-gray-500">Gerencie sua conta</p>
+                <h1 className="text-2xl font-bold text-ink">Configurações</h1>
+                <p className="text-muted">Gerencie sua conta</p>
             </div>
 
             <Card>
@@ -43,7 +43,7 @@ export default function ConfiguracoesPage() {
                 </CardHeader>
                 <CardContent className="space-y-3">
                     <div className="flex justify-between py-2 border-b">
-                        <span className="text-sm text-gray-500">Email</span>
+                        <span className="text-sm text-muted">Email</span>
                         <span className="text-sm font-medium">{user?.email}</span>
                     </div>
                 </CardContent>
@@ -59,7 +59,7 @@ export default function ConfiguracoesPage() {
                 <CardContent>
                     <form onSubmit={handleChangePassword} className="space-y-4 max-w-md">
                         <div>
-                            <label className="block text-sm font-medium text-gray-700 mb-1">Nova senha</label>
+                            <label className="block text-sm font-medium text-ink mb-1">Nova senha</label>
                             <input
                                 type="password"
                                 value={newPassword}
@@ -74,7 +74,7 @@ export default function ConfiguracoesPage() {
                             Atualizar senha
                         </button>
                         {message && (
-                            <p className={`text-sm ${message.includes('sucesso') ? 'text-green-600' : 'text-red-600'}`}>{message}</p>
+                            <p className={`text-sm ${message.includes('sucesso') ? 'text-success-text' : 'text-danger-text'}`}>{message}</p>
                         )}
                     </form>
                 </CardContent>

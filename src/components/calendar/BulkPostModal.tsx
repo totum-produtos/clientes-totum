@@ -64,21 +64,21 @@ export default function BulkPostModal({ isOpen, onClose, onSave, clientId }: Bul
 
     return (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50">
-            <div className="bg-white rounded-lg shadow-xl w-full max-w-2xl mx-4 max-h-[90vh] overflow-y-auto">
+            <div className="bg-canvas rounded-lg shadow-xl w-full max-w-2xl mx-4 max-h-[90vh] overflow-y-auto">
                 <div className="flex items-center justify-between p-4 border-b">
                     <h3 className="text-lg font-semibold">Adicionar posts em massa</h3>
-                    <button onClick={onClose} className="p-1 hover:bg-gray-100 rounded-lg">
-                        <X className="h-5 w-5 text-gray-500" />
+                    <button onClick={onClose} className="p-1 hover:bg-surface-strong rounded-lg">
+                        <X className="h-5 w-5 text-muted" />
                     </button>
                 </div>
 
                 <div className="p-4 space-y-4">
                     {/* Mode toggle */}
                     <div className="flex gap-2">
-                        <button onClick={() => setMode('form')} className={`px-3 py-1.5 rounded-lg text-sm ${mode === 'form' ? 'bg-primary-100 text-primary-700' : 'bg-gray-100 text-gray-600'}`}>
+                        <button onClick={() => setMode('form')} className={`px-3 py-1.5 rounded-lg text-sm ${mode === 'form' ? 'bg-primary-100 text-primary-700' : 'bg-surface-strong text-body'}`}>
                             Formulário
                         </button>
-                        <button onClick={() => setMode('csv')} className={`px-3 py-1.5 rounded-lg text-sm ${mode === 'csv' ? 'bg-primary-100 text-primary-700' : 'bg-gray-100 text-gray-600'}`}>
+                        <button onClick={() => setMode('csv')} className={`px-3 py-1.5 rounded-lg text-sm ${mode === 'csv' ? 'bg-primary-100 text-primary-700' : 'bg-surface-strong text-body'}`}>
                             Importar CSV
                         </button>
                     </div>
@@ -86,8 +86,8 @@ export default function BulkPostModal({ isOpen, onClose, onSave, clientId }: Bul
                     {mode === 'csv' ? (
                         <div className="space-y-3">
                             <div className="flex items-center justify-between">
-                                <p className="text-sm text-gray-500">
-                                    Cole o CSV no formato: <code className="bg-gray-100 px-1 rounded">assunto,tipo,data</code>
+                                <p className="text-sm text-muted">
+                                    Cole o CSV no formato: <code className="bg-surface-strong px-1 rounded">assunto,tipo,data</code>
                                 </p>
                                 <button
                                     onClick={() => {
@@ -119,7 +119,7 @@ export default function BulkPostModal({ isOpen, onClose, onSave, clientId }: Bul
                     ) : (
                         <div className="space-y-3">
                             {posts.map((post, idx) => (
-                                <div key={idx} className="flex gap-2 items-start p-3 bg-gray-50 rounded-lg">
+                                <div key={idx} className="flex gap-2 items-start p-3 bg-surface-soft rounded-lg">
                                     <div className="flex-1 grid grid-cols-12 gap-2">
                                         <input
                                             placeholder="Título do post"
@@ -142,13 +142,13 @@ export default function BulkPostModal({ isOpen, onClose, onSave, clientId }: Bul
                                         />
                                     </div>
                                     {posts.length > 1 && (
-                                        <button onClick={() => removeRow(idx)} className="p-2 text-red-500 hover:bg-red-50 rounded-lg">
+                                        <button onClick={() => removeRow(idx)} className="p-2 text-danger-text hover:bg-danger-bg rounded-lg">
                                             <X className="h-4 w-4" />
                                         </button>
                                     )}
                                 </div>
                             ))}
-                            <button onClick={addRow} className="w-full py-2 border-2 border-dashed border-gray-300 rounded-lg text-sm text-gray-500 hover:border-primary-400 hover:text-primary-600 transition-colors">
+                            <button onClick={addRow} className="w-full py-2 border-2 border-dashed border-hairline rounded-lg text-sm text-muted hover:border-primary-400 hover:text-primary-600 transition-colors">
                                 + Adicionar linha
                             </button>
                         </div>
@@ -158,7 +158,7 @@ export default function BulkPostModal({ isOpen, onClose, onSave, clientId }: Bul
                         <button onClick={handleSubmit} className="btn-primary flex-1 px-4 py-2 rounded-lg text-sm flex items-center justify-center gap-2">
                             <Save className="h-4 w-4" /> Salvar {posts.filter(p => p.subject.trim()).length} posts
                         </button>
-                        <button onClick={onClose} className="px-4 py-2 rounded-lg text-sm border hover:bg-gray-50">
+                        <button onClick={onClose} className="px-4 py-2 rounded-lg text-sm border hover:bg-surface-soft">
                             Cancelar
                         </button>
                     </div>

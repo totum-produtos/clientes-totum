@@ -180,21 +180,21 @@ export default function AdminPage() {
     return (
         <div className="space-y-6 p-2">
             <div>
-                <h1 className="text-2xl font-bold text-gray-900">Painel Admin</h1>
-                <p className="text-gray-500">Gerenciar clientes e acessos do portal</p>
+                <h1 className="text-2xl font-bold text-ink">Painel Admin</h1>
+                <p className="text-muted">Gerenciar clientes e acessos do portal</p>
             </div>
 
             {message && (
-                <div className={`p-3 rounded-lg text-sm ${message.includes('sucesso') ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'}`}>
+                <div className={`p-3 rounded-lg text-sm ${message.includes('sucesso') ? 'bg-success-bg text-success-text' : 'bg-danger-bg text-danger-text'}`}>
                     {message}
                 </div>
             )}
 
             {/* Alterações Pendentes */}
             {pendingChanges.length > 0 && (
-                <Card className="border-amber-200">
+                <Card className="border-warning-bg">
                     <CardHeader>
-                        <CardTitle className="flex items-center gap-2 text-amber-700">
+                        <CardTitle className="flex items-center gap-2 text-warning-text">
                             <Clock className="h-5 w-5" />
                             Alterações pendentes de aprovação ({pendingChanges.length})
                         </CardTitle>
@@ -204,33 +204,33 @@ export default function AdminPage() {
                             const client = clients.find(c => c.id === change.portal_client_id);
                             const requester = authUsers.find(u => u.id === change.requested_by);
                             return (
-                                <div key={change.id} className="p-4 bg-amber-50 rounded-xl border border-amber-100">
+                                <div key={change.id} className="p-4 bg-warning-bg rounded-md border border-amber-100">
                                     <div className="flex items-center justify-between mb-2">
                                         <div>
-                                            <p className="font-medium text-sm text-gray-900">{client?.nome || 'Cliente desconhecido'}</p>
-                                            <p className="text-xs text-gray-500">Solicitado por: {requester?.email || change.requested_by} • {new Date(change.created_at).toLocaleDateString('pt-BR')}</p>
+                                            <p className="font-medium text-sm text-ink">{client?.nome || 'Cliente desconhecido'}</p>
+                                            <p className="text-xs text-muted">Solicitado por: {requester?.email || change.requested_by} • {new Date(change.created_at).toLocaleDateString('pt-BR')}</p>
                                         </div>
-                                        <span className="text-xs px-2 py-1 rounded-full bg-amber-100 text-amber-700 font-medium">Pendente</span>
+                                        <span className="text-xs px-2 py-1 rounded-full bg-warning-bg text-warning-text font-medium">Pendente</span>
                                     </div>
                                     <div className="grid grid-cols-1 md:grid-cols-2 gap-3 mb-3">
-                                        <div className="p-2 bg-white rounded-lg text-sm">
-                                            <span className="text-xs text-gray-400 uppercase">Campo</span>
-                                            <p className="font-medium text-gray-700">{change.field_path}</p>
+                                        <div className="p-2 bg-canvas rounded-lg text-sm">
+                                            <span className="text-xs text-muted-soft uppercase">Campo</span>
+                                            <p className="font-medium text-ink">{change.field_path}</p>
                                         </div>
-                                        <div className="p-2 bg-white rounded-lg text-sm">
-                                            <span className="text-xs text-gray-400 uppercase">Valor atual → Novo</span>
-                                            <p className="text-gray-700">
-                                                <span className="text-red-500 line-through">{change.old_value || '—'}</span>
-                                                <span className="mx-2 text-gray-400">→</span>
-                                                <span className="text-green-600 font-medium">{change.new_value || '—'}</span>
+                                        <div className="p-2 bg-canvas rounded-lg text-sm">
+                                            <span className="text-xs text-muted-soft uppercase">Valor atual → Novo</span>
+                                            <p className="text-ink">
+                                                <span className="text-danger-text line-through">{change.old_value || '—'}</span>
+                                                <span className="mx-2 text-muted-soft">→</span>
+                                                <span className="text-success-text font-medium">{change.new_value || '—'}</span>
                                             </p>
                                         </div>
                                     </div>
                                     <div className="flex items-center gap-2">
-                                        <button onClick={() => handleApprove(change)} className="flex items-center gap-1.5 px-4 py-2 bg-green-600 text-white rounded-lg text-sm font-medium hover:bg-green-700 transition-colors">
+                                        <button onClick={() => handleApprove(change)} className="flex items-center gap-1.5 px-4 py-2 bg-success text-white rounded-lg text-sm font-medium hover:bg-green-700 transition-colors">
                                             <CheckCircle className="w-4 h-4" /> Aprovar
                                         </button>
-                                        <button onClick={() => handleReject(change)} className="flex items-center gap-1.5 px-4 py-2 bg-red-600 text-white rounded-lg text-sm font-medium hover:bg-red-700 transition-colors">
+                                        <button onClick={() => handleReject(change)} className="flex items-center gap-1.5 px-4 py-2 bg-danger text-white rounded-lg text-sm font-medium hover:bg-red-700 transition-colors">
                                             <XCircle className="w-4 h-4" /> Rejeitar
                                         </button>
                                     </div>
@@ -254,7 +254,7 @@ export default function AdminPage() {
                 </CardHeader>
                 <CardContent>
                     {formOpen && (
-                        <form onSubmit={handleCreateClient} className="mb-4 p-4 bg-gray-50 rounded-lg space-y-3">
+                        <form onSubmit={handleCreateClient} className="mb-4 p-4 bg-surface-soft rounded-lg space-y-3">
                             <h3 className="font-medium text-sm">Novo cliente</h3>
                             <input required placeholder="Nome do cliente" value={newClient.nome} onChange={e => setNewClient({...newClient, nome: e.target.value})} className="w-full px-3 py-2 border rounded-lg text-sm" />
                             <input required placeholder="Slug (ex: cliente-xyz)" value={newClient.slug} onChange={e => setNewClient({...newClient, slug: e.target.value})} className="w-full px-3 py-2 border rounded-lg text-sm" />
@@ -270,14 +270,14 @@ export default function AdminPage() {
                             <div key={c.id} className="flex items-center justify-between p-3 border rounded-lg">
                                 <div>
                                     <p className="font-medium text-sm">{c.nome}</p>
-                                    <p className="text-xs text-gray-500">{c.slug} • {c.email_responsavel}</p>
+                                    <p className="text-xs text-muted">{c.slug} • {c.email_responsavel}</p>
                                 </div>
-                                <span className={`text-xs px-2 py-1 rounded-full ${c.status === 'active' ? 'bg-green-100 text-green-700' : 'bg-gray-100 text-gray-700'}`}>
+                                <span className={`text-xs px-2 py-1 rounded-full ${c.status === 'active' ? 'bg-success-bg text-success-text' : 'bg-surface-strong text-ink'}`}>
                                     {c.status}
                                 </span>
                             </div>
                         ))}
-                        {clients.length === 0 && <p className="text-sm text-gray-400">Nenhum cliente cadastrado.</p>}
+                        {clients.length === 0 && <p className="text-sm text-muted-soft">Nenhum cliente cadastrado.</p>}
                     </div>
                 </CardContent>
             </Card>
@@ -295,7 +295,7 @@ export default function AdminPage() {
                 </CardHeader>
                 <CardContent>
                     {linkOpen && (
-                        <form onSubmit={handleLinkUser} className="mb-4 p-4 bg-gray-50 rounded-lg space-y-3">
+                        <form onSubmit={handleLinkUser} className="mb-4 p-4 bg-surface-soft rounded-lg space-y-3">
                             <h3 className="font-medium text-sm">Vincular usuário a cliente</h3>
                             <select required value={selectedClient} onChange={e => setSelectedClient(e.target.value)} className="w-full px-3 py-2 border rounded-lg text-sm">
                                 <option value="">Selecione o cliente</option>
@@ -319,13 +319,13 @@ export default function AdminPage() {
                                 <div key={i} className="flex items-center justify-between p-3 border rounded-lg">
                                     <div>
                                         <p className="font-medium text-sm">{authUser?.email || u.user_id}</p>
-                                        <p className="text-xs text-gray-500">Cliente: {client?.nome || 'Desconhecido'}</p>
+                                        <p className="text-xs text-muted">Cliente: {client?.nome || 'Desconhecido'}</p>
                                     </div>
                                     <span className="text-xs px-2 py-1 rounded-full bg-primary-50 text-primary-700">{u.role}</span>
                                 </div>
                             );
                         })}
-                        {users.length === 0 && <p className="text-sm text-gray-400">Nenhum vínculo criado.</p>}
+                        {users.length === 0 && <p className="text-sm text-muted-soft">Nenhum vínculo criado.</p>}
                     </div>
                 </CardContent>
             </Card>
@@ -343,12 +343,12 @@ export default function AdminPage() {
                         <div key={u.id} className="flex items-center justify-between p-3 border rounded-lg">
                             <div>
                                 <p className="font-medium text-sm">{u.email}</p>
-                                <p className="text-xs text-gray-500">ID: {u.id.slice(0, 8)}...</p>
+                                <p className="text-xs text-muted">ID: {u.id.slice(0, 8)}...</p>
                             </div>
                             {users.some(vu => vu.user_id === u.id) ? (
-                                <span className="text-xs px-2 py-1 rounded-full bg-green-100 text-green-700">Vinculado</span>
+                                <span className="text-xs px-2 py-1 rounded-full bg-success-bg text-success-text">Vinculado</span>
                             ) : (
-                                <span className="text-xs px-2 py-1 rounded-full bg-gray-100 text-gray-500">Não vinculado</span>
+                                <span className="text-xs px-2 py-1 rounded-full bg-surface-strong text-muted">Não vinculado</span>
                             )}
                         </div>
                     ))}

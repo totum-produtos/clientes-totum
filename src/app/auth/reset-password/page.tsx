@@ -72,17 +72,17 @@ export default function ResetPasswordPage() {
 
     if (success) {
         return (
-            <div className="bg-white py-8 px-4 shadow sm:rounded-lg sm:px-10">
+            <div className="bg-canvas py-8 px-4 shadow sm:rounded-lg sm:px-10">
                 <div className="text-center">
                     <div className="flex justify-center mb-4">
                         <CheckCircle className="h-16 w-16 text-green-500" />
                     </div>
 
-                    <h2 className="text-2xl font-bold text-gray-900 mb-2">
+                    <h2 className="text-2xl font-bold text-ink mb-2">
                         Password reset successful
                     </h2>
 
-                    <p className="text-gray-600 mb-8">
+                    <p className="text-body mb-8">
                         Your password has been successfully reset.
                         You will be redirected to the app in a moment.
                     </p>
@@ -92,25 +92,25 @@ export default function ResetPasswordPage() {
     }
 
     return (
-        <div className="bg-white py-8 px-4 shadow sm:rounded-lg sm:px-10">
+        <div className="bg-canvas py-8 px-4 shadow sm:rounded-lg sm:px-10">
             <div className="sm:mx-auto sm:w-full sm:max-w-md">
                 <div className="flex justify-center mb-4">
                     <Key className="h-12 w-12 text-primary-600" />
                 </div>
-                <h2 className="text-2xl font-bold text-center text-gray-900 mb-8">
+                <h2 className="text-2xl font-bold text-center text-ink mb-8">
                     Create new password
                 </h2>
             </div>
 
             {error && (
-                <div className="mb-4 p-4 text-sm text-red-700 bg-red-100 rounded-lg">
+                <div className="mb-4 p-4 text-sm text-danger-text bg-danger-bg rounded-lg">
                     {error}
                 </div>
             )}
 
             <form onSubmit={handleSubmit} className="space-y-6">
                 <div>
-                    <label htmlFor="new-password" className="block text-sm font-medium text-gray-700">
+                    <label htmlFor="new-password" className="block text-sm font-medium text-ink">
                         New Password
                     </label>
                     <div className="mt-1">
@@ -122,13 +122,13 @@ export default function ResetPasswordPage() {
                             required
                             value={newPassword}
                             onChange={(e) => setNewPassword(e.target.value)}
-                            className="block w-full appearance-none rounded-md border border-gray-300 px-3 py-2 shadow-sm focus:border-primary-500 focus:outline-none focus:ring-primary-500"
+                            className="block w-full appearance-none rounded-md border border-hairline px-3 py-2 shadow-airbnb focus:border-primary-500 focus:outline-none focus:ring-primary-500"
                         />
                     </div>
                 </div>
 
                 <div>
-                    <label htmlFor="confirm-password" className="block text-sm font-medium text-gray-700">
+                    <label htmlFor="confirm-password" className="block text-sm font-medium text-ink">
                         Confirm New Password
                     </label>
                     <div className="mt-1">
@@ -140,10 +140,10 @@ export default function ResetPasswordPage() {
                             required
                             value={confirmPassword}
                             onChange={(e) => setConfirmPassword(e.target.value)}
-                            className="block w-full appearance-none rounded-md border border-gray-300 px-3 py-2 shadow-sm focus:border-primary-500 focus:outline-none focus:ring-primary-500"
+                            className="block w-full appearance-none rounded-md border border-hairline px-3 py-2 shadow-airbnb focus:border-primary-500 focus:outline-none focus:ring-primary-500"
                         />
                     </div>
-                    <p className="mt-2 text-sm text-gray-500">
+                    <p className="mt-2 text-sm text-muted">
                         Password must be at least 6 characters long
                     </p>
                 </div>
@@ -152,7 +152,7 @@ export default function ResetPasswordPage() {
                     <button
                         type="submit"
                         disabled={loading}
-                        className="flex w-full justify-center rounded-md border border-transparent bg-primary-600 py-2 px-4 text-sm font-medium text-white shadow-sm hover:bg-primary-700 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-2 disabled:opacity-50"
+                        className="flex w-full justify-center rounded-md border border-transparent bg-primary-600 py-2 px-4 text-sm font-medium text-white shadow-airbnb hover:bg-primary-700 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-2 disabled:opacity-50"
                     >
                         {loading ? 'Resetting password...' : 'Reset password'}
                     </button>

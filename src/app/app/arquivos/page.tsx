@@ -6,7 +6,7 @@ import { createSPASassClient } from '@/lib/supabase/client';
 import { FileText, Download, Upload, Trash2, FileArchive, FileSpreadsheet, Image, File } from 'lucide-react';
 
 const typeIcons: Record<string, React.ReactNode> = {
-  PDF: <FileText className="h-5 w-5 text-red-500" />,
+  PDF: <FileText className="h-5 w-5 text-danger-text" />,
   ZIP: <FileArchive className="h-5 w-5 text-yellow-500" />,
   XLSX: <FileSpreadsheet className="h-5 w-5 text-green-500" />,
   DOCX: <FileText className="h-5 w-5 text-blue-500" />,
@@ -132,10 +132,10 @@ export default function ArquivosPage() {
     <div className="space-y-6 p-2">
       <div className="flex justify-between items-center">
         <div>
-          <h1 className="text-2xl font-bold text-gray-900">Arquivos compartilhados</h1>
-          <p className="text-gray-500">Documentos e materiais da sua conta</p>
+          <h1 className="text-2xl font-bold text-ink">Arquivos compartilhados</h1>
+          <p className="text-muted">Documentos e materiais da sua conta</p>
         </div>
-        <label className="cursor-pointer inline-flex items-center gap-2 px-4 py-2 bg-[#d81220] text-white rounded-lg text-sm font-medium hover:bg-[#b91c1c] transition-colors disabled:opacity-50">
+        <label className="cursor-pointer inline-flex items-center gap-2 px-4 py-2 bg-[rausch] text-white rounded-lg text-sm font-medium hover:bg-[rausch-active] transition-colors disabled:opacity-50">
           <Upload className="h-4 w-4" />
           {uploading ? 'Enviando...' : 'Enviar arquivo'}
           <input type="file" className="hidden" onChange={handleUpload} disabled={uploading || !client} />
@@ -143,7 +143,7 @@ export default function ArquivosPage() {
       </div>
 
       {error && (
-        <div className="bg-yellow-50 border-l-4 border-yellow-400 text-yellow-800 px-4 py-3 text-sm rounded">
+        <div className="bg-warning-bg border-l-4 border-yellow-400 text-yellow-800 px-4 py-3 text-sm rounded">
           ⚠️ {error}
         </div>
       )}
@@ -159,33 +159,33 @@ export default function ArquivosPage() {
             </div>
           ) : arquivos.length === 0 ? (
             <div className="text-center py-8">
-              <FileText className="h-10 w-10 text-gray-300 mx-auto mb-2" />
-              <p className="text-sm text-gray-400">Nenhum arquivo enviado ainda.</p>
-              <p className="text-xs text-gray-400 mt-1">Clique em "Enviar arquivo" para começar.</p>
+              <FileText className="h-10 w-10 text-muted-soft mx-auto mb-2" />
+              <p className="text-sm text-muted-soft">Nenhum arquivo enviado ainda.</p>
+              <p className="text-xs text-muted-soft mt-1">Clique em "Enviar arquivo" para começar.</p>
             </div>
           ) : (
             arquivos.map((arquivo) => (
-              <div key={arquivo.id || arquivo.name} className="flex items-center gap-4 p-4 border rounded-lg hover:bg-gray-50 transition-colors">
-                <div className="shrink-0">{typeIcons[getExt(arquivo.name)] || <File className="h-5 w-5 text-gray-500" />}</div>
+              <div key={arquivo.id || arquivo.name} className="flex items-center gap-4 p-4 border rounded-lg hover:bg-surface-soft transition-colors">
+                <div className="shrink-0">{typeIcons[getExt(arquivo.name)] || <File className="h-5 w-5 text-muted" />}</div>
                 <div className="flex-1 min-w-0">
                   <p className="font-medium text-sm truncate">{arquivo.name}</p>
-                  <p className="text-xs text-gray-500">
+                  <p className="text-xs text-muted">
                     {formatSize(arquivo.metadata?.size)} • {new Date(arquivo.updated_at).toLocaleDateString('pt-BR')}
                   </p>
                 </div>
                 <button
                   onClick={() => handleDownload(arquivo.name)}
-                  className="p-2 hover:bg-gray-100 rounded-lg shrink-0"
+                  className="p-2 hover:bg-surface-strong rounded-lg shrink-0"
                   title="Download"
                 >
-                  <Download className="h-4 w-4 text-gray-500" />
+                  <Download className="h-4 w-4 text-muted" />
                 </button>
                 <button
                   onClick={() => handleDelete(arquivo.name)}
-                  className="p-2 hover:bg-red-50 rounded-lg shrink-0"
+                  className="p-2 hover:bg-danger-bg rounded-lg shrink-0"
                   title="Remover"
                 >
-                  <Trash2 className="h-4 w-4 text-red-500" />
+                  <Trash2 className="h-4 w-4 text-danger-text" />
                 </button>
               </div>
             ))

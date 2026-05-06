@@ -45,10 +45,10 @@ const LegalDocument: React.FC<LegalDocumentProps> = ({ filePath, title }) => {
             <CardContent className="prose prose-blue max-w-none min-h-[200px]">
                 {loading ? (
                     <div className="flex items-center justify-center h-[200px]">
-                        <Loader2 className="w-8 h-8 animate-spin text-blue-600" />
+                        <Loader2 className="w-8 h-8 animate-spin text-rausch" />
                     </div>
                 ) : error ? (
-                    <div className="text-center text-red-600 py-8">
+                    <div className="text-center text-danger-text py-8">
                         {error}
                     </div>
                 ) : (

@@ -211,9 +211,9 @@ export default function CentralConteudoPage() {
   }, [posts]);
 
   const tipoColors: Record<string, string> = {
-    porque: "bg-red-500",
-    o_que: "bg-blue-500",
-    como: "bg-green-500",
+    porque: "bg-danger-bg0",
+    o_que: "bg-surface-soft0",
+    como: "bg-success-bg0",
   };
 
   const tipoLabels: Record<string, string> = {
@@ -225,7 +225,7 @@ export default function CentralConteudoPage() {
   if (loading) {
     return (
       <div className="flex items-center justify-center h-full">
-        <div className="animate-spin h-8 w-8 border-b-2 border-[#d81220] rounded-full" />
+        <div className="animate-spin h-8 w-8 border-b-2 border-[rausch] rounded-full" />
       </div>
     );
   }
@@ -237,24 +237,24 @@ export default function CentralConteudoPage() {
       )}
 
       {/* Sidebar — lista de clientes */}
-      <div className="w-72 bg-white border-r flex flex-col">
+      <div className="w-72 bg-canvas border-r flex flex-col">
         <div className="p-4 border-b">
-          <h1 className="text-lg font-bold text-gray-900 flex items-center gap-2">
-            <LayoutGrid className="h-5 w-5 text-[#d81220]" />
+          <h1 className="text-lg font-bold text-ink flex items-center gap-2">
+            <LayoutGrid className="h-5 w-5 text-[rausch]" />
             Central de Conteúdo
           </h1>
-          <p className="text-xs text-gray-500 mt-1">Visão master de todos os clientes</p>
+          <p className="text-xs text-muted mt-1">Visão master de todos os clientes</p>
         </div>
 
         <div className="p-3">
           <div className="relative">
-            <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-gray-400" />
+            <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-soft" />
             <input
               type="text"
               placeholder="Buscar cliente..."
               value={search}
               onChange={(e) => setSearch(e.target.value)}
-              className="w-full pl-9 pr-3 py-2 border rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-[#d81220]"
+              className="w-full pl-9 pr-3 py-2 border rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-[rausch]"
             />
           </div>
         </div>
@@ -268,13 +268,13 @@ export default function CentralConteudoPage() {
                 onClick={() => setSelectedCliente(c)}
                 className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-left text-sm transition-colors ${
                   selectedCliente?.id === c.id
-                    ? "bg-gray-900 text-white"
-                    : "text-gray-700 hover:bg-gray-100"
+                    ? "bg-ink text-white"
+                    : "text-ink hover:bg-surface-strong"
                 }`}
               >
                 <div
                   className="w-8 h-8 rounded-full flex items-center justify-center text-white text-xs font-bold shrink-0"
-                  style={{ backgroundColor: c.primary_color || "#d81220" }}
+                  style={{ backgroundColor: c.primary_color || "rausch" }}
                 >
                   {c.nome.charAt(0).toUpperCase()}
                 </div>
@@ -285,8 +285,8 @@ export default function CentralConteudoPage() {
                       <span
                         className={`text-[10px] px-1.5 py-0.5 rounded-full font-bold ${
                           selectedCliente?.id === c.id
-                            ? "bg-white/20 text-white"
-                            : "bg-gray-100 text-gray-600"
+                            ? "bg-canvas/20 text-white"
+                            : "bg-surface-strong text-body"
                         }`}
                       >
                         {count}
@@ -297,14 +297,14 @@ export default function CentralConteudoPage() {
                 </div>
                 <ChevronRight
                   className={`h-4 w-4 shrink-0 ${
-                    selectedCliente?.id === c.id ? "text-white" : "text-gray-400"
+                    selectedCliente?.id === c.id ? "text-white" : "text-muted-soft"
                   }`}
                 />
               </button>
             );
           })}
           {clientesFiltrados.length === 0 && (
-            <p className="text-sm text-gray-400 text-center py-4">
+            <p className="text-sm text-muted-soft text-center py-4">
               Nenhum cliente encontrado
             </p>
           )}
@@ -312,31 +312,31 @@ export default function CentralConteudoPage() {
       </div>
 
       {/* Conteúdo principal */}
-      <div className="flex-1 overflow-y-auto bg-gray-50">
+      <div className="flex-1 overflow-y-auto bg-surface-soft">
         {selectedCliente ? (
           <div className="max-w-4xl mx-auto p-6">
             {/* Header do cliente */}
-            <div className="bg-white rounded-xl border p-6 mb-6">
+            <div className="bg-canvas rounded-md border p-6 mb-6">
               <div className="flex items-start justify-between flex-wrap gap-4">
                 <div className="flex items-center gap-4">
                   <div
-                    className="w-14 h-14 rounded-xl flex items-center justify-center text-white text-xl font-bold"
-                    style={{ backgroundColor: selectedCliente.primary_color || "#d81220" }}
+                    className="w-14 h-14 rounded-md flex items-center justify-center text-white text-xl font-bold"
+                    style={{ backgroundColor: selectedCliente.primary_color || "rausch" }}
                   >
                     {selectedCliente.nome.charAt(0).toUpperCase()}
                   </div>
                   <div>
-                    <h2 className="text-xl font-bold text-gray-900">
+                    <h2 className="text-xl font-bold text-ink">
                       {selectedCliente.nome}
                     </h2>
-                    <p className="text-sm text-gray-500">
+                    <p className="text-sm text-muted">
                       {selectedCliente.email_responsavel}
                     </p>
                     <span
                       className={`inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium mt-1 ${
                         selectedCliente.status === "ativo"
-                          ? "bg-green-100 text-green-800"
-                          : "bg-gray-100 text-gray-600"
+                          ? "bg-success-bg text-success-text"
+                          : "bg-surface-strong text-body"
                       }`}
                     >
                       {selectedCliente.status}
@@ -347,19 +347,19 @@ export default function CentralConteudoPage() {
                 <div className="flex gap-2">
                   <a
                     href={`/app/calendario?client=${selectedCliente.id}`}
-                    className="flex items-center gap-1.5 px-3 py-2 rounded-lg border text-sm hover:bg-gray-50 transition-colors"
+                    className="flex items-center gap-1.5 px-3 py-2 rounded-lg border text-sm hover:bg-surface-soft transition-colors"
                   >
                     <CalendarDays className="h-4 w-4" /> Calendário
                   </a>
                   <a
                     href={`/app/arquivos?client=${selectedCliente.id}`}
-                    className="flex items-center gap-1.5 px-3 py-2 rounded-lg border text-sm hover:bg-gray-50 transition-colors"
+                    className="flex items-center gap-1.5 px-3 py-2 rounded-lg border text-sm hover:bg-surface-soft transition-colors"
                   >
                     <FolderOpen className="h-4 w-4" /> Arquivos
                   </a>
                   <a
                     href={`/app/drive?client=${selectedCliente.id}`}
-                    className="flex items-center gap-1.5 px-3 py-2 rounded-lg border text-sm hover:bg-gray-50 transition-colors"
+                    className="flex items-center gap-1.5 px-3 py-2 rounded-lg border text-sm hover:bg-surface-soft transition-colors"
                   >
                     <Cloud className="h-4 w-4" /> Drive
                   </a>
@@ -369,9 +369,9 @@ export default function CentralConteudoPage() {
 
             {/* Alerta de gaps */}
             {gapDias.length > 0 && activeTab === "calendario" && (
-              <div className="bg-amber-50 border border-amber-200 rounded-lg p-3 mb-4 flex items-center gap-2">
-                <AlertTriangle className="h-4 w-4 text-amber-600 shrink-0" />
-                <p className="text-sm text-amber-800">
+              <div className="bg-warning-bg border border-warning-bg rounded-lg p-3 mb-4 flex items-center gap-2">
+                <AlertTriangle className="h-4 w-4 text-warning-text shrink-0" />
+                <p className="text-sm text-warning-text">
                   <span className="font-semibold">{gapDias.length} dia(s)</span> sem post
                   neste mês até hoje: {gapDias.slice(0, 10).join(", ")}
                   {gapDias.length > 10 ? "..." : ""}
@@ -381,13 +381,13 @@ export default function CentralConteudoPage() {
 
             {/* Tabs + filtros + export */}
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-4">
-              <div className="flex gap-1 bg-white rounded-lg border p-1 w-fit">
+              <div className="flex gap-1 bg-canvas rounded-lg border p-1 w-fit">
                 <button
                   onClick={() => setActiveTab("posts")}
                   className={`px-4 py-1.5 rounded-md text-sm font-medium transition-colors ${
                     activeTab === "posts"
-                      ? "bg-gray-900 text-white"
-                      : "text-gray-600 hover:bg-gray-100"
+                      ? "bg-ink text-white"
+                      : "text-body hover:bg-surface-strong"
                   }`}
                 >
                   <List className="h-4 w-4 inline mr-1.5" />
@@ -397,8 +397,8 @@ export default function CentralConteudoPage() {
                   onClick={() => setActiveTab("calendario")}
                   className={`px-4 py-1.5 rounded-md text-sm font-medium transition-colors ${
                     activeTab === "calendario"
-                      ? "bg-gray-900 text-white"
-                      : "text-gray-600 hover:bg-gray-100"
+                      ? "bg-ink text-white"
+                      : "text-body hover:bg-surface-strong"
                   }`}
                 >
                   <CalendarDays className="h-4 w-4 inline mr-1.5" />
@@ -408,8 +408,8 @@ export default function CentralConteudoPage() {
 
               {activeTab === "posts" && (
                 <div className="flex items-center gap-2">
-                  <div className="flex items-center gap-1 bg-white rounded-lg border px-2 py-1">
-                    <Filter className="h-3.5 w-3.5 text-gray-400 ml-1" />
+                  <div className="flex items-center gap-1 bg-canvas rounded-lg border px-2 py-1">
+                    <Filter className="h-3.5 w-3.5 text-muted-soft ml-1" />
                     {(["todos", "porque", "o_que", "como"] as const).map(
                       (tipo) => (
                         <button
@@ -417,8 +417,8 @@ export default function CentralConteudoPage() {
                           onClick={() => setFiltroTipo(tipo)}
                           className={`px-2 py-1 rounded text-[11px] font-medium transition-colors ${
                             filtroTipo === tipo
-                              ? "bg-gray-900 text-white"
-                              : "text-gray-500 hover:bg-gray-100"
+                              ? "bg-ink text-white"
+                              : "text-muted hover:bg-surface-strong"
                           }`}
                         >
                           {tipo === "todos"
@@ -430,7 +430,7 @@ export default function CentralConteudoPage() {
                   </div>
                   <button
                     onClick={handleExportCSV}
-                    className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg border text-sm hover:bg-gray-50 transition-colors"
+                    className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg border text-sm hover:bg-surface-soft transition-colors"
                     title="Exportar posts para CSV"
                   >
                     <Download className="h-4 w-4" /> Exportar
@@ -445,7 +445,7 @@ export default function CentralConteudoPage() {
                 {postsFiltrados.map((post) => (
                   <div
                     key={post.id}
-                    className="bg-white rounded-lg border p-4 hover:shadow-sm transition-shadow"
+                    className="bg-canvas rounded-lg border p-4 hover:shadow-airbnb transition-shadow"
                   >
                     <div className="flex items-start justify-between">
                       <div className="flex-1">
@@ -455,10 +455,10 @@ export default function CentralConteudoPage() {
                               tipoColors[post.tipo] || "bg-gray-400"
                             }`}
                           />
-                          <span className="text-xs font-medium text-gray-500">
+                          <span className="text-xs font-medium text-muted">
                             {tipoLabels[post.tipo] || post.tipo}
                           </span>
-                          <span className="text-xs text-gray-400">
+                          <span className="text-xs text-muted-soft">
                             {new Date(post.published_at).toLocaleDateString(
                               "pt-BR",
                               {
@@ -471,11 +471,11 @@ export default function CentralConteudoPage() {
                             )}
                           </span>
                         </div>
-                        <h3 className="text-sm font-semibold text-gray-900">
+                        <h3 className="text-sm font-semibold text-ink">
                           {post.subject}
                         </h3>
                       </div>
-                      <div className="text-right text-xs text-gray-500 space-y-0.5">
+                      <div className="text-right text-xs text-muted space-y-0.5">
                         <p>{post.views?.toLocaleString("pt-BR")} views</p>
                         <p>{post.likes?.toLocaleString("pt-BR")} likes</p>
                         <p>{post.engagement_rate}% eng</p>
@@ -484,26 +484,26 @@ export default function CentralConteudoPage() {
 
                     {/* Ações rápidas: mover data */}
                     <div className="flex items-center gap-2 mt-3 pt-3 border-t border-gray-50">
-                      <span className="text-[11px] text-gray-400 uppercase font-medium">
+                      <span className="text-[11px] text-muted-soft uppercase font-medium">
                         Mover:
                       </span>
                       <button
                         onClick={() => moverPost(post.id, -1)}
-                        className="flex items-center gap-1 px-2 py-1 rounded text-[11px] border hover:bg-gray-50 transition-colors"
+                        className="flex items-center gap-1 px-2 py-1 rounded text-[11px] border hover:bg-surface-soft transition-colors"
                         title="Voltar 1 dia"
                       >
                         <ArrowLeft className="h-3 w-3" /> -1 dia
                       </button>
                       <button
                         onClick={() => moverPost(post.id, 1)}
-                        className="flex items-center gap-1 px-2 py-1 rounded text-[11px] border hover:bg-gray-50 transition-colors"
+                        className="flex items-center gap-1 px-2 py-1 rounded text-[11px] border hover:bg-surface-soft transition-colors"
                         title="Avançar 1 dia"
                       >
                         <ArrowRight className="h-3 w-3" /> +1 dia
                       </button>
                       <button
                         onClick={() => moverPost(post.id, 7)}
-                        className="flex items-center gap-1 px-2 py-1 rounded text-[11px] border hover:bg-gray-50 transition-colors"
+                        className="flex items-center gap-1 px-2 py-1 rounded text-[11px] border hover:bg-surface-soft transition-colors"
                         title="Avançar 1 semana"
                       >
                         <ArrowRight className="h-3 w-3" /> +1 sem
@@ -512,9 +512,9 @@ export default function CentralConteudoPage() {
                   </div>
                 ))}
                 {postsFiltrados.length === 0 && (
-                  <div className="bg-white rounded-lg border p-8 text-center">
-                    <List className="h-8 w-8 text-gray-300 mx-auto mb-2" />
-                    <p className="text-sm text-gray-500">
+                  <div className="bg-canvas rounded-lg border p-8 text-center">
+                    <List className="h-8 w-8 text-muted-soft mx-auto mb-2" />
+                    <p className="text-sm text-muted">
                       Nenhum post para este cliente
                     </p>
                     {filtroTipo !== "todos" && (
@@ -532,15 +532,15 @@ export default function CentralConteudoPage() {
 
             {/* Calendário com gap indicator */}
             {activeTab === "calendario" && (
-              <div className="bg-white rounded-lg border p-6">
-                <h3 className="text-sm font-semibold text-gray-900 mb-4">
+              <div className="bg-canvas rounded-lg border p-6">
+                <h3 className="text-sm font-semibold text-ink mb-4">
                   Posts de{" "}
                   {new Date().toLocaleString("pt-BR", {
                     month: "long",
                     year: "numeric",
                   })}
                 </h3>
-                <div className="grid grid-cols-7 gap-2 text-center text-xs text-gray-500 mb-2">
+                <div className="grid grid-cols-7 gap-2 text-center text-xs text-muted mb-2">
                   {["Dom", "Seg", "Ter", "Qua", "Qui", "Sex", "Sáb"].map(
                     (d) => (
                       <div key={d} className="py-1 font-medium">
@@ -579,23 +579,23 @@ export default function CentralConteudoPage() {
                         key={i}
                         className={`min-h-[60px] border rounded-lg p-1 text-sm ${
                           isToday
-                            ? "ring-2 ring-[#d81220] ring-offset-1"
+                            ? "ring-2 ring-[rausch] ring-offset-1"
                             : ""
                         } ${
                           hasGap
-                            ? "border-red-300 bg-red-50"
+                            ? "border-danger-bg bg-danger-bg"
                             : dayPosts.length > 0
-                            ? "bg-gray-50"
+                            ? "bg-surface-soft"
                             : ""
                         }`}
                       >
                         <span
                           className={`font-medium ${
                             isToday
-                              ? "text-[#d81220]"
+                              ? "text-[rausch]"
                               : hasGap
-                              ? "text-red-600"
-                              : "text-gray-700"
+                              ? "text-danger-text"
+                              : "text-ink"
                           }`}
                         >
                           {currentDay}
@@ -621,7 +621,7 @@ export default function CentralConteudoPage() {
                     );
                   })}
                 </div>
-                <div className="flex items-center gap-4 mt-4 text-xs text-gray-500">
+                <div className="flex items-center gap-4 mt-4 text-xs text-muted">
                   <span className="flex items-center gap-1">
                     <span className="w-2 h-2 rounded-full bg-red-400" />
                     Dia sem post (passado)
@@ -637,8 +637,8 @@ export default function CentralConteudoPage() {
         ) : (
           <div className="flex items-center justify-center h-full">
             <div className="text-center">
-              <User className="h-12 w-12 text-gray-300 mx-auto mb-3" />
-              <p className="text-gray-500">
+              <User className="h-12 w-12 text-muted-soft mx-auto mb-3" />
+              <p className="text-muted">
                 Selecione um cliente para visualizar o conteúdo
               </p>
             </div>

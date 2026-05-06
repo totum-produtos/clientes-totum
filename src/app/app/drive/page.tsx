@@ -84,20 +84,20 @@ export default function DrivePage() {
   return (
     <div className="space-y-6 p-2">
       <div>
-        <h1 className="text-2xl font-bold text-gray-900">Google Drive</h1>
-        <p className="text-gray-500">Acesse as pastas e arquivos compartilhados da Totum</p>
+        <h1 className="text-2xl font-bold text-ink">Google Drive</h1>
+        <p className="text-muted">Acesse as pastas e arquivos compartilhados da Totum</p>
       </div>
 
       {!folderId ? (
         <Card>
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
-              <Cloud className="h-5 w-5 text-[#d81220]" />
+              <Cloud className="h-5 w-5 text-[rausch]" />
               Vincular pasta do Google Drive
             </CardTitle>
           </CardHeader>
           <CardContent className="space-y-4">
-            <p className="text-sm text-gray-600">
+            <p className="text-sm text-body">
               Cole abaixo o link da pasta do Google Drive que a Totum compartilhou com você.
               Você pode encontrar este link no email de onboarding ou solicitar ao seu gestor.
             </p>
@@ -106,12 +106,12 @@ export default function DrivePage() {
               placeholder="https://drive.google.com/drive/folders/1aBcD..."
               value={driveUrl}
               onChange={(e) => setDriveUrl(e.target.value)}
-              className="w-full px-4 py-3 border rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-[#d81220]"
+              className="w-full px-4 py-3 border rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-[rausch]"
             />
             <button
               onClick={saveDriveFolder}
               disabled={saving || !driveUrl}
-              className="w-full py-3 px-4 bg-[#d81220] text-white rounded-lg text-sm font-medium hover:bg-[#b91c1c] disabled:opacity-50 transition-colors"
+              className="w-full py-3 px-4 bg-[rausch] text-white rounded-lg text-sm font-medium hover:bg-[rausch-active] disabled:opacity-50 transition-colors"
             >
               {saving ? 'Salvando...' : 'Vincular pasta'}
             </button>
@@ -128,7 +128,7 @@ export default function DrivePage() {
                 </span>
                 <button
                   onClick={disconnectDrive}
-                  className="text-xs text-red-600 hover:text-red-700 flex items-center gap-1"
+                  className="text-xs text-danger-text hover:text-danger-text flex items-center gap-1"
                 >
                   <Unlink className="h-3 w-3" /> Remover vínculo
                 </button>
@@ -139,7 +139,7 @@ export default function DrivePage() {
                 href={`https://drive.google.com/drive/folders/${folderId}`}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="inline-flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg text-sm font-medium hover:bg-blue-700 transition-colors"
+                className="inline-flex items-center gap-2 px-4 py-2 bg-rausch text-white rounded-lg text-sm font-medium hover:bg-rausch-active transition-colors"
               >
                 <ExternalLink className="h-4 w-4" />
                 Abrir no Google Drive
@@ -160,7 +160,7 @@ export default function DrivePage() {
         </>
       )}
 
-      <p className="text-xs text-gray-400">
+      <p className="text-xs text-muted-soft">
         Dica: se a pré-visualização não carregar, clique em "Abrir no Google Drive" para acessar diretamente.
       </p>
     </div>

@@ -61,21 +61,21 @@ const AnimatedSignIn: React.FC = () => {
     <div className="min-h-screen w-full bg-[#fafafa]">
       <div className="flex min-h-screen items-center justify-center p-4 md:p-0">
         <div
-          className={`w-full max-w-6xl overflow-hidden rounded-2xl bg-white shadow-xl shadow-gray-200 transition-all duration-500 ${
+          className={`w-full max-w-6xl overflow-hidden rounded-lg bg-canvas shadow-xl shadow-gray-200 transition-all duration-500 ${
             formVisible ? 'opacity-100 scale-100' : 'opacity-0 scale-95'
           }`}
         >
           <div className="flex flex-col md:flex-row">
             {/* Left side - Images and stats */}
             <div
-              className="hidden md:block w-full md:w-3/5 bg-gray-50 p-6"
+              className="hidden md:block w-full md:w-3/5 bg-surface-soft p-6"
               style={{
                 opacity: formVisible ? 1 : 0,
                 transition: 'opacity 0.8s ease-out',
               }}
             >
               <div className="grid grid-cols-2 grid-rows-3 gap-4 h-full min-h-[560px]">
-                <div className="overflow-hidden rounded-xl">
+                <div className="overflow-hidden rounded-md">
                   <img
                     src="https://images.unsplash.com/photo-1552664730-d307ca884978?auto=format&fit=crop&w=600&q=80"
                     alt="Equipe Totum"
@@ -83,7 +83,7 @@ const AnimatedSignIn: React.FC = () => {
                   />
                 </div>
                 <div
-                  className="rounded-xl flex flex-col justify-center items-center p-6 text-white bg-[#d81220]"
+                  className="rounded-md flex flex-col justify-center items-center p-6 text-white bg-[rausch]"
                   style={{
                     transform: formVisible ? 'translateY(0)' : 'translateY(20px)',
                     opacity: formVisible ? 1 : 0,
@@ -94,14 +94,14 @@ const AnimatedSignIn: React.FC = () => {
                   <h2 className="text-5xl font-bold mb-2">36</h2>
                   <p className="text-center text-sm">posts publicados este mês</p>
                 </div>
-                <div className="overflow-hidden rounded-xl">
+                <div className="overflow-hidden rounded-md">
                   <img
                     src="https://images.unsplash.com/photo-1460925895917-afdab827c52f?auto=format&fit=crop&w=600&q=80"
                     alt="Marketing digital"
                     className="w-full h-full object-cover"
                   />
                 </div>
-                <div className="overflow-hidden rounded-xl">
+                <div className="overflow-hidden rounded-md">
                   <img
                     src="https://images.unsplash.com/photo-1551434678-e076c223a692?auto=format&fit=crop&w=600&q=80"
                     alt="Estratégia"
@@ -109,7 +109,7 @@ const AnimatedSignIn: React.FC = () => {
                   />
                 </div>
                 <div
-                  className="rounded-xl flex flex-col justify-center items-center p-6 text-white bg-gray-900"
+                  className="rounded-md flex flex-col justify-center items-center p-6 text-white bg-ink"
                   style={{
                     transform: formVisible ? 'translateY(0)' : 'translateY(20px)',
                     opacity: formVisible ? 1 : 0,
@@ -120,7 +120,7 @@ const AnimatedSignIn: React.FC = () => {
                   <h2 className="text-5xl font-bold mb-2">4.2x</h2>
                   <p className="text-center text-sm">ROAS médio das campanhas</p>
                 </div>
-                <div className="overflow-hidden rounded-xl">
+                <div className="overflow-hidden rounded-md">
                   <img
                     src="https://images.unsplash.com/photo-1533750349088-cd871a92f312?auto=format&fit=crop&w=600&q=80"
                     alt="Campanha"
@@ -132,7 +132,7 @@ const AnimatedSignIn: React.FC = () => {
 
             {/* Right side - Sign in form */}
             <div
-              className="w-full md:w-2/5 p-8 md:p-12 bg-white text-gray-900 flex flex-col justify-center"
+              className="w-full md:w-2/5 p-8 md:p-12 bg-canvas text-ink flex flex-col justify-center"
               style={{
                 transform: formVisible ? 'translateX(0)' : 'translateX(20px)',
                 opacity: formVisible ? 1 : 0,
@@ -140,23 +140,23 @@ const AnimatedSignIn: React.FC = () => {
               }}
             >
               <div className="mb-8">
-                <h1 className="text-2xl font-bold mb-1 text-gray-900">
-                  Bem-vindo à <span className="text-[#d81220]">Totum</span>
+                <h1 className="text-2xl font-bold mb-1 text-ink">
+                  Bem-vindo à <span className="text-[rausch]">Totum</span>
                 </h1>
-                <p className="text-sm text-gray-600">
+                <p className="text-sm text-body">
                   Acesse sua Central do Cliente e acompanhe todo o conteúdo da sua marca.
                 </p>
               </div>
 
               {error && (
-                <div className="mb-4 p-3 bg-red-50 text-red-700 rounded-lg text-sm">
+                <div className="mb-4 p-3 bg-danger-bg text-danger-text rounded-lg text-sm">
                   {error}
                 </div>
               )}
 
               <form onSubmit={handleSignIn} className="space-y-5">
                 <div className="space-y-1">
-                  <label htmlFor="email" className="block text-sm font-medium text-gray-700">
+                  <label htmlFor="email" className="block text-sm font-medium text-ink">
                     Email
                   </label>
                   <input
@@ -166,14 +166,14 @@ const AnimatedSignIn: React.FC = () => {
                     autoComplete="email"
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
-                    className="block w-full rounded-md border border-gray-300 py-3 px-4 focus:outline-none focus:ring-2 focus:ring-[#d81220] focus:border-transparent sm:text-sm bg-white text-gray-900 placeholder:text-gray-400"
+                    className="block w-full rounded-md border border-hairline py-3 px-4 focus:outline-none focus:ring-2 focus:ring-[rausch] focus:border-transparent sm:text-sm bg-canvas text-ink placeholder:text-muted-soft"
                     placeholder="seu@email.com"
                     required
                   />
                 </div>
 
                 <div className="space-y-1">
-                  <label htmlFor="password" className="block text-sm font-medium text-gray-700">
+                  <label htmlFor="password" className="block text-sm font-medium text-ink">
                     Senha
                   </label>
                   <div className="relative">
@@ -184,13 +184,13 @@ const AnimatedSignIn: React.FC = () => {
                       autoComplete="current-password"
                       value={password}
                       onChange={(e) => setPassword(e.target.value)}
-                      className="block w-full rounded-md border border-gray-300 py-3 px-4 pr-10 focus:outline-none focus:ring-2 focus:ring-[#d81220] focus:border-transparent sm:text-sm bg-white text-gray-900 placeholder:text-gray-400"
+                      className="block w-full rounded-md border border-hairline py-3 px-4 pr-10 focus:outline-none focus:ring-2 focus:ring-[rausch] focus:border-transparent sm:text-sm bg-canvas text-ink placeholder:text-muted-soft"
                       placeholder="••••••••"
                       required
                     />
                     <button
                       type="button"
-                      className="absolute inset-y-0 right-0 flex items-center pr-3 text-gray-500 hover:text-gray-700"
+                      className="absolute inset-y-0 right-0 flex items-center pr-3 text-muted hover:text-ink"
                       onClick={() => setShowPassword(!showPassword)}
                     >
                       {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
@@ -200,7 +200,7 @@ const AnimatedSignIn: React.FC = () => {
 
                 <div className="flex items-center justify-between">
                   <div className="text-sm">
-                    <Link href="/auth/forgot-password" className="font-medium text-[#d81220] hover:text-[#b91c1c]">
+                    <Link href="/auth/forgot-password" className="font-medium text-[rausch] hover:text-[rausch-active]">
                       Esqueceu a senha?
                     </Link>
                   </div>
@@ -209,7 +209,7 @@ const AnimatedSignIn: React.FC = () => {
                 <button
                   type="submit"
                   disabled={isLoading}
-                  className="flex w-full justify-center rounded-md py-3 px-4 text-sm font-semibold text-white shadow-sm transition-all duration-300 bg-[#d81220] hover:bg-[#b91c1c] disabled:opacity-70 disabled:cursor-not-allowed"
+                  className="flex w-full justify-center rounded-md py-3 px-4 text-sm font-semibold text-white shadow-airbnb transition-all duration-300 bg-[rausch] hover:bg-[rausch-active] disabled:opacity-70 disabled:cursor-not-allowed"
                 >
                   {isLoading ? (
                     <span className="flex items-center">
@@ -228,8 +228,8 @@ const AnimatedSignIn: React.FC = () => {
               <SSOButtons onError={setError} />
 
               <div className="mt-6 text-center text-sm">
-                <span className="text-gray-600">Não tem uma conta?</span>{' '}
-                <Link href="/auth/register" className="font-medium text-[#d81220] hover:text-[#b91c1c]">
+                <span className="text-body">Não tem uma conta?</span>{' '}
+                <Link href="/auth/register" className="font-medium text-[rausch] hover:text-[rausch-active]">
                   Cadastre-se
                 </Link>
               </div>

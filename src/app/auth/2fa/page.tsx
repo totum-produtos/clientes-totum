@@ -57,7 +57,7 @@ export default function TwoFactorAuthPage() {
     if (error) {
         return (
             <div className="flex justify-center items-center">
-                <div className="text-red-600">{error}</div>
+                <div className="text-danger-text">{error}</div>
             </div>
         );
     }
