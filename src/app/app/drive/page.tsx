@@ -78,7 +78,7 @@ export default function DrivePage() {
   }
 
   if (loading) {
-    return <div className="flex justify-center p-8"><div className="animate-spin h-8 w-8 border-b-2 border-primary-600 rounded-full"></div></div>;
+    return <div className="flex justify-center p-8"><div className="animate-spin h-8 w-8 border-b-2 border-rausch rounded-full"></div></div>;
   }
 
   return (
@@ -92,7 +92,7 @@ export default function DrivePage() {
         <Card>
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
-              <Cloud className="h-5 w-5 text-[rausch]" />
+              <Cloud className="h-5 w-5 text-rausch" />
               Vincular pasta do Google Drive
             </CardTitle>
           </CardHeader>
@@ -106,12 +106,12 @@ export default function DrivePage() {
               placeholder="https://drive.google.com/drive/folders/1aBcD..."
               value={driveUrl}
               onChange={(e) => setDriveUrl(e.target.value)}
-              className="w-full px-4 py-3 border rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-[rausch]"
+              className="w-full px-4 py-3 border rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-rausch"
             />
             <button
               onClick={saveDriveFolder}
               disabled={saving || !driveUrl}
-              className="w-full py-3 px-4 bg-[rausch] text-white rounded-lg text-sm font-medium hover:bg-[rausch-active] disabled:opacity-50 transition-colors"
+              className="w-full py-3 px-4 bg-rausch text-white rounded-lg text-sm font-medium hover:bg-rausch-active disabled:opacity-50 transition-colors"
             >
               {saving ? 'Salvando...' : 'Vincular pasta'}
             </button>
@@ -123,7 +123,7 @@ export default function DrivePage() {
             <CardHeader>
               <CardTitle className="flex items-center justify-between">
                 <span className="flex items-center gap-2">
-                  <Folder className="h-5 w-5 text-yellow-500" />
+                  <Folder className="h-5 w-5 text-warning" />
                   Pasta vinculada
                 </span>
                 <button

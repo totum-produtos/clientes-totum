@@ -11,7 +11,7 @@ export default function DashboardPage() {
     if (loading) {
         return (
             <div className="flex items-center justify-center min-h-screen">
-                <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary-600"></div>
+                <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-rausch"></div>
             </div>
         );
     }
@@ -32,8 +32,8 @@ export default function DashboardPage() {
             <div className="grid gap-4 md:grid-cols-4">
                 <Card>
                     <CardContent className="p-4 flex items-center gap-4">
-                        <div className="p-3 bg-primary-50 rounded-lg">
-                            <TrendingUp className="h-5 w-5 text-primary-600" />
+                        <div className="p-3 bg-rausch/5 rounded-lg">
+                            <TrendingUp className="h-5 w-5 text-rausch" />
                         </div>
                         <div>
                             <p className="text-sm text-muted">Posts publicados</p>
@@ -43,8 +43,8 @@ export default function DashboardPage() {
                 </Card>
                 <Card>
                     <CardContent className="p-4 flex items-center gap-4">
-                        <div className="p-3 bg-primary-50 rounded-lg">
-                            <Users className="h-5 w-5 text-primary-600" />
+                        <div className="p-3 bg-rausch/5 rounded-lg">
+                            <Users className="h-5 w-5 text-rausch" />
                         </div>
                         <div>
                             <p className="text-sm text-muted">Total de views</p>
@@ -54,8 +54,8 @@ export default function DashboardPage() {
                 </Card>
                 <Card>
                     <CardContent className="p-4 flex items-center gap-4">
-                        <div className="p-3 bg-primary-50 rounded-lg">
-                            <BarChart3 className="h-5 w-5 text-primary-600" />
+                        <div className="p-3 bg-rausch/5 rounded-lg">
+                            <BarChart3 className="h-5 w-5 text-rausch" />
                         </div>
                         <div>
                             <p className="text-sm text-muted">Engajamento médio</p>
@@ -65,8 +65,8 @@ export default function DashboardPage() {
                 </Card>
                 <Card>
                     <CardContent className="p-4 flex items-center gap-4">
-                        <div className="p-3 bg-primary-50 rounded-lg">
-                            <CheckCircle2 className="h-5 w-5 text-primary-600" />
+                        <div className="p-3 bg-rausch/5 rounded-lg">
+                            <CheckCircle2 className="h-5 w-5 text-rausch" />
                         </div>
                         <div>
                             <p className="text-sm text-muted">Tarefas pendentes</p>
@@ -81,7 +81,7 @@ export default function DashboardPage() {
                 <Card>
                     <CardHeader>
                         <CardTitle className="flex items-center gap-2">
-                            <CalendarDays className="h-5 w-5 text-primary-600" />
+                            <CalendarDays className="h-5 w-5 text-rausch" />
                             Entregas recentes
                         </CardTitle>
                     </CardHeader>
@@ -92,13 +92,13 @@ export default function DashboardPage() {
                                     <p className="font-medium text-sm">{t.titulo}</p>
                                     <p className="text-xs text-muted">{t.departamento} • {t.prioridade}</p>
                                 </div>
-                                <span className={`text-xs px-2 py-1 rounded-full ${t.status === 'concluido' ? 'bg-success-bg text-success-text' : 'bg-warning-bg text-yellow-700'}`}>
+                                <span className={`text-xs px-2 py-1 rounded-full ${t.status === 'concluido' ? 'bg-success-bg text-success-text' : 'bg-warning-bg text-warning-text'}`}>
                                     {t.status}
                                 </span>
                             </div>
                         ))}
                         {tarefas.length === 0 && <p className="text-sm text-muted-soft">Nenhuma tarefa vinculada.</p>}
-                        <Link href="/app/contrato" className="text-sm text-primary-600 hover:underline block mt-2">Ver todas →</Link>
+                        <Link href="/app/contrato" className="text-sm text-rausch hover:underline block mt-2">Ver todas →</Link>
                     </CardContent>
                 </Card>
 
@@ -106,7 +106,7 @@ export default function DashboardPage() {
                 <Card>
                     <CardHeader>
                         <CardTitle className="flex items-center gap-2">
-                            <TrendingUp className="h-5 w-5 text-primary-600" />
+                            <TrendingUp className="h-5 w-5 text-rausch" />
                             Posts recentes
                         </CardTitle>
                     </CardHeader>
@@ -121,7 +121,7 @@ export default function DashboardPage() {
                             </div>
                         ))}
                         {posts.length === 0 && <p className="text-sm text-muted-soft">Nenhum post vinculado.</p>}
-                        <Link href="/app/calendario" className="text-sm text-primary-600 hover:underline block mt-2">Ver calendário →</Link>
+                        <Link href="/app/calendario" className="text-sm text-rausch hover:underline block mt-2">Ver calendário →</Link>
                     </CardContent>
                 </Card>
             </div>

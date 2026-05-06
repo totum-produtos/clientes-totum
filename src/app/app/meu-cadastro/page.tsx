@@ -19,7 +19,7 @@ const SECTIONS = [
   { id: "puv", label: "PUV", icon: Award },
 ];
 
-export default function MeuCadastroPage() {
+export default function MinhasEmpresaPage() {
   const { user, client, loading: globalLoading, refreshData } = useGlobal();
   const [clientData, setClientData] = useState<any>(null);
   const [editMode, setEditMode] = useState(false);
@@ -157,7 +157,7 @@ export default function MeuCadastroPage() {
   if (globalLoading || !clientData) {
     return (
       <div className="min-h-screen bg-surface-soft flex items-center justify-center">
-        <div className="w-8 h-8 border-4 border-[rausch] border-t-transparent rounded-full animate-spin" />
+        <div className="w-8 h-8 border-4 border-rausch border-t-transparent rounded-full animate-spin" />
       </div>
     );
   }
@@ -168,7 +168,7 @@ export default function MeuCadastroPage() {
         <div className="max-w-5xl mx-auto px-6 py-6">
           <div className="flex items-center justify-between">
             <div>
-              <h1 className="text-xl font-bold text-ink">MEU CADASTRO</h1>
+              <h1 className="text-xl font-bold text-ink">MINHAS EMPRESA</h1>
               <p className="text-sm text-muted mt-1">Visualize e solicite alterações nos dados da sua empresa</p>
             </div>
             <div className="flex items-center gap-3">
@@ -178,7 +178,7 @@ export default function MeuCadastroPage() {
                 </span>
               )}
               {!editMode ? (
-                <button onClick={() => setEditMode(true)} className="flex items-center gap-2 px-4 py-2 bg-[rausch] text-white rounded-md text-sm font-medium hover:bg-[rausch-active] transition-colors">
+                <button onClick={() => setEditMode(true)} className="flex items-center gap-2 px-4 py-2 bg-rausch text-white rounded-md text-sm font-medium hover:bg-rausch-active transition-colors">
                   <Edit3 className="w-4 h-4" /> Editar
                 </button>
               ) : (
@@ -186,7 +186,7 @@ export default function MeuCadastroPage() {
                   <button onClick={() => { setEditMode(false); setMessage(""); }} className="flex items-center gap-2 px-4 py-2 text-body hover:text-ink rounded-md text-sm font-medium transition-colors">
                     <X className="w-4 h-4" /> Cancelar
                   </button>
-                  <button onClick={handleSubmitChanges} disabled={loading} className="flex items-center gap-2 px-4 py-2 bg-success text-white rounded-md text-sm font-medium hover:bg-green-700 disabled:opacity-50 transition-colors">
+                  <button onClick={handleSubmitChanges} disabled={loading} className="flex items-center gap-2 px-4 py-2 bg-success text-white rounded-md text-sm font-medium hover:bg-success-text disabled:opacity-50 transition-colors">
                     {loading ? <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" /> : <><Save className="w-4 h-4" /> Salvar alterações</>}
                   </button>
                 </div>
@@ -194,7 +194,7 @@ export default function MeuCadastroPage() {
             </div>
           </div>
           {message && (
-            <div className={`mt-4 p-4 rounded-md text-sm flex items-center gap-2 ${message.startsWith("✅") ? "bg-success-bg text-success-text border border-green-200" : message.startsWith("❌") ? "bg-danger-bg text-danger-text border border-danger-bg" : "bg-surface-soft text-rausch border border-hairline"}`}>
+            <div className={`mt-4 p-4 rounded-md text-sm flex items-center gap-2 ${message.startsWith("✅") ? "bg-success-bg text-success-text border border-success/20" : message.startsWith("❌") ? "bg-danger-bg text-danger-text border border-danger-bg" : "bg-surface-soft text-rausch border border-hairline"}`}>
               {message.startsWith("✅") ? <CheckCircle className="w-4 h-4" /> : message.startsWith("❌") ? <AlertCircle className="w-4 h-4" /> : <Clock className="w-4 h-4" />}
               {message.replace(/^[✅❌]\s*/, "")}
             </div>
@@ -297,7 +297,7 @@ function Section({ id, label, icon: Icon, expanded, toggle, children }: any) {
       <button onClick={() => toggle(id)} className="w-full flex items-center justify-between px-6 py-4 hover:bg-surface-soft transition-colors">
         <div className="flex items-center gap-3">
           <div className="w-9 h-9 rounded-md bg-surface-soft flex items-center justify-center">
-            <Icon className="w-4.5 h-4.5 text-[rausch]" />
+            <Icon className="w-4.5 h-4.5 text-rausch" />
           </div>
           <h3 className="font-semibold text-ink">{label}</h3>
         </div>

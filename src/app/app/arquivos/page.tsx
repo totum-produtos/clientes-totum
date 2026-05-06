@@ -7,11 +7,11 @@ import { FileText, Download, Upload, Trash2, FileArchive, FileSpreadsheet, Image
 
 const typeIcons: Record<string, React.ReactNode> = {
   PDF: <FileText className="h-5 w-5 text-danger-text" />,
-  ZIP: <FileArchive className="h-5 w-5 text-yellow-500" />,
-  XLSX: <FileSpreadsheet className="h-5 w-5 text-green-500" />,
-  DOCX: <FileText className="h-5 w-5 text-blue-500" />,
-  PNG: <Image className="h-5 w-5 text-purple-500" />,
-  JPG: <Image className="h-5 w-5 text-purple-500" />,
+  ZIP: <FileArchive className="h-5 w-5 text-warning" />,
+  XLSX: <FileSpreadsheet className="h-5 w-5 text-success" />,
+  DOCX: <FileText className="h-5 w-5 text-legal-link" />,
+  PNG: <Image className="h-5 w-5 text-luxe" />,
+  JPG: <Image className="h-5 w-5 text-luxe" />,
 };
 
 type Arquivo = {
@@ -135,7 +135,7 @@ export default function ArquivosPage() {
           <h1 className="text-2xl font-bold text-ink">Arquivos compartilhados</h1>
           <p className="text-muted">Documentos e materiais da sua conta</p>
         </div>
-        <label className="cursor-pointer inline-flex items-center gap-2 px-4 py-2 bg-[rausch] text-white rounded-lg text-sm font-medium hover:bg-[rausch-active] transition-colors disabled:opacity-50">
+        <label className="cursor-pointer inline-flex items-center gap-2 px-4 py-2 bg-rausch text-white rounded-lg text-sm font-medium hover:bg-rausch-active transition-colors disabled:opacity-50">
           <Upload className="h-4 w-4" />
           {uploading ? 'Enviando...' : 'Enviar arquivo'}
           <input type="file" className="hidden" onChange={handleUpload} disabled={uploading || !client} />
@@ -143,7 +143,7 @@ export default function ArquivosPage() {
       </div>
 
       {error && (
-        <div className="bg-warning-bg border-l-4 border-yellow-400 text-yellow-800 px-4 py-3 text-sm rounded">
+        <div className="bg-warning-bg border-l-4 border-warning text-warning-text px-4 py-3 text-sm rounded">
           ⚠️ {error}
         </div>
       )}
@@ -155,7 +155,7 @@ export default function ArquivosPage() {
         <CardContent className="space-y-2">
           {loading ? (
             <div className="flex justify-center py-8">
-              <div className="animate-spin h-6 w-6 border-b-2 border-primary-600 rounded-full"></div>
+              <div className="animate-spin h-6 w-6 border-b-2 border-rausch rounded-full"></div>
             </div>
           ) : arquivos.length === 0 ? (
             <div className="text-center py-8">

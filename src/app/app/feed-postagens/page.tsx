@@ -186,21 +186,21 @@ export default function FeedPostagensPage() {
           )}
           {distribuicaoCD.oque > 0 && (
             <div
-              className="h-full bg-emerald-400"
+              className="h-full bg-success"
               style={{ width: `${(distribuicaoCD.oque / postsFiltrados.length) * 100}%` }}
               title={`O que: ${distribuicaoCD.oque}`}
             />
           )}
           {distribuicaoCD.como > 0 && (
             <div
-              className="h-full bg-sky-400"
+              className="h-full bg-legal-link"
               style={{ width: `${(distribuicaoCD.como / postsFiltrados.length) * 100}%` }}
               title={`Como: ${distribuicaoCD.como}`}
             />
           )}
           {distribuicaoCD.outros > 0 && (
             <div
-              className="h-full bg-gray-300"
+              className="h-full bg-hairline"
               style={{ width: `${(distribuicaoCD.outros / postsFiltrados.length) * 100}%` }}
               title={`Outros: ${distribuicaoCD.outros}`}
             />
@@ -212,11 +212,11 @@ export default function FeedPostagensPage() {
             <span className="text-body">Porquê ({distribuicaoCD.porque})</span>
           </div>
           <div className="flex items-center gap-1.5 text-xs">
-            <div className="w-2.5 h-2.5 rounded-full bg-emerald-400" />
+            <div className="w-2.5 h-2.5 rounded-full bg-success" />
             <span className="text-body">O que ({distribuicaoCD.oque})</span>
           </div>
           <div className="flex items-center gap-1.5 text-xs">
-            <div className="w-2.5 h-2.5 rounded-full bg-sky-400" />
+            <div className="w-2.5 h-2.5 rounded-full bg-legal-link" />
             <span className="text-body">Como ({distribuicaoCD.como})</span>
           </div>
         </div>
@@ -247,7 +247,7 @@ export default function FeedPostagensPage() {
             placeholder="Buscar por assunto..."
             value={filtroBusca}
             onChange={(e) => setFiltroBusca(e.target.value)}
-            className="w-full pl-10 pr-4 py-2 border rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-[rausch] bg-canvas"
+            className="w-full pl-10 pr-4 py-2 border rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-rausch bg-canvas"
           />
         </div>
         <div className="flex gap-2">
@@ -270,7 +270,7 @@ export default function FeedPostagensPage() {
       {/* Feed */}
       {loading ? (
         <div className="flex justify-center py-16">
-          <div className="animate-spin h-8 w-8 border-b-2 border-[rausch] rounded-full" />
+          <div className="animate-spin h-8 w-8 border-b-2 border-rausch rounded-full" />
         </div>
       ) : postsPorDia.length === 0 ? (
         <div className="text-center py-16 bg-canvas border rounded-md">
@@ -337,7 +337,7 @@ export default function FeedPostagensPage() {
                           </div>
                         </div>
 
-                        <div className="flex items-center gap-4 mt-3 pt-3 border-t border-gray-50">
+                        <div className="flex items-center gap-4 mt-3 pt-3 border-t border-hairline-soft">
                           <div className="flex items-center gap-1.5 text-sm text-body">
                             <Eye className="h-4 w-4 text-muted-soft" />
                             <span className="font-medium">{post.views || 0}</span>

@@ -83,7 +83,7 @@ const AnimatedSignIn: React.FC = () => {
                   />
                 </div>
                 <div
-                  className="rounded-md flex flex-col justify-center items-center p-6 text-white bg-[rausch]"
+                  className="rounded-md flex flex-col justify-center items-center p-6 text-white bg-rausch"
                   style={{
                     transform: formVisible ? 'translateY(0)' : 'translateY(20px)',
                     opacity: formVisible ? 1 : 0,
@@ -141,7 +141,7 @@ const AnimatedSignIn: React.FC = () => {
             >
               <div className="mb-8">
                 <h1 className="text-2xl font-bold mb-1 text-ink">
-                  Bem-vindo à <span className="text-[rausch]">Totum</span>
+                  Bem-vindo à <span className="text-rausch">Totum</span>
                 </h1>
                 <p className="text-sm text-body">
                   Acesse sua Central do Cliente e acompanhe todo o conteúdo da sua marca.
@@ -166,7 +166,7 @@ const AnimatedSignIn: React.FC = () => {
                     autoComplete="email"
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
-                    className="block w-full rounded-md border border-hairline py-3 px-4 focus:outline-none focus:ring-2 focus:ring-[rausch] focus:border-transparent sm:text-sm bg-canvas text-ink placeholder:text-muted-soft"
+                    className="block w-full rounded-md border border-hairline py-3 px-4 focus:outline-none focus:ring-2 focus:ring-rausch focus:border-transparent sm:text-sm bg-canvas text-ink placeholder:text-muted-soft"
                     placeholder="seu@email.com"
                     required
                   />
@@ -184,7 +184,7 @@ const AnimatedSignIn: React.FC = () => {
                       autoComplete="current-password"
                       value={password}
                       onChange={(e) => setPassword(e.target.value)}
-                      className="block w-full rounded-md border border-hairline py-3 px-4 pr-10 focus:outline-none focus:ring-2 focus:ring-[rausch] focus:border-transparent sm:text-sm bg-canvas text-ink placeholder:text-muted-soft"
+                      className="block w-full rounded-md border border-hairline py-3 px-4 pr-10 focus:outline-none focus:ring-2 focus:ring-rausch focus:border-transparent sm:text-sm bg-canvas text-ink placeholder:text-muted-soft"
                       placeholder="••••••••"
                       required
                     />
@@ -200,7 +200,7 @@ const AnimatedSignIn: React.FC = () => {
 
                 <div className="flex items-center justify-between">
                   <div className="text-sm">
-                    <Link href="/auth/forgot-password" className="font-medium text-[rausch] hover:text-[rausch-active]">
+                    <Link href="/auth/forgot-password" className="font-medium text-rausch hover:text-[rausch-active]">
                       Esqueceu a senha?
                     </Link>
                   </div>
@@ -209,7 +209,7 @@ const AnimatedSignIn: React.FC = () => {
                 <button
                   type="submit"
                   disabled={isLoading}
-                  className="flex w-full justify-center rounded-md py-3 px-4 text-sm font-semibold text-white shadow-airbnb transition-all duration-300 bg-[rausch] hover:bg-[rausch-active] disabled:opacity-70 disabled:cursor-not-allowed"
+                  className="flex w-full justify-center rounded-md py-3 px-4 text-sm font-semibold text-white shadow-airbnb transition-all duration-300 bg-rausch hover:bg-rausch-active disabled:opacity-70 disabled:cursor-not-allowed"
                 >
                   {isLoading ? (
                     <span className="flex items-center">
@@ -229,7 +229,7 @@ const AnimatedSignIn: React.FC = () => {
 
               <div className="mt-6 text-center text-sm">
                 <span className="text-body">Não tem uma conta?</span>{' '}
-                <Link href="/auth/register" className="font-medium text-[rausch] hover:text-[rausch-active]">
+                <Link href="/auth/register" className="font-medium text-rausch hover:text-[rausch-active]">
                   Cadastre-se
                 </Link>
               </div>

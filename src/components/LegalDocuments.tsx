@@ -47,7 +47,7 @@ export default function LegalDocuments({ minimalist }: LegalDocumentsParams) {
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
                 <Link
                     href={`/legal/privacy`}
-                    className="flex items-center justify-center gap-2 px-4 py-2 bg-canvas rounded-lg border border-hairline hover:border-blue-500 hover:bg-surface-soft transition-all group"
+                    className="flex items-center justify-center gap-2 px-4 py-2 bg-canvas rounded-lg border border-hairline hover:border-legal-link hover:bg-surface-soft transition-all group"
                 >
                     <Shield className="w-4 h-4 text-muted group-hover:text-rausch"/>
                     <span
@@ -55,7 +55,7 @@ export default function LegalDocuments({ minimalist }: LegalDocumentsParams) {
                 </Link>
                 <Link
                     href={`/legal/terms`}
-                    className="flex items-center justify-center gap-2 px-4 py-2 bg-canvas rounded-lg border border-hairline hover:border-blue-500 hover:bg-surface-soft transition-all group"
+                    className="flex items-center justify-center gap-2 px-4 py-2 bg-canvas rounded-lg border border-hairline hover:border-legal-link hover:bg-surface-soft transition-all group"
                 >
                     <FileText className="w-4 h-4 text-muted group-hover:text-rausch"/>
                     <span
@@ -63,7 +63,7 @@ export default function LegalDocuments({ minimalist }: LegalDocumentsParams) {
                 </Link>
                 <Link
                     href={`/legal/refund`}
-                    className="flex items-center justify-center gap-2 px-4 py-2 bg-canvas rounded-lg border border-hairline hover:border-blue-500 hover:bg-surface-soft transition-all group"
+                    className="flex items-center justify-center gap-2 px-4 py-2 bg-canvas rounded-lg border border-hairline hover:border-legal-link hover:bg-surface-soft transition-all group"
                 >
                     <RefreshCw className="w-4 h-4 text-muted group-hover:text-rausch"/>
                     <span

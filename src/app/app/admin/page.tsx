@@ -174,7 +174,7 @@ export default function AdminPage() {
     }
 
     if (loading) {
-        return <div className="flex justify-center p-8"><div className="animate-spin h-8 w-8 border-b-2 border-primary-600 rounded-full"></div></div>;
+        return <div className="flex justify-center p-8"><div className="animate-spin h-8 w-8 border-b-2 border-rausch rounded-full"></div></div>;
     }
 
     return (
@@ -227,10 +227,10 @@ export default function AdminPage() {
                                         </div>
                                     </div>
                                     <div className="flex items-center gap-2">
-                                        <button onClick={() => handleApprove(change)} className="flex items-center gap-1.5 px-4 py-2 bg-success text-white rounded-lg text-sm font-medium hover:bg-green-700 transition-colors">
+                                        <button onClick={() => handleApprove(change)} className="flex items-center gap-1.5 px-4 py-2 bg-success text-white rounded-lg text-sm font-medium hover:bg-success-text transition-colors">
                                             <CheckCircle className="w-4 h-4" /> Aprovar
                                         </button>
-                                        <button onClick={() => handleReject(change)} className="flex items-center gap-1.5 px-4 py-2 bg-danger text-white rounded-lg text-sm font-medium hover:bg-red-700 transition-colors">
+                                        <button onClick={() => handleReject(change)} className="flex items-center gap-1.5 px-4 py-2 bg-danger text-white rounded-lg text-sm font-medium hover:bg-danger-text transition-colors">
                                             <XCircle className="w-4 h-4" /> Rejeitar
                                         </button>
                                     </div>
@@ -245,7 +245,7 @@ export default function AdminPage() {
             <Card>
                 <CardHeader className="flex flex-row items-center justify-between">
                     <CardTitle className="flex items-center gap-2">
-                        <Building2 className="h-5 w-5 text-primary-600" />
+                        <Building2 className="h-5 w-5 text-rausch" />
                         Clientes do portal ({clients.length})
                     </CardTitle>
                     <button onClick={() => setFormOpen(!formOpen)} className="btn-primary px-3 py-1.5 rounded-lg text-sm flex items-center gap-1">
@@ -286,7 +286,7 @@ export default function AdminPage() {
             <Card>
                 <CardHeader className="flex flex-row items-center justify-between">
                     <CardTitle className="flex items-center gap-2">
-                        <Link2 className="h-5 w-5 text-primary-600" />
+                        <Link2 className="h-5 w-5 text-rausch" />
                         Usuários vinculados ({users.length})
                     </CardTitle>
                     <button onClick={() => setLinkOpen(!linkOpen)} className="btn-primary px-3 py-1.5 rounded-lg text-sm flex items-center gap-1">
@@ -321,7 +321,7 @@ export default function AdminPage() {
                                         <p className="font-medium text-sm">{authUser?.email || u.user_id}</p>
                                         <p className="text-xs text-muted">Cliente: {client?.nome || 'Desconhecido'}</p>
                                     </div>
-                                    <span className="text-xs px-2 py-1 rounded-full bg-primary-50 text-primary-700">{u.role}</span>
+                                    <span className="text-xs px-2 py-1 rounded-full bg-rausch/5 text-rausch-active">{u.role}</span>
                                 </div>
                             );
                         })}
@@ -334,7 +334,7 @@ export default function AdminPage() {
             <Card>
                 <CardHeader>
                     <CardTitle className="flex items-center gap-2">
-                        <Users className="h-5 w-5 text-primary-600" />
+                        <Users className="h-5 w-5 text-rausch" />
                         Usuários do Supabase Auth ({authUsers.length})
                     </CardTitle>
                 </CardHeader>

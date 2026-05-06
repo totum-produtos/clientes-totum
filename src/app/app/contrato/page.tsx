@@ -65,7 +65,7 @@ export default function ContratoPage() {
     }, [client]);
 
     if (loading) {
-        return <div className="flex justify-center p-8"><div className="animate-spin h-8 w-8 border-b-2 border-primary-600 rounded-full"></div></div>;
+        return <div className="flex justify-center p-8"><div className="animate-spin h-8 w-8 border-b-2 border-rausch rounded-full"></div></div>;
     }
 
     const concluidas = tarefas.filter(t => t.status === 'concluido').length;
@@ -81,8 +81,8 @@ export default function ContratoPage() {
             <div className="grid gap-4 md:grid-cols-3">
                 <Card>
                     <CardContent className="p-4 flex items-center gap-4">
-                        <div className="p-3 bg-primary-50 rounded-lg">
-                            <FileText className="h-5 w-5 text-primary-600" />
+                        <div className="p-3 bg-rausch/5 rounded-lg">
+                            <FileText className="h-5 w-5 text-rausch" />
                         </div>
                         <div>
                             <p className="text-sm text-muted">Total de tarefas</p>
@@ -104,7 +104,7 @@ export default function ContratoPage() {
                 <Card>
                     <CardContent className="p-4 flex items-center gap-4">
                         <div className="p-3 bg-warning-bg rounded-lg">
-                            <Clock className="h-5 w-5 text-yellow-600" />
+                            <Clock className="h-5 w-5 text-warning" />
                         </div>
                         <div>
                             <p className="text-sm text-muted">Pendentes</p>
@@ -117,7 +117,7 @@ export default function ContratoPage() {
             <Card>
                 <CardHeader>
                     <CardTitle className="flex items-center gap-2">
-                        <CheckCircle2 className="h-5 w-5 text-primary-600" />
+                        <CheckCircle2 className="h-5 w-5 text-rausch" />
                         Lista de tarefas
                     </CardTitle>
                 </CardHeader>
@@ -125,16 +125,16 @@ export default function ContratoPage() {
                     {tarefas.map((t) => (
                         <div key={t.id} className="flex items-start gap-3 p-3 bg-surface-soft rounded-lg">
                             {t.status === 'concluido' ? (
-                                <CheckCircle2 className="h-4 w-4 text-green-500 mt-0.5 shrink-0" />
+                                <CheckCircle2 className="h-4 w-4 text-success mt-0.5 shrink-0" />
                             ) : (
-                                <Clock className="h-4 w-4 text-yellow-500 mt-0.5 shrink-0" />
+                                <Clock className="h-4 w-4 text-warning mt-0.5 shrink-0" />
                             )}
                             <div className="flex-1">
                                 <p className="text-sm font-medium">{t.titulo}</p>
                                 {t.descricao && <p className="text-xs text-muted">{t.descricao}</p>}
                                 <p className="text-xs text-muted-soft mt-1">{t.departamento} • {t.prioridade}{t.data_limite ? ` • até ${new Date(t.data_limite).toLocaleDateString('pt-BR')}` : ''}</p>
                             </div>
-                            <span className={`text-xs px-2 py-1 rounded-full shrink-0 ${t.status === 'concluido' ? 'bg-success-bg text-success-text' : 'bg-warning-bg text-yellow-700'}`}>
+                            <span className={`text-xs px-2 py-1 rounded-full shrink-0 ${t.status === 'concluido' ? 'bg-success-bg text-success-text' : 'bg-warning-bg text-warning-text'}`}>
                                 {t.status}
                             </span>
                         </div>

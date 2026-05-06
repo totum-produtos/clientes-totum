@@ -41,7 +41,7 @@ export default function ForgotPasswordPage() {
             <div className="bg-canvas py-8 px-4 shadow sm:rounded-lg sm:px-10">
                 <div className="text-center">
                     <div className="flex justify-center mb-4">
-                        <CheckCircle className="h-16 w-16 text-green-500" />
+                        <CheckCircle className="h-16 w-16 text-success" />
                     </div>
 
                     <h2 className="text-2xl font-bold text-ink mb-2">
@@ -54,7 +54,7 @@ export default function ForgotPasswordPage() {
                     </p>
 
                     <div className="mt-6 text-center text-sm">
-                        <Link href="/auth/login" className="font-medium text-primary-600 hover:text-primary-500">
+                        <Link href="/auth/login" className="font-medium text-rausch hover:text-rausch">
                             Return to login
                         </Link>
                     </div>
@@ -91,7 +91,7 @@ export default function ForgotPasswordPage() {
                             required
                             value={email}
                             onChange={(e) => setEmail(e.target.value)}
-                            className="block w-full appearance-none rounded-md border border-hairline px-3 py-2 shadow-airbnb focus:border-primary-500 focus:outline-none focus:ring-primary-500"
+                            className="block w-full appearance-none rounded-md border border-hairline px-3 py-2 shadow-airbnb focus:border-rausch focus:outline-none focus:ring-rausch"
                         />
                     </div>
                     <p className="mt-2 text-sm text-muted">
@@ -103,7 +103,7 @@ export default function ForgotPasswordPage() {
                     <button
                         type="submit"
                         disabled={loading}
-                        className="flex w-full justify-center rounded-md border border-transparent bg-primary-600 py-2 px-4 text-sm font-medium text-white shadow-airbnb hover:bg-primary-700 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-2 disabled:opacity-50"
+                        className="flex w-full justify-center rounded-md border border-transparent bg-rausch py-2 px-4 text-sm font-medium text-white shadow-airbnb hover:bg-rausch-active focus:outline-none focus:ring-2 focus:ring-rausch focus:ring-offset-2 disabled:opacity-50"
                     >
                         {loading ? 'Sending reset link...' : 'Send reset link'}
                     </button>
@@ -113,7 +113,7 @@ export default function ForgotPasswordPage() {
             <div className="mt-6 text-center text-sm">
                 <span className="text-body">Remember your password?</span>
                 {' '}
-                <Link href="/auth/login" className="font-medium text-primary-600 hover:text-primary-500">
+                <Link href="/auth/login" className="font-medium text-rausch hover:text-rausch">
                     Sign in
                 </Link>
             </div>

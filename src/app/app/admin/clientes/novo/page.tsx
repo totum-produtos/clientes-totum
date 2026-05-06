@@ -138,7 +138,7 @@ export default function NovoClientePage() {
             <p className="text-xs text-muted mt-0.5 uppercase tracking-wide">Preencha os dados do novo cliente</p>
           </div>
           <div className="text-sm text-muted">
-            Etapa <span className="font-semibold text-[rausch]">{step}</span> de {STEPS.length}
+            Etapa <span className="font-semibold text-rausch">{step}</span> de {STEPS.length}
           </div>
         </div>
       </div>
@@ -158,14 +158,14 @@ export default function NovoClientePage() {
                       onClick={() => setStep(s.id)}
                       className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-md text-left text-sm transition-all ${
                         isActive
-                          ? "bg-[rausch] text-white shadow-airbnb"
+                          ? "bg-rausch text-white shadow-airbnb"
                           : isCompleted
                           ? "text-success-text hover:bg-success-bg"
                           : "text-body hover:bg-surface-soft"
                       }`}
                     >
                       <div className={`w-7 h-7 rounded-full flex items-center justify-center text-xs font-bold shrink-0 ${
-                        isActive ? "bg-canvas text-[rausch]" : isCompleted ? "bg-success-bg0 text-white" : "bg-surface-strong text-muted"
+                        isActive ? "bg-canvas text-rausch" : isCompleted ? "bg-success text-white" : "bg-surface-strong text-muted"
                       }`}>
                         {isCompleted ? <Check className="w-3.5 h-3.5" /> : s.id}
                       </div>
@@ -183,7 +183,7 @@ export default function NovoClientePage() {
                   <span className="font-medium">{Math.round((step / STEPS.length) * 100)}%</span>
                 </div>
                 <div className="h-2 bg-surface-strong rounded-full overflow-hidden">
-                  <div className="h-full bg-[rausch] rounded-full transition-all duration-500" style={{ width: `${(step / STEPS.length) * 100}%` }} />
+                  <div className="h-full bg-rausch rounded-full transition-all duration-500" style={{ width: `${(step / STEPS.length) * 100}%` }} />
                 </div>
               </div>
             </div>
@@ -194,7 +194,7 @@ export default function NovoClientePage() {
             <div className="bg-canvas rounded-lg border shadow-airbnb p-8">
               <div className="flex items-center gap-3 mb-8">
                 <div className="w-10 h-10 rounded-md bg-surface-soft flex items-center justify-center">
-                  <StepIcon className="w-5 h-5 text-[rausch]" />
+                  <StepIcon className="w-5 h-5 text-rausch" />
                 </div>
                 <div>
                   <h2 className="text-lg font-bold text-ink">{STEPS[step - 1].label}</h2>
@@ -280,7 +280,7 @@ export default function NovoClientePage() {
                     <Field label="Classe social">
                       <div className="flex flex-wrap gap-2">
                         {CLASSES_SOCIAIS.map(c => (
-                          <button key={c} onClick={() => toggleArray("classe_social", c)} className={`px-3 py-2 rounded-lg text-sm font-medium transition-all ${form.classe_social.includes(c) ? "bg-[rausch] text-white shadow" : "bg-surface-strong text-body hover:bg-surface-strong"}`}>{c}</button>
+                          <button key={c} onClick={() => toggleArray("classe_social", c)} className={`px-3 py-2 rounded-lg text-sm font-medium transition-all ${form.classe_social.includes(c) ? "bg-rausch text-white shadow" : "bg-surface-strong text-body hover:bg-surface-strong"}`}>{c}</button>
                         ))}
                       </div>
                     </Field>
@@ -329,7 +329,7 @@ export default function NovoClientePage() {
                   <div>
                     <label className="block text-sm font-medium text-ink mb-2">Imagens do Key Visual</label>
                     <input ref={fileInputRef} type="file" accept="image/*" multiple onChange={handleImageUpload} className="hidden" />
-                    <button onClick={() => fileInputRef.current?.click()} className="flex items-center gap-2 px-4 py-3 border-2 border-dashed border-hairline rounded-md text-sm text-muted hover:border-[rausch] hover:text-[rausch] transition-colors w-full justify-center">
+                    <button onClick={() => fileInputRef.current?.click()} className="flex items-center gap-2 px-4 py-3 border-2 border-dashed border-hairline rounded-md text-sm text-muted hover:border-rausch hover:text-rausch transition-colors w-full justify-center">
                       <Upload className="w-4 h-4" /> Clique para fazer upload de imagens
                     </button>
                     {form.key_visual_images.length > 0 && (
@@ -337,7 +337,7 @@ export default function NovoClientePage() {
                         {form.key_visual_images.map((img, i) => (
                           <div key={i} className="relative w-24 h-24 rounded-md overflow-hidden border group">
                             <img src={img} alt={`key visual ${i}`} className="w-full h-full object-cover" />
-                            <button onClick={() => removeImage(i)} className="absolute top-1 right-1 w-6 h-6 bg-danger-bg0 text-white rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
+                            <button onClick={() => removeImage(i)} className="absolute top-1 right-1 w-6 h-6 bg-danger text-white rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
                               <X className="w-3 h-3" />
                             </button>
                           </div>
@@ -356,7 +356,7 @@ export default function NovoClientePage() {
                   <div>
                     <label className="block text-sm font-medium text-ink mb-2">Canais de atendimento</label>
                     <div className="flex flex-wrap gap-2">{CANAIS.map(c => (
-                      <button key={c} onClick={() => toggleArray("canais_atendimento", c)} className={`px-4 py-2 rounded-md text-sm font-medium transition-all ${form.canais_atendimento.includes(c) ? "bg-[rausch] text-white shadow" : "bg-surface-strong text-body hover:bg-surface-strong"}`}>{c}</button>
+                      <button key={c} onClick={() => toggleArray("canais_atendimento", c)} className={`px-4 py-2 rounded-md text-sm font-medium transition-all ${form.canais_atendimento.includes(c) ? "bg-rausch text-white shadow" : "bg-surface-strong text-body hover:bg-surface-strong"}`}>{c}</button>
                     ))}</div>
                   </div>
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
@@ -384,7 +384,7 @@ export default function NovoClientePage() {
                   <div>
                     <label className="block text-sm font-medium text-ink mb-2">Dias de atendimento</label>
                     <div className="flex flex-wrap gap-2">{DIAS.map(d => (
-                      <button key={d} onClick={() => toggleArray("dias_atendimento", d)} className={`w-12 h-12 rounded-md text-sm font-medium transition-all ${form.dias_atendimento.includes(d) ? "bg-[rausch] text-white shadow" : "bg-surface-strong text-body hover:bg-surface-strong"}`}>{d}</button>
+                      <button key={d} onClick={() => toggleArray("dias_atendimento", d)} className={`w-12 h-12 rounded-md text-sm font-medium transition-all ${form.dias_atendimento.includes(d) ? "bg-rausch text-white shadow" : "bg-surface-strong text-body hover:bg-surface-strong"}`}>{d}</button>
                     ))}</div>
                   </div>
                   <Field label="Informações adicionais"><textarea value={form.informacoes_adicionais} onChange={e => update("informacoes_adicionais", e.target.value)} placeholder="Algo mais que devamos saber?" rows={3} className="input-field resize-none" /></Field>
@@ -411,7 +411,7 @@ export default function NovoClientePage() {
                       <Field label="Dores"><textarea value={persona.dores} onChange={e => updatePersona(idx, "dores", e.target.value)} placeholder="Quais são as principais dores?" rows={2} className="input-field resize-none" /></Field>
                     </div>
                   ))}
-                  <button onClick={addPersona} className="flex items-center gap-2 px-4 py-3 border-2 border-dashed border-hairline rounded-md text-sm text-muted hover:border-[rausch] hover:text-[rausch] transition-colors w-full justify-center">
+                  <button onClick={addPersona} className="flex items-center gap-2 px-4 py-3 border-2 border-dashed border-hairline rounded-md text-sm text-muted hover:border-rausch hover:text-rausch transition-colors w-full justify-center">
                     <Plus className="w-4 h-4" /> Adicionar outra persona
                   </button>
                 </div>
@@ -422,7 +422,7 @@ export default function NovoClientePage() {
                 <div className="space-y-5">
                   <div className="bg-danger-bg border border-danger-bg rounded-md p-5">
                     <div className="flex items-center gap-2 mb-2">
-                      <div className="w-8 h-8 rounded-full bg-danger-bg0 text-white flex items-center justify-center text-sm font-bold">P</div>
+                      <div className="w-8 h-8 rounded-full bg-danger text-white flex items-center justify-center text-sm font-bold">P</div>
                       <h4 className="font-semibold text-danger-text">Porquê</h4>
                     </div>
                     <p className="text-xs text-danger-text mb-2">Propósito, causa, crença — por que a empresa existe?</p>
@@ -430,15 +430,15 @@ export default function NovoClientePage() {
                   </div>
                   <div className="bg-surface-soft border border-hairline rounded-md p-5">
                     <div className="flex items-center gap-2 mb-2">
-                      <div className="w-8 h-8 rounded-full bg-surface-soft0 text-white flex items-center justify-center text-sm font-bold">Q</div>
+                      <div className="w-8 h-8 rounded-full bg-surface-soft text-ink flex items-center justify-center text-sm font-bold">Q</div>
                       <h4 className="font-semibold text-rausch">O que</h4>
                     </div>
                     <p className="text-xs text-rausch mb-2">Produto, serviço, resultado — o que a empresa oferece?</p>
                     <textarea value={form.circulo_dourado.o_que} onChange={e => setForm(f => ({ ...f, circulo_dourado: { ...f.circulo_dourado, o_que: e.target.value } }))} placeholder="Ex: Criamos estratégias de marketing digital..." rows={3} className="input-field resize-none bg-canvas" />
                   </div>
-                  <div className="bg-success-bg border border-green-200 rounded-md p-5">
+                  <div className="bg-success-bg border border-success/20 rounded-md p-5">
                     <div className="flex items-center gap-2 mb-2">
-                      <div className="w-8 h-8 rounded-full bg-success-bg0 text-white flex items-center justify-center text-sm font-bold">C</div>
+                      <div className="w-8 h-8 rounded-full bg-success text-white flex items-center justify-center text-sm font-bold">C</div>
                       <h4 className="font-semibold text-success-text">Como</h4>
                     </div>
                     <p className="text-xs text-success-text mb-2">Processo, diferencial, método — como a empresa entrega?</p>
@@ -460,9 +460,9 @@ export default function NovoClientePage() {
               {/* STEP 9: PUV */}
               {step === 9 && (
                 <div className="space-y-5">
-                  <div className="bg-gradient-to-br from-[rausch]/5 to-[rausch]/5 border border-hairline rounded-md p-6">
+                  <div className="bg-gradient-to-br from-rausch/5 to-rausch/5 border border-hairline rounded-md p-6">
                     <h4 className="font-semibold text-ink mb-2 flex items-center gap-2">
-                      <Award className="w-5 h-5 text-[rausch]" />
+                      <Award className="w-5 h-5 text-rausch" />
                       Proposta Única de Valor (PUV)
                     </h4>
                     <p className="text-sm text-body mb-4">O que torna esse cliente único? Por que alguém deveria escolhê-lo?</p>
@@ -477,11 +477,11 @@ export default function NovoClientePage() {
                   <ChevronRight className="w-4 h-4 rotate-180" /> Voltar
                 </button>
                 {step < STEPS.length ? (
-                  <button onClick={() => setStep(s => Math.min(STEPS.length, s + 1))} className="flex items-center gap-2 px-8 py-3 bg-[rausch] text-white rounded-full text-sm font-medium hover:bg-[rausch-active] transition-all shadow-airbnb shadow-airbnb">
+                  <button onClick={() => setStep(s => Math.min(STEPS.length, s + 1))} className="flex items-center gap-2 px-8 py-3 bg-rausch text-white rounded-full text-sm font-medium hover:bg-rausch-active transition-all shadow-airbnb shadow-airbnb">
                     Próximo <ChevronRight className="w-4 h-4" />
                   </button>
                 ) : (
-                  <button onClick={handleSubmit} disabled={loading} className="flex items-center gap-2 px-8 py-3 bg-[rausch] text-white rounded-full text-sm font-medium hover:bg-[rausch-active] disabled:opacity-50 transition-all shadow-airbnb shadow-airbnb">
+                  <button onClick={handleSubmit} disabled={loading} className="flex items-center gap-2 px-8 py-3 bg-rausch text-white rounded-full text-sm font-medium hover:bg-rausch-active disabled:opacity-50 transition-all shadow-airbnb shadow-airbnb">
                     {loading ? <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" /> : <><Check className="w-4 h-4" /> Finalizar cadastro</>}
                   </button>
                 )}

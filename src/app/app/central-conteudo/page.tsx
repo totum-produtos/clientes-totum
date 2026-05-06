@@ -211,9 +211,9 @@ export default function CentralConteudoPage() {
   }, [posts]);
 
   const tipoColors: Record<string, string> = {
-    porque: "bg-danger-bg0",
-    o_que: "bg-surface-soft0",
-    como: "bg-success-bg0",
+    porque: "bg-danger",
+    o_que: "bg-surface-soft",
+    como: "bg-success",
   };
 
   const tipoLabels: Record<string, string> = {
@@ -225,7 +225,7 @@ export default function CentralConteudoPage() {
   if (loading) {
     return (
       <div className="flex items-center justify-center h-full">
-        <div className="animate-spin h-8 w-8 border-b-2 border-[rausch] rounded-full" />
+        <div className="animate-spin h-8 w-8 border-b-2 border-rausch rounded-full" />
       </div>
     );
   }
@@ -240,7 +240,7 @@ export default function CentralConteudoPage() {
       <div className="w-72 bg-canvas border-r flex flex-col">
         <div className="p-4 border-b">
           <h1 className="text-lg font-bold text-ink flex items-center gap-2">
-            <LayoutGrid className="h-5 w-5 text-[rausch]" />
+            <LayoutGrid className="h-5 w-5 text-rausch" />
             Central de Conteúdo
           </h1>
           <p className="text-xs text-muted mt-1">Visão master de todos os clientes</p>
@@ -254,7 +254,7 @@ export default function CentralConteudoPage() {
               placeholder="Buscar cliente..."
               value={search}
               onChange={(e) => setSearch(e.target.value)}
-              className="w-full pl-9 pr-3 py-2 border rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-[rausch]"
+              className="w-full pl-9 pr-3 py-2 border rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-rausch"
             />
           </div>
         </div>
@@ -452,7 +452,7 @@ export default function CentralConteudoPage() {
                         <div className="flex items-center gap-2 mb-1 flex-wrap">
                           <span
                             className={`inline-block w-2 h-2 rounded-full ${
-                              tipoColors[post.tipo] || "bg-gray-400"
+                              tipoColors[post.tipo] || "bg-muted"
                             }`}
                           />
                           <span className="text-xs font-medium text-muted">
@@ -483,7 +483,7 @@ export default function CentralConteudoPage() {
                     </div>
 
                     {/* Ações rápidas: mover data */}
-                    <div className="flex items-center gap-2 mt-3 pt-3 border-t border-gray-50">
+                    <div className="flex items-center gap-2 mt-3 pt-3 border-t border-hairline-soft">
                       <span className="text-[11px] text-muted-soft uppercase font-medium">
                         Mover:
                       </span>
@@ -520,7 +520,7 @@ export default function CentralConteudoPage() {
                     {filtroTipo !== "todos" && (
                       <button
                         onClick={() => setFiltroTipo("todos")}
-                        className="text-xs text-primary-600 mt-2 hover:underline"
+                        className="text-xs text-rausch mt-2 hover:underline"
                       >
                         Limpar filtro
                       </button>
@@ -579,7 +579,7 @@ export default function CentralConteudoPage() {
                         key={i}
                         className={`min-h-[60px] border rounded-lg p-1 text-sm ${
                           isToday
-                            ? "ring-2 ring-[rausch] ring-offset-1"
+                            ? "ring-2 ring-rausch ring-offset-1"
                             : ""
                         } ${
                           hasGap
@@ -592,7 +592,7 @@ export default function CentralConteudoPage() {
                         <span
                           className={`font-medium ${
                             isToday
-                              ? "text-[rausch]"
+                              ? "text-rausch"
                               : hasGap
                               ? "text-danger-text"
                               : "text-ink"
@@ -605,14 +605,14 @@ export default function CentralConteudoPage() {
                             <span
                               key={p.id}
                               className={`w-1.5 h-1.5 rounded-full ${
-                                tipoColors[p.tipo] || "bg-gray-400"
+                                tipoColors[p.tipo] || "bg-muted"
                               }`}
                               title={p.subject}
                             />
                           ))}
                           {hasGap && (
                             <span
-                              className="w-1.5 h-1.5 rounded-full bg-red-400"
+                              className="w-1.5 h-1.5 rounded-full bg-danger"
                               title="Sem post"
                             />
                           )}
@@ -623,11 +623,11 @@ export default function CentralConteudoPage() {
                 </div>
                 <div className="flex items-center gap-4 mt-4 text-xs text-muted">
                   <span className="flex items-center gap-1">
-                    <span className="w-2 h-2 rounded-full bg-red-400" />
+                    <span className="w-2 h-2 rounded-full bg-danger" />
                     Dia sem post (passado)
                   </span>
                   <span className="flex items-center gap-1">
-                    <span className="w-2 h-2 rounded-full bg-gray-300" />
+                    <span className="w-2 h-2 rounded-full bg-hairline" />
                     Dia futuro
                   </span>
                 </div>

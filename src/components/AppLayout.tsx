@@ -45,7 +45,7 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
         { name: 'Feed de Postagens', href: '/app/feed-postagens', icon: List, clientOnly: true },
         { name: 'Arquivos do Cliente', href: '/app/arquivos', icon: FolderOpen, clientOnly: true },
         { name: 'Totum Drive', href: '/app/drive', icon: Cloud, clientOnly: true },
-        { name: 'Meu Cadastro', href: '/app/meu-cadastro', icon: ClipboardList, clientOnly: true },
+        { name: 'Minhas Empresa', href: '/app/meu-cadastro', icon: ClipboardList, clientOnly: true },
         { name: 'Notificações', href: '/app/notificacoes', icon: Bell, clientOnly: false },
         { name: 'Central de Conteúdo', href: '/app/central-conteudo', icon: LayoutGrid, clientOnly: false },
         { name: 'Contrato', href: '/app/contrato', icon: FileText, clientOnly: false },

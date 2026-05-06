@@ -182,7 +182,7 @@ export default function GestaoClientesPage() {
   if (loading) {
     return (
       <div className="flex justify-center items-center h-96">
-        <div className="animate-spin h-10 w-10 border-b-2 border-[rausch] rounded-full" />
+        <div className="animate-spin h-10 w-10 border-b-2 border-rausch rounded-full" />
       </div>
     );
   }
@@ -199,7 +199,7 @@ export default function GestaoClientesPage() {
         </div>
         <button
           onClick={() => router.push('/app/admin/clientes/novo')}
-          className="inline-flex items-center gap-2 px-4 py-2 bg-[rausch] text-white rounded-lg text-sm font-medium hover:bg-[rausch-active] transition-colors"
+          className="inline-flex items-center gap-2 px-4 py-2 bg-rausch text-white rounded-lg text-sm font-medium hover:bg-rausch-active transition-colors"
         >
           <Building2 className="h-4 w-4" />
           Novo Cliente
@@ -255,7 +255,7 @@ export default function GestaoClientesPage() {
             placeholder="Buscar por nome, email ou slug..."
             value={busca}
             onChange={(e) => setBusca(e.target.value)}
-            className="w-full pl-10 pr-4 py-2 border rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-[rausch] bg-canvas"
+            className="w-full pl-10 pr-4 py-2 border rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-rausch bg-canvas"
           />
         </div>
         <div className="flex gap-2">
@@ -265,7 +265,7 @@ export default function GestaoClientesPage() {
               onClick={() => setFiltroStatus(status)}
               className={`px-3 py-2 rounded-lg text-sm font-medium capitalize transition-colors ${
                 filtroStatus === status
-                  ? 'bg-[rausch] text-white'
+                  ? 'bg-rausch text-white'
                   : 'bg-canvas border text-body hover:bg-surface-soft'
               }`}
             >
@@ -363,7 +363,7 @@ export default function GestaoClientesPage() {
                       <span className="text-[10px] px-2 py-0.5 bg-success-bg text-success-text rounded-full">Google</span>
                     )}
                     {cliente.drive_folder_cliente_id && (
-                      <span className="text-[10px] px-2 py-0.5 bg-warning-bg text-yellow-700 rounded-full">Drive</span>
+                      <span className="text-[10px] px-2 py-0.5 bg-warning-bg text-warning-text rounded-full">Drive</span>
                     )}
                   </div>
 
@@ -415,7 +415,7 @@ export default function GestaoClientesPage() {
                 onClick={() => router.push(`/app/admin/clientes/${cliente.id}`)}
               >
                 <div className="col-span-3 flex items-center gap-3">
-                  <div className="w-8 h-8 rounded bg-[rausch] flex items-center justify-center text-white font-bold text-sm shrink-0">
+                  <div className="w-8 h-8 rounded bg-rausch flex items-center justify-center text-white font-bold text-sm shrink-0">
                     {cliente.nome.charAt(0).toUpperCase()}
                   </div>
                   <div className="min-w-0">
@@ -440,14 +440,14 @@ export default function GestaoClientesPage() {
                     className="p-1.5 hover:bg-surface-strong rounded"
                     title={cliente.status === 'inactive' ? 'Ativar' : 'Inativar'}
                   >
-                    {cliente.status === 'inactive' ? <Power className="h-4 w-4 text-green-500" /> : <PowerOff className="h-4 w-4 text-muted-soft" />}
+                    {cliente.status === 'inactive' ? <Power className="h-4 w-4 text-success" /> : <PowerOff className="h-4 w-4 text-muted-soft" />}
                   </button>
                   <button
                     onClick={(e) => { e.stopPropagation(); setClienteParaDeletar(cliente); }}
                     className="p-1.5 hover:bg-danger-bg rounded"
                     title="Deletar"
                   >
-                    <Trash2 className="h-4 w-4 text-red-400" />
+                    <Trash2 className="h-4 w-4 text-danger" />
                   </button>
                   <button
                     onClick={(e) => { e.stopPropagation(); router.push(`/app/admin/clientes/${cliente.id}`); }}
@@ -490,7 +490,7 @@ export default function GestaoClientesPage() {
                 <button onClick={() => setClienteParaDeletar(null)} className="flex-1 py-2.5 px-4 border rounded-lg text-sm font-medium text-body hover:bg-surface-soft transition-colors">
                   Cancelar
                 </button>
-                <button onClick={() => handleDeletar(clienteParaDeletar)} disabled={deleteLoading} className="flex-1 py-2.5 px-4 bg-danger text-white rounded-lg text-sm font-medium hover:bg-red-700 disabled:opacity-50 transition-colors">
+                <button onClick={() => handleDeletar(clienteParaDeletar)} disabled={deleteLoading} className="flex-1 py-2.5 px-4 bg-danger text-white rounded-lg text-sm font-medium hover:bg-danger-text disabled:opacity-50 transition-colors">
                   {deleteLoading ? 'Deletando...' : 'Sim, deletar'}
                 </button>
               </div>
@@ -532,7 +532,7 @@ function ClienteDashboard({ cliente, onClose }: { cliente: any; onClose: () => v
         {/* Header */}
         <div className="sticky top-0 bg-canvas border-b px-6 py-4 flex items-center justify-between z-10">
           <div className="flex items-center gap-3">
-            <div className="w-12 h-12 rounded-md bg-[rausch] flex items-center justify-center text-white font-bold text-lg">
+            <div className="w-12 h-12 rounded-md bg-rausch flex items-center justify-center text-white font-bold text-lg">
               {cliente.nome.charAt(0).toUpperCase()}
             </div>
             <div>
@@ -550,14 +550,14 @@ function ClienteDashboard({ cliente, onClose }: { cliente: any; onClose: () => v
 
         {loading ? (
           <div className="flex justify-center py-20">
-            <div className="w-8 h-8 border-4 border-[rausch] border-t-transparent rounded-full animate-spin" />
+            <div className="w-8 h-8 border-4 border-rausch border-t-transparent rounded-full animate-spin" />
           </div>
         ) : (
           <div className="p-6 space-y-6">
             {/* Stats */}
             <div className="grid grid-cols-4 gap-3">
               <div className="bg-surface-soft p-4 rounded-md text-center">
-                <FileText className="h-5 w-5 text-[rausch] mx-auto mb-1" />
+                <FileText className="h-5 w-5 text-rausch mx-auto mb-1" />
                 <p className="text-2xl font-bold">{cliente.stats?.totalPosts || 0}</p>
                 <p className="text-[10px] text-muted uppercase">Posts</p>
               </div>
@@ -672,7 +672,7 @@ function DashSection({ icon: Icon, title, children }: any) {
   return (
     <div className="border rounded-md overflow-hidden">
       <div className="flex items-center gap-2 px-4 py-3 bg-surface-soft border-b">
-        <Icon className="w-4 h-4 text-[rausch]" />
+        <Icon className="w-4 h-4 text-rausch" />
         <h3 className="text-sm font-semibold text-ink">{title}</h3>
       </div>
       <div className="p-4">{children}</div>

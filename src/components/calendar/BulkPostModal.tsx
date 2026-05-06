@@ -75,10 +75,10 @@ export default function BulkPostModal({ isOpen, onClose, onSave, clientId }: Bul
                 <div className="p-4 space-y-4">
                     {/* Mode toggle */}
                     <div className="flex gap-2">
-                        <button onClick={() => setMode('form')} className={`px-3 py-1.5 rounded-lg text-sm ${mode === 'form' ? 'bg-primary-100 text-primary-700' : 'bg-surface-strong text-body'}`}>
+                        <button onClick={() => setMode('form')} className={`px-3 py-1.5 rounded-lg text-sm ${mode === 'form' ? 'bg-rausch/5 text-rausch-active' : 'bg-surface-strong text-body'}`}>
                             Formulário
                         </button>
-                        <button onClick={() => setMode('csv')} className={`px-3 py-1.5 rounded-lg text-sm ${mode === 'csv' ? 'bg-primary-100 text-primary-700' : 'bg-surface-strong text-body'}`}>
+                        <button onClick={() => setMode('csv')} className={`px-3 py-1.5 rounded-lg text-sm ${mode === 'csv' ? 'bg-rausch/5 text-rausch-active' : 'bg-surface-strong text-body'}`}>
                             Importar CSV
                         </button>
                     </div>
@@ -100,7 +100,7 @@ export default function BulkPostModal({ isOpen, onClose, onSave, clientId }: Bul
                                         a.click();
                                         URL.revokeObjectURL(url);
                                     }}
-                                    className="text-xs flex items-center gap-1 text-primary-600 hover:text-primary-700"
+                                    className="text-xs flex items-center gap-1 text-rausch hover:text-rausch-active"
                                 >
                                     <Download className="h-3 w-3" /> Baixar template
                                 </button>
@@ -148,7 +148,7 @@ export default function BulkPostModal({ isOpen, onClose, onSave, clientId }: Bul
                                     )}
                                 </div>
                             ))}
-                            <button onClick={addRow} className="w-full py-2 border-2 border-dashed border-hairline rounded-lg text-sm text-muted hover:border-primary-400 hover:text-primary-600 transition-colors">
+                            <button onClick={addRow} className="w-full py-2 border-2 border-dashed border-hairline rounded-lg text-sm text-muted hover:border-rausch hover:text-rausch transition-colors">
                                 + Adicionar linha
                             </button>
                         </div>

@@ -74,7 +74,7 @@ export default function PostModal({ isOpen, date, post, onSave, onDelete, onClos
             <input
               value={subject}
               onChange={(e) => setSubject(e.target.value)}
-              className="w-full px-3 py-2 border rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-[rausch]"
+              className="w-full px-3 py-2 border rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-rausch"
               placeholder="Ex: Por que escolhemos a Totum?"
               required
             />
@@ -107,7 +107,7 @@ export default function PostModal({ isOpen, date, post, onSave, onDelete, onClos
               type="datetime-local"
               value={publishedAt}
               onChange={(e) => setPublishedAt(e.target.value)}
-              className="w-full px-3 py-2 border rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-[rausch]"
+              className="w-full px-3 py-2 border rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-rausch"
               required
             />
           </div>
@@ -119,7 +119,7 @@ export default function PostModal({ isOpen, date, post, onSave, onDelete, onClos
                 type="number"
                 value={views}
                 onChange={(e) => setViews(e.target.value)}
-                className="w-full px-3 py-2 border rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-[rausch]"
+                className="w-full px-3 py-2 border rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-rausch"
                 placeholder="0"
               />
             </div>
@@ -129,7 +129,7 @@ export default function PostModal({ isOpen, date, post, onSave, onDelete, onClos
                 type="number"
                 value={likes}
                 onChange={(e) => setLikes(e.target.value)}
-                className="w-full px-3 py-2 border rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-[rausch]"
+                className="w-full px-3 py-2 border rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-rausch"
                 placeholder="0"
               />
             </div>
@@ -140,7 +140,7 @@ export default function PostModal({ isOpen, date, post, onSave, onDelete, onClos
                 step="0.1"
                 value={engagementRate}
                 onChange={(e) => setEngagementRate(e.target.value)}
-                className="w-full px-3 py-2 border rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-[rausch]"
+                className="w-full px-3 py-2 border rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-rausch"
                 placeholder="0"
               />
             </div>
@@ -149,7 +149,7 @@ export default function PostModal({ isOpen, date, post, onSave, onDelete, onClos
           <div className="flex gap-2 pt-2">
             <button
               type="submit"
-              className="flex-1 py-2 px-4 bg-[rausch] text-white rounded-lg text-sm font-medium hover:bg-[rausch-active] transition-colors"
+              className="flex-1 py-2 px-4 bg-rausch text-white rounded-lg text-sm font-medium hover:bg-rausch-active transition-colors"
             >
               {post ? 'Salvar alterações' : 'Criar post'}
             </button>

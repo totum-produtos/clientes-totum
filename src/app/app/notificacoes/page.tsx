@@ -73,7 +73,7 @@ export default function NotificacoesPage() {
     const opacity = read ? "opacity-50" : "";
     switch (type) {
       case "alteracao_pendente": return <Clock className={`w-5 h-5 text-amber-500 ${opacity}`} />;
-      case "alteracao_aprovada": return <CheckCircle className={`w-5 h-5 text-green-500 ${opacity}`} />;
+      case "alteracao_aprovada": return <CheckCircle className={`w-5 h-5 text-success ${opacity}`} />;
       case "alteracao_rejeitada": return <XCircle className={`w-5 h-5 text-danger-text ${opacity}`} />;
       default: return <FileText className={`w-5 h-5 text-muted-soft ${opacity}`} />;
     }
@@ -89,7 +89,7 @@ export default function NotificacoesPage() {
               <p className="text-sm text-muted mt-1">Acompanhe todas as suas notificações</p>
             </div>
             {unreadCount > 0 && (
-              <button onClick={markAllAsRead} className="flex items-center gap-2 px-4 py-2 bg-[rausch] text-white rounded-md text-sm font-medium hover:bg-[rausch-active] transition-colors">
+              <button onClick={markAllAsRead} className="flex items-center gap-2 px-4 py-2 bg-rausch text-white rounded-md text-sm font-medium hover:bg-rausch-active transition-colors">
                 <Check className="w-4 h-4" /> Marcar todas como lidas
               </button>
             )}
@@ -107,7 +107,7 @@ export default function NotificacoesPage() {
               onClick={() => setFilter(f)}
               className={`px-4 py-2 rounded-md text-sm font-medium transition-all ${
                 filter === f
-                  ? "bg-[rausch] text-white shadow"
+                  ? "bg-rausch text-white shadow"
                   : "bg-canvas text-body hover:bg-surface-strong border"
               }`}
             >
@@ -119,7 +119,7 @@ export default function NotificacoesPage() {
         {/* Lista */}
         {loading ? (
           <div className="flex items-center justify-center py-20">
-            <div className="w-8 h-8 border-4 border-[rausch] border-t-transparent rounded-full animate-spin" />
+            <div className="w-8 h-8 border-4 border-rausch border-t-transparent rounded-full animate-spin" />
           </div>
         ) : filtered.length === 0 ? (
           <div className="bg-canvas rounded-lg border shadow-airbnb p-12 text-center">

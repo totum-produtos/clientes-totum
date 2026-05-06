@@ -69,7 +69,7 @@ export default function NotificationBell() {
   const getIcon = (type: string) => {
     switch (type) {
       case "alteracao_pendente": return <Clock className="w-4 h-4 text-amber-500" />;
-      case "alteracao_aprovada": return <CheckCircle className="w-4 h-4 text-green-500" />;
+      case "alteracao_aprovada": return <CheckCircle className="w-4 h-4 text-success" />;
       case "alteracao_rejeitada": return <XCircle className="w-4 h-4 text-danger-text" />;
       default: return <FileText className="w-4 h-4 text-muted-soft" />;
     }
@@ -83,7 +83,7 @@ export default function NotificationBell() {
       >
         <Bell className="w-5 h-5" />
         {unreadCount > 0 && (
-          <span className="absolute top-0 right-0 w-4 h-4 bg-danger-bg0 text-white text-[10px] font-bold rounded-full flex items-center justify-center">
+          <span className="absolute top-0 right-0 w-4 h-4 bg-danger text-white text-[10px] font-bold rounded-full flex items-center justify-center">
             {unreadCount > 9 ? "9+" : unreadCount}
           </span>
         )}
@@ -94,7 +94,7 @@ export default function NotificationBell() {
           <div className="flex items-center justify-between px-4 py-3 border-b">
             <h3 className="text-sm font-semibold text-ink">Notificações</h3>
             {unreadCount > 0 && (
-              <button onClick={markAllAsRead} className="text-xs text-[rausch] hover:underline font-medium">
+              <button onClick={markAllAsRead} className="text-xs text-rausch hover:underline font-medium">
                 Marcar todas como lidas
               </button>
             )}
@@ -122,7 +122,7 @@ export default function NotificationBell() {
                         {new Date(n.created_at).toLocaleDateString("pt-BR", { day: "2-digit", month: "short", hour: "2-digit", minute: "2-digit" })}
                       </p>
                     </div>
-                    {!n.read && <div className="w-2 h-2 bg-[rausch] rounded-full mt-1.5 shrink-0" />}
+                    {!n.read && <div className="w-2 h-2 bg-rausch rounded-full mt-1.5 shrink-0" />}
                   </div>
                 </div>
               ))
@@ -132,7 +132,7 @@ export default function NotificationBell() {
           <div className="px-4 py-2.5 border-t bg-surface-soft">
             <button
               onClick={() => { setOpen(false); router.push("/app/notificacoes"); }}
-              className="w-full text-center text-xs text-[rausch] hover:underline font-medium py-1"
+              className="w-full text-center text-xs text-rausch hover:underline font-medium py-1"
             >
               Ver todas as notificações
             </button>

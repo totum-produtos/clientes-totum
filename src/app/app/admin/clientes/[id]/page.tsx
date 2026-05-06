@@ -221,7 +221,7 @@ export default function EditarClientePage() {
   if (loading) {
     return (
       <div className="min-h-screen bg-surface-soft flex items-center justify-center">
-        <div className="w-8 h-8 border-4 border-[rausch] border-t-transparent rounded-full animate-spin" />
+        <div className="w-8 h-8 border-4 border-rausch border-t-transparent rounded-full animate-spin" />
       </div>
     );
   }
@@ -242,7 +242,7 @@ export default function EditarClientePage() {
           </div>
           <div className="flex items-center gap-3">
             {!editMode ? (
-              <button onClick={() => setEditMode(true)} className="flex items-center gap-2 px-5 py-2.5 bg-[rausch] text-white rounded-md text-sm font-medium hover:bg-[rausch-active] transition-all shadow-airbnb shadow-airbnb">
+              <button onClick={() => setEditMode(true)} className="flex items-center gap-2 px-5 py-2.5 bg-rausch text-white rounded-md text-sm font-medium hover:bg-rausch-active transition-all shadow-airbnb shadow-airbnb">
                 <Edit3 className="w-4 h-4" /> Editar
               </button>
             ) : (
@@ -250,7 +250,7 @@ export default function EditarClientePage() {
                 <button onClick={() => { setEditMode(false); setMessage(""); setError(""); }} className="flex items-center gap-2 px-5 py-2.5 text-body hover:text-ink rounded-md text-sm font-medium transition-colors">
                   <X className="w-4 h-4" /> Cancelar
                 </button>
-                <button onClick={handleSave} disabled={saving} className="flex items-center gap-2 px-5 py-2.5 bg-success text-white rounded-md text-sm font-medium hover:bg-green-700 disabled:opacity-50 transition-all shadow-airbnb shadow-airbnb">
+                <button onClick={handleSave} disabled={saving} className="flex items-center gap-2 px-5 py-2.5 bg-success text-white rounded-md text-sm font-medium hover:bg-success-text disabled:opacity-50 transition-all shadow-airbnb shadow-airbnb">
                   {saving ? <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" /> : <><Save className="w-4 h-4" /> Salvar</>}
                 </button>
               </div>
@@ -262,7 +262,7 @@ export default function EditarClientePage() {
       {(error || message) && (
         <div className="max-w-7xl mx-auto px-6 pt-4">
           {error && <div className="p-4 bg-danger-bg border border-danger-bg rounded-md text-sm text-danger-text">{error}</div>}
-          {message && <div className="p-4 bg-success-bg border border-green-200 rounded-md text-sm text-success-text flex items-center gap-2"><Check className="w-4 h-4" />{message.replace("✅ ", "")}</div>}
+          {message && <div className="p-4 bg-success-bg border border-success/20 rounded-md text-sm text-success-text flex items-center gap-2"><Check className="w-4 h-4" />{message.replace("✅ ", "")}</div>}
         </div>
       )}
 
@@ -290,14 +290,14 @@ export default function EditarClientePage() {
                       onClick={() => setStep(s.id)}
                       className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-md text-left text-sm transition-all ${
                         isActive
-                          ? "bg-[rausch] text-white shadow-airbnb"
+                          ? "bg-rausch text-white shadow-airbnb"
                           : isCompleted
                           ? "text-success-text hover:bg-success-bg"
                           : "text-body hover:bg-surface-soft"
                       }`}
                     >
                       <div className={`w-7 h-7 rounded-full flex items-center justify-center text-xs font-bold shrink-0 ${
-                        isActive ? "bg-canvas text-[rausch]" : isCompleted ? "bg-success-bg0 text-white" : "bg-surface-strong text-muted"
+                        isActive ? "bg-canvas text-rausch" : isCompleted ? "bg-success text-white" : "bg-surface-strong text-muted"
                       }`}>
                         {isCompleted ? <Check className="w-3.5 h-3.5" /> : s.id}
                       </div>
@@ -315,7 +315,7 @@ export default function EditarClientePage() {
             <div className="bg-canvas rounded-lg border shadow-airbnb p-8">
               <div className="flex items-center gap-3 mb-8">
                 <div className="w-10 h-10 rounded-md bg-surface-soft flex items-center justify-center">
-                  <StepIcon className="w-5 h-5 text-[rausch]" />
+                  <StepIcon className="w-5 h-5 text-rausch" />
                 </div>
                 <div>
                   <h2 className="text-lg font-bold text-ink">{STEPS[step - 1].label}</h2>
@@ -386,7 +386,7 @@ export default function EditarClientePage() {
                     <Field label="Classe social" editMode={editMode}>
                       <div className="flex flex-wrap gap-2">
                         {CLASSES_SOCIAIS.map(c => (
-                          <button key={c} onClick={() => editMode && toggleArray("classe_social", c)} className={`px-3 py-2 rounded-lg text-sm font-medium transition-all ${form.classe_social.includes(c) ? "bg-[rausch] text-white shadow" : "bg-surface-strong text-body"}`}>{c}</button>
+                          <button key={c} onClick={() => editMode && toggleArray("classe_social", c)} className={`px-3 py-2 rounded-lg text-sm font-medium transition-all ${form.classe_social.includes(c) ? "bg-rausch text-white shadow" : "bg-surface-strong text-body"}`}>{c}</button>
                         ))}
                       </div>
                     </Field>
@@ -434,7 +434,7 @@ export default function EditarClientePage() {
                     <label className="block text-sm font-medium text-ink mb-2">Imagens do Key Visual</label>
                     <input ref={fileInputRef} type="file" accept="image/*" multiple onChange={handleImageUpload} className="hidden" disabled={!editMode} />
                     {editMode && (
-                      <button onClick={() => fileInputRef.current?.click()} className="flex items-center gap-2 px-4 py-3 border-2 border-dashed border-hairline rounded-md text-sm text-muted hover:border-[rausch] hover:text-[rausch] transition-colors w-full justify-center">
+                      <button onClick={() => fileInputRef.current?.click()} className="flex items-center gap-2 px-4 py-3 border-2 border-dashed border-hairline rounded-md text-sm text-muted hover:border-rausch hover:text-rausch transition-colors w-full justify-center">
                         <Upload className="w-4 h-4" /> Clique para fazer upload de imagens
                       </button>
                     )}
@@ -444,7 +444,7 @@ export default function EditarClientePage() {
                           <div key={i} className="relative w-24 h-24 rounded-md overflow-hidden border group">
                             <img src={img} alt={`key visual ${i}`} className="w-full h-full object-cover" />
                             {editMode && (
-                              <button onClick={() => removeImage(i)} className="absolute top-1 right-1 w-6 h-6 bg-danger-bg0 text-white rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
+                              <button onClick={() => removeImage(i)} className="absolute top-1 right-1 w-6 h-6 bg-danger text-white rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
                                 <X className="w-3 h-3" />
                               </button>
                             )}
@@ -464,7 +464,7 @@ export default function EditarClientePage() {
                   <div>
                     <label className="block text-sm font-medium text-ink mb-2">Canais de atendimento</label>
                     <div className="flex flex-wrap gap-2">{CANAIS.map(c => (
-                      <button key={c} onClick={() => editMode && toggleArray("canais_atendimento", c)} className={`px-4 py-2 rounded-md text-sm font-medium transition-all ${form.canais_atendimento.includes(c) ? "bg-[rausch] text-white shadow" : "bg-surface-strong text-body"}`}>{c}</button>
+                      <button key={c} onClick={() => editMode && toggleArray("canais_atendimento", c)} className={`px-4 py-2 rounded-md text-sm font-medium transition-all ${form.canais_atendimento.includes(c) ? "bg-rausch text-white shadow" : "bg-surface-strong text-body"}`}>{c}</button>
                     ))}</div>
                   </div>
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
@@ -492,7 +492,7 @@ export default function EditarClientePage() {
                   <div>
                     <label className="block text-sm font-medium text-ink mb-2">Dias de atendimento</label>
                     <div className="flex flex-wrap gap-2">{DIAS.map(d => (
-                      <button key={d} onClick={() => editMode && toggleArray("dias_atendimento", d)} className={`w-12 h-12 rounded-md text-sm font-medium transition-all ${form.dias_atendimento.includes(d) ? "bg-[rausch] text-white shadow" : "bg-surface-strong text-body"}`}>{d}</button>
+                      <button key={d} onClick={() => editMode && toggleArray("dias_atendimento", d)} className={`w-12 h-12 rounded-md text-sm font-medium transition-all ${form.dias_atendimento.includes(d) ? "bg-rausch text-white shadow" : "bg-surface-strong text-body"}`}>{d}</button>
                     ))}</div>
                   </div>
                   <Field label="Informações adicionais" editMode={editMode}><textarea value={form.informacoes_adicionais} onChange={e => update("informacoes_adicionais", e.target.value)} placeholder="Algo mais que devamos saber?" rows={3} className="input-field resize-none" readOnly={!editMode} /></Field>
@@ -520,7 +520,7 @@ export default function EditarClientePage() {
                     </div>
                   ))}
                   {editMode && (
-                    <button onClick={addPersona} className="flex items-center gap-2 px-4 py-3 border-2 border-dashed border-hairline rounded-md text-sm text-muted hover:border-[rausch] hover:text-[rausch] transition-colors w-full justify-center">
+                    <button onClick={addPersona} className="flex items-center gap-2 px-4 py-3 border-2 border-dashed border-hairline rounded-md text-sm text-muted hover:border-rausch hover:text-rausch transition-colors w-full justify-center">
                       <Plus className="w-4 h-4" /> Adicionar outra persona
                     </button>
                   )}
@@ -532,7 +532,7 @@ export default function EditarClientePage() {
                 <div className="space-y-5">
                   <div className="bg-danger-bg border border-danger-bg rounded-md p-5">
                     <div className="flex items-center gap-2 mb-2">
-                      <div className="w-8 h-8 rounded-full bg-danger-bg0 text-white flex items-center justify-center text-sm font-bold">P</div>
+                      <div className="w-8 h-8 rounded-full bg-danger text-white flex items-center justify-center text-sm font-bold">P</div>
                       <h4 className="font-semibold text-danger-text">Porquê</h4>
                     </div>
                     <p className="text-xs text-danger-text mb-2">Propósito, causa, crença — por que a empresa existe?</p>
@@ -540,15 +540,15 @@ export default function EditarClientePage() {
                   </div>
                   <div className="bg-surface-soft border border-hairline rounded-md p-5">
                     <div className="flex items-center gap-2 mb-2">
-                      <div className="w-8 h-8 rounded-full bg-surface-soft0 text-white flex items-center justify-center text-sm font-bold">Q</div>
+                      <div className="w-8 h-8 rounded-full bg-surface-soft text-ink flex items-center justify-center text-sm font-bold">Q</div>
                       <h4 className="font-semibold text-rausch">O que</h4>
                     </div>
                     <p className="text-xs text-rausch mb-2">Produto, serviço, resultado — o que a empresa oferece?</p>
                     <textarea value={form.circulo_dourado.o_que} onChange={e => setForm(f => ({ ...f, circulo_dourado: { ...f.circulo_dourado, o_que: e.target.value } }))} placeholder="Ex: Criamos estratégias de marketing digital..." rows={3} className="input-field resize-none bg-canvas" readOnly={!editMode} />
                   </div>
-                  <div className="bg-success-bg border border-green-200 rounded-md p-5">
+                  <div className="bg-success-bg border border-success/20 rounded-md p-5">
                     <div className="flex items-center gap-2 mb-2">
-                      <div className="w-8 h-8 rounded-full bg-success-bg0 text-white flex items-center justify-center text-sm font-bold">C</div>
+                      <div className="w-8 h-8 rounded-full bg-success text-white flex items-center justify-center text-sm font-bold">C</div>
                       <h4 className="font-semibold text-success-text">Como</h4>
                     </div>
                     <p className="text-xs text-success-text mb-2">Processo, diferencial, método — como a empresa entrega?</p>
@@ -570,9 +570,9 @@ export default function EditarClientePage() {
               {/* STEP 9: PUV */}
               {step === 9 && (
                 <div className="space-y-5">
-                  <div className="bg-gradient-to-br from-[rausch]/5 to-[rausch]/5 border border-hairline rounded-md p-6">
+                  <div className="bg-gradient-to-br from-rausch/5 to-rausch/5 border border-hairline rounded-md p-6">
                     <h4 className="font-semibold text-ink mb-2 flex items-center gap-2">
-                      <Award className="w-5 h-5 text-[rausch]" />
+                      <Award className="w-5 h-5 text-rausch" />
                       Proposta Única de Valor (PUV)
                     </h4>
                     <p className="text-sm text-body mb-4">O que torna esse cliente único? Por que alguém deveria escolhê-lo?</p>
@@ -587,7 +587,7 @@ export default function EditarClientePage() {
                   <ChevronRight className="w-4 h-4 rotate-180" /> Voltar
                 </button>
                 {step < STEPS.length ? (
-                  <button onClick={() => setStep(s => Math.min(STEPS.length, s + 1))} className="flex items-center gap-2 px-8 py-3 bg-[rausch] text-white rounded-full text-sm font-medium hover:bg-[rausch-active] transition-all shadow-airbnb shadow-airbnb">
+                  <button onClick={() => setStep(s => Math.min(STEPS.length, s + 1))} className="flex items-center gap-2 px-8 py-3 bg-rausch text-white rounded-full text-sm font-medium hover:bg-rausch-active transition-all shadow-airbnb shadow-airbnb">
                     Próximo <ChevronRight className="w-4 h-4" />
                   </button>
                 ) : (

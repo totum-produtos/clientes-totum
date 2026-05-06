@@ -1,80 +1,123 @@
 "use client";
-import { startOfMonth, endOfMonth, startOfWeek, endOfWeek, eachDayOfInterval, isSameMonth, isSameDay, format } from 'date-fns';
-import { ptBR } from 'date-fns/locale';
+import {
+  startOfMonth, endOfMonth, startOfWeek, endOfWeek,
+  eachDayOfInterval, isSameMonth, isSameDay, format, addMonths, subMonths
+} from "date-fns";
+import { ptBR } from "date-fns/locale";
+import { ChevronLeft, ChevronRight } from "lucide-react";
 
-const circuloDouradoColors: Record<string, string> = {
-  porque: 'bg-warning-bg0',
-  oque: 'bg-emerald-500',
-  como: 'bg-sky-500',
+const tipoColors: Record<string, string> = {
+  porque: "bg-danger",
+  o_que: "bg-warning",
+  como: "bg-success",
+  oque: "bg-warning",
 };
 
-const circuloDouradoLabels: Record<string, string> = {
-  porque: 'P',
-  oque: 'Q',
-  como: 'C',
+const tipoLabels: Record<string, string> = {
+  porque: "P",
+  o_que: "Q",
+  como: "C",
+  oque: "Q",
 };
 
-type Post = {
-  id: number;
-  subject: string;
-  tipo: string;
-  published_at: string;
-};
-
-interface Props {
-  month: Date;
-  posts: Post[];
-  onDayClick: (date: Date) => void;
-  onPostClick: (post: Post) => void;
+interface CalendarEvent {
+  id: number | string;
+  title: string;
+  date: Date;
+  type: string;
 }
 
-export default function CalendarGrid({ month, posts, onDayClick, onPostClick }: Props) {
-  const monthStart = startOfMonth(month);
+interface Props {
+  currentMonth: Date;
+  onMonthChange: (date: Date) => void;
+  events: CalendarEvent[];
+  onDayClick: (date: Date) => void;
+  onEventClick: (event: CalendarEvent) => void;
+}
+
+export default function CalendarGrid({
+  currentMonth,
+  onMonthChange,
+  events,
+  onDayClick,
+  onEventClick,
+}: Props) {
+  const monthStart = startOfMonth(currentMonth);
   const monthEnd = endOfMonth(monthStart);
   const calendarStart = startOfWeek(monthStart, { locale: ptBR });
   const calendarEnd = endOfWeek(monthEnd, { locale: ptBR });
   const days = eachDayOfInterval({ start: calendarStart, end: calendarEnd });
 
+  const weekDays = ["Dom", "Seg", "Ter", "Qua", "Qui", "Sex", "Sáb"];
+
   return (
-    <div className="grid grid-cols-7 gap-1">
-      {['Dom', 'Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sáb'].map((d) => (
-        <div key={d} className="text-center text-xs font-medium text-muted py-2 uppercase">
-          {d}
-        </div>
-      ))}
-      {days.map((day) => {
-        const dayPosts = posts.filter((p) => isSameDay(new Date(p.published_at), day));
-        return (
-          <div
-            key={day.toISOString()}
-            onClick={() => onDayClick(day)}
-            className={`min-h-[80px] border rounded-lg p-1.5 cursor-pointer transition-colors hover:bg-surface-soft ${
-              !isSameMonth(day, month) ? 'bg-surface-soft/50 opacity-50' : 'bg-canvas'
-            } ${isSameDay(day, new Date()) ? 'ring-2 ring-[rausch] ring-offset-1' : ''}`}
-          >
-            <span className={`text-sm font-medium ${isSameDay(day, new Date()) ? 'text-[rausch]' : 'text-ink'}`}>
-              {format(day, 'd')}
-            </span>
-            <div className="flex flex-wrap gap-1 mt-1">
-              {dayPosts.map((p) => (
-                <button
-                  key={p.id}
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    onPostClick(p);
-                  }}
-                  className={`w-5 h-5 rounded-full text-[10px] font-bold text-white flex items-center justify-center ${
-                    circuloDouradoColors[p.tipo] || 'bg-gray-400'
-                  }`}
-                  title={`${p.subject} (${circuloDouradoLabels[p.tipo] || p.tipo})`}
-                >
-                  {circuloDouradoLabels[p.tipo] || '?'}
-                </button>
-              ))}
+    <div className="bg-canvas rounded-md border border-hairline shadow-airbnb overflow-hidden">
+      {/* Header com navegação de mês */}
+      <div className="flex items-center justify-between px-4 py-3 border-b border-hairline-soft">
+        <button
+          onClick={() => onMonthChange(subMonths(currentMonth, 1))}
+          className="p-1.5 rounded-md hover:bg-surface-soft text-muted hover:text-ink transition-colors"
+          aria-label="Mês anterior"
+        >
+          <ChevronLeft className="w-5 h-5" />
+        </button>
+        <h2 className="text-title-sm font-cereal text-ink capitalize">
+          {format(currentMonth, "MMMM yyyy", { locale: ptBR })}
+        </h2>
+        <button
+          onClick={() => onMonthChange(addMonths(currentMonth, 1))}
+          className="p-1.5 rounded-md hover:bg-surface-soft text-muted hover:text-ink transition-colors"
+          aria-label="Próximo mês"
+        >
+          <ChevronRight className="w-5 h-5" />
+        </button>
+      </div>
+
+      <div className="p-3">
+        <div className="grid grid-cols-7 gap-1">
+          {weekDays.map((d) => (
+            <div key={d} className="text-center text-caption text-muted py-2 uppercase font-medium">
+              {d}
             </div>
-          </div>
-        );
-      })}
+          ))}
+          {days.map((day) => {
+            const dayEvents = events.filter((e) => isSameDay(e.date, day));
+            const isToday = isSameDay(day, new Date());
+            const isCurrentMonth = isSameMonth(day, currentMonth);
+
+            return (
+              <div
+                key={day.toISOString()}
+                onClick={() => onDayClick(day)}
+                className={`min-h-[80px] border rounded-lg p-1.5 cursor-pointer transition-colors hover:bg-surface-soft ${
+                  !isCurrentMonth ? "bg-surface-soft/50 opacity-50" : "bg-canvas"
+                } ${isToday ? "ring-2 ring-rausch ring-offset-1" : ""}`}
+              >
+                <span className={`text-sm font-medium ${isToday ? "text-rausch" : "text-ink"}`}>
+                  {format(day, "d")}
+                </span>
+                <div className="flex flex-wrap gap-1 mt-1">
+                  {dayEvents.map((e) => (
+                    <button
+                      key={e.id}
+                      onClick={(ev) => {
+                        ev.stopPropagation();
+                        onEventClick(e);
+                      }}
+                      className={`w-5 h-5 rounded-full text-[10px] font-bold text-on-primary flex items-center justify-center ${
+                        tipoColors[e.type] || "bg-muted"
+                      }`}
+                      title={`${e.title} (${tipoLabels[e.type] || e.type})`}
+                    >
+                      {tipoLabels[e.type] || "?"}
+                    </button>
+                  ))}
+                </div>
+              </div>
+            );
+          })}
+        </div>
+      </div>
     </div>
   );
 }

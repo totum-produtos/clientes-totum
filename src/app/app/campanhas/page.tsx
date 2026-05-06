@@ -114,7 +114,7 @@ export default function CampanhasPage() {
     }
 
     if (loading) {
-        return <div className="flex justify-center p-8"><div className="animate-spin h-8 w-8 border-b-2 border-primary-600 rounded-full"></div></div>;
+        return <div className="flex justify-center p-8"><div className="animate-spin h-8 w-8 border-b-2 border-rausch rounded-full"></div></div>;
     }
 
     const totalViews = posts.reduce((sum, p) => sum + (p.views || 0), 0);
@@ -144,13 +144,13 @@ export default function CampanhasPage() {
             <div className="flex gap-2 border-b border-hairline">
                 <button
                     onClick={() => setActiveTab('organic')}
-                    className={`px-4 py-2 text-sm font-medium border-b-2 transition-colors ${activeTab === 'organic' ? 'border-[rausch] text-[rausch]' : 'border-transparent text-muted hover:text-ink'}`}
+                    className={`px-4 py-2 text-sm font-medium border-b-2 transition-colors ${activeTab === 'organic' ? 'border-rausch text-rausch' : 'border-transparent text-muted hover:text-ink'}`}
                 >
                     Conteúdo Orgânico
                 </button>
                 <button
                     onClick={() => setActiveTab('paid')}
-                    className={`px-4 py-2 text-sm font-medium border-b-2 transition-colors ${activeTab === 'paid' ? 'border-[rausch] text-[rausch]' : 'border-transparent text-muted hover:text-ink'}`}
+                    className={`px-4 py-2 text-sm font-medium border-b-2 transition-colors ${activeTab === 'paid' ? 'border-rausch text-rausch' : 'border-transparent text-muted hover:text-ink'}`}
                 >
                     Campanhas Pagas
                 </button>
@@ -161,25 +161,25 @@ export default function CampanhasPage() {
                     <div className="grid gap-4 md:grid-cols-4">
                         <Card>
                             <CardContent className="p-4 flex items-center gap-4">
-                                <div className="p-3 bg-primary-50 rounded-lg"><Eye className="h-5 w-5 text-primary-600" /></div>
+                                <div className="p-3 bg-rausch/5 rounded-lg"><Eye className="h-5 w-5 text-rausch" /></div>
                                 <div><p className="text-sm text-muted">Total Views</p><p className="text-lg font-bold">{totalViews.toLocaleString()}</p></div>
                             </CardContent>
                         </Card>
                         <Card>
                             <CardContent className="p-4 flex items-center gap-4">
-                                <div className="p-3 bg-primary-50 rounded-lg"><Heart className="h-5 w-5 text-primary-600" /></div>
+                                <div className="p-3 bg-rausch/5 rounded-lg"><Heart className="h-5 w-5 text-rausch" /></div>
                                 <div><p className="text-sm text-muted">Total Likes</p><p className="text-lg font-bold">{totalLikes.toLocaleString()}</p></div>
                             </CardContent>
                         </Card>
                         <Card>
                             <CardContent className="p-4 flex items-center gap-4">
-                                <div className="p-3 bg-primary-50 rounded-lg"><BarChart3 className="h-5 w-5 text-primary-600" /></div>
+                                <div className="p-3 bg-rausch/5 rounded-lg"><BarChart3 className="h-5 w-5 text-rausch" /></div>
                                 <div><p className="text-sm text-muted">Engajamento médio</p><p className="text-lg font-bold">{avgEngagement}%</p></div>
                             </CardContent>
                         </Card>
                         <Card>
                             <CardContent className="p-4 flex items-center gap-4">
-                                <div className="p-3 bg-primary-50 rounded-lg"><TrendingUp className="h-5 w-5 text-primary-600" /></div>
+                                <div className="p-3 bg-rausch/5 rounded-lg"><TrendingUp className="h-5 w-5 text-rausch" /></div>
                                 <div><p className="text-sm text-muted">Posts</p><p className="text-lg font-bold">{posts.length}</p></div>
                             </CardContent>
                         </Card>
@@ -269,7 +269,7 @@ export default function CampanhasPage() {
                                 <button
                                     onClick={connectMeta}
                                     disabled={connecting === 'meta' || !metaAccountId || !metaToken}
-                                    className="w-full py-2 px-4 bg-[rausch] text-white rounded-lg text-sm font-medium hover:bg-[rausch-active] disabled:opacity-50"
+                                    className="w-full py-2 px-4 bg-rausch text-white rounded-lg text-sm font-medium hover:bg-rausch-active disabled:opacity-50"
                                 >
                                     {connecting === 'meta' ? 'Conectando...' : 'Conectar Meta Ads'}
                                 </button>
@@ -295,7 +295,7 @@ export default function CampanhasPage() {
                                 <button
                                     onClick={connectGoogle}
                                     disabled={connecting === 'google' || !googleCustomerId || !googleDevToken}
-                                    className="w-full py-2 px-4 bg-[rausch] text-white rounded-lg text-sm font-medium hover:bg-[rausch-active] disabled:opacity-50"
+                                    className="w-full py-2 px-4 bg-rausch text-white rounded-lg text-sm font-medium hover:bg-rausch-active disabled:opacity-50"
                                 >
                                     {connecting === 'google' ? 'Conectando...' : 'Conectar Google Ads'}
                                 </button>

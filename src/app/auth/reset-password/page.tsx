@@ -75,7 +75,7 @@ export default function ResetPasswordPage() {
             <div className="bg-canvas py-8 px-4 shadow sm:rounded-lg sm:px-10">
                 <div className="text-center">
                     <div className="flex justify-center mb-4">
-                        <CheckCircle className="h-16 w-16 text-green-500" />
+                        <CheckCircle className="h-16 w-16 text-success" />
                     </div>
 
                     <h2 className="text-2xl font-bold text-ink mb-2">
@@ -95,7 +95,7 @@ export default function ResetPasswordPage() {
         <div className="bg-canvas py-8 px-4 shadow sm:rounded-lg sm:px-10">
             <div className="sm:mx-auto sm:w-full sm:max-w-md">
                 <div className="flex justify-center mb-4">
-                    <Key className="h-12 w-12 text-primary-600" />
+                    <Key className="h-12 w-12 text-rausch" />
                 </div>
                 <h2 className="text-2xl font-bold text-center text-ink mb-8">
                     Create new password
@@ -122,7 +122,7 @@ export default function ResetPasswordPage() {
                             required
                             value={newPassword}
                             onChange={(e) => setNewPassword(e.target.value)}
-                            className="block w-full appearance-none rounded-md border border-hairline px-3 py-2 shadow-airbnb focus:border-primary-500 focus:outline-none focus:ring-primary-500"
+                            className="block w-full appearance-none rounded-md border border-hairline px-3 py-2 shadow-airbnb focus:border-rausch focus:outline-none focus:ring-rausch"
                         />
                     </div>
                 </div>
@@ -140,7 +140,7 @@ export default function ResetPasswordPage() {
                             required
                             value={confirmPassword}
                             onChange={(e) => setConfirmPassword(e.target.value)}
-                            className="block w-full appearance-none rounded-md border border-hairline px-3 py-2 shadow-airbnb focus:border-primary-500 focus:outline-none focus:ring-primary-500"
+                            className="block w-full appearance-none rounded-md border border-hairline px-3 py-2 shadow-airbnb focus:border-rausch focus:outline-none focus:ring-rausch"
                         />
                     </div>
                     <p className="mt-2 text-sm text-muted">
@@ -152,7 +152,7 @@ export default function ResetPasswordPage() {
                     <button
                         type="submit"
                         disabled={loading}
-                        className="flex w-full justify-center rounded-md border border-transparent bg-primary-600 py-2 px-4 text-sm font-medium text-white shadow-airbnb hover:bg-primary-700 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-2 disabled:opacity-50"
+                        className="flex w-full justify-center rounded-md border border-transparent bg-rausch py-2 px-4 text-sm font-medium text-white shadow-airbnb hover:bg-rausch-active focus:outline-none focus:ring-2 focus:ring-rausch focus:ring-offset-2 disabled:opacity-50"
                     >
                         {loading ? 'Resetting password...' : 'Reset password'}
                     </button>
