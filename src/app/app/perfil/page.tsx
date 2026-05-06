@@ -289,6 +289,7 @@ export default function PerfilPage() {
                 <div>
                   <label className="block text-caption text-ink mb-1.5">Idioma</label>
                   <select
+
                     value={form.idioma}
                     onChange={e => setForm(f => ({ ...f, idioma: e.target.value }))}
                     className="input-field"
@@ -299,6 +300,7 @@ export default function PerfilPage() {
                 <div>
                   <label className="block text-caption text-ink mb-1.5">Fuso horário</label>
                   <select
+
                     value={form.timezone}
                     onChange={e => setForm(f => ({ ...f, timezone: e.target.value }))}
                     className="input-field"

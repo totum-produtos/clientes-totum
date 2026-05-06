@@ -117,7 +117,7 @@ export default function DrivePage() {
               placeholder="https://drive.google.com/drive/folders/1aBcD..."
               value={driveUrl}
               onChange={(e) => setDriveUrl(e.target.value)}
-              className="w-full px-4 py-3 border rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-rausch"
+              className="w-full px-4 py-3 border rounded-none text-sm focus:outline-none focus:ring-2 focus:ring-rausch"
             />
             <button
               onClick={saveDriveFolder}

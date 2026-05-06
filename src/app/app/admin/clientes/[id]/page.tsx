@@ -405,13 +405,13 @@ export default function EditarClientePage() {
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
                     <Field label="Cor primária" editMode={editMode}>
                       <div className="flex items-center gap-3">
-                        <input type="color" value={form.cor_primaria} onChange={e => update("cor_primaria", e.target.value)} className="w-12 h-12 rounded-sm border cursor-pointer" disabled={!editMode} />
+                        <input type="color" value={form.cor_primaria} onChange={e => update("cor_primaria", e.target.value)} className="w-12 h-12 rounded-none border cursor-pointer" disabled={!editMode} />
                         <input value={form.cor_primaria} onChange={e => update("cor_primaria", e.target.value)} className="input-field font-mono uppercase" readOnly={!editMode} />
                       </div>
                     </Field>
                     <Field label="Cor secundária" editMode={editMode}>
                       <div className="flex items-center gap-3">
-                        <input type="color" value={form.cor_secundaria} onChange={e => update("cor_secundaria", e.target.value)} className="w-12 h-12 rounded-sm border cursor-pointer" disabled={!editMode} />
+                        <input type="color" value={form.cor_secundaria} onChange={e => update("cor_secundaria", e.target.value)} className="w-12 h-12 rounded-none border cursor-pointer" disabled={!editMode} />
                         <input value={form.cor_secundaria} onChange={e => update("cor_secundaria", e.target.value)} className="input-field font-mono uppercase" readOnly={!editMode} />
                       </div>
                     </Field>

@@ -248,7 +248,7 @@ export default function FeedPostagensPage() {
             placeholder="Buscar por assunto..."
             value={filtroBusca}
             onChange={(e) => setFiltroBusca(e.target.value)}
-            className="w-full pl-10 pr-4 py-2 border rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-rausch bg-canvas"
+            className="w-full pl-10 pr-4 py-2 border rounded-none text-sm focus:outline-none focus:ring-2 focus:ring-rausch bg-canvas"
           />
         </div>
         <div className="flex gap-2">

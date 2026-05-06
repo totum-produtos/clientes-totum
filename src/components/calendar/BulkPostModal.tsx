@@ -106,6 +106,7 @@ export default function BulkPostModal({ isOpen, onClose, onSave, clientId }: Bul
                                 </button>
                             </div>
                             <textarea
+
                                 value={csvText}
                                 onChange={e => setCsvText(e.target.value)}
                                 rows={8}
@@ -128,6 +129,7 @@ export default function BulkPostModal({ isOpen, onClose, onSave, clientId }: Bul
                                             className="col-span-6 px-3 py-2 border rounded-lg text-sm"
                                         />
                                         <select
+
                                             value={post.tipo}
                                             onChange={e => updateRow(idx, 'tipo', e.target.value)}
                                             className="col-span-3 px-3 py-2 border rounded-lg text-sm"

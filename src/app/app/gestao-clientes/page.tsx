@@ -270,7 +270,7 @@ export default function GestaoClientesPage() {
                   : 'bg-canvas border text-body hover:bg-surface-soft'
               }`}
             >
-              {status === 'todos' ? 'Todos' : STATUS_CONFIG[status]?.label || status}
+              {status === 'todos' ? 'Todos' : STATUS_CONFIG[status]?.label || status || '—'}
             </button>
           ))}
         </div>
@@ -294,7 +294,7 @@ export default function GestaoClientesPage() {
       {viewMode === 'grid' && (
         <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
           {clientesFiltrados.map((cliente) => {
-            const statusCfg = STATUS_CONFIG[cliente.status || 'inactive'];
+            const statusCfg = STATUS_CONFIG[cliente.status || 'inactive'] || STATUS_CONFIG.inactive;
             return (
               <Card
                 key={cliente.id}
@@ -408,7 +408,7 @@ export default function GestaoClientesPage() {
             <div className="col-span-2 text-right">Ações</div>
           </div>
           {clientesFiltrados.map((cliente) => {
-            const statusCfg = STATUS_CONFIG[cliente.status || 'inactive'];
+            const statusCfg = STATUS_CONFIG[cliente.status || 'inactive'] || STATUS_CONFIG.inactive;
             return (
               <div
                 key={cliente.id}
@@ -525,7 +525,7 @@ function ClienteDashboard({ cliente, onClose }: { cliente: any; onClose: () => v
     load();
   }, [cliente.id]);
 
-  const statusCfg = STATUS_CONFIG[cliente.status] || STATUS_CONFIG.inactive;
+  const statusCfg = STATUS_CONFIG[cliente.status || 'inactive'] || STATUS_CONFIG.inactive || { label: '—', bg: 'bg-surface-strong', text: 'text-body' };
 
   return (
     <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4" onClick={onClose}>

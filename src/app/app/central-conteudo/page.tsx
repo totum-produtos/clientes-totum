@@ -258,7 +258,7 @@ export default function CentralConteudoPage() {
               placeholder="Buscar cliente..."
               value={search}
               onChange={(e) => setSearch(e.target.value)}
-              className="w-full pl-9 pr-3 py-2 border rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-rausch"
+              className="w-full pl-9 pr-3 py-2 border rounded-none text-sm focus:outline-none focus:ring-2 focus:ring-rausch"
             />
           </div>
         </div>
