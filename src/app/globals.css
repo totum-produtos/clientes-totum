@@ -308,6 +308,10 @@
     .input-primary {
         @apply border-secondary-300 focus:border-primary-500 focus:ring-primary-500;
     }
+
+    .input-field {
+        @apply w-full px-4 py-3 border border-gray-200 rounded-xl text-sm text-gray-900 placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-[#3b82f6]/20 focus:border-[#3b82f6] transition-all bg-white;
+    }
 }
 
 
