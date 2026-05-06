@@ -198,7 +198,7 @@ export default function GestaoClientesPage() {
           </p>
         </div>
         <button
-          onClick={() => router.push('/app/admin')}
+          onClick={() => router.push('/app/admin/clientes/novo')}
           className="inline-flex items-center gap-2 px-4 py-2 bg-[#d81220] text-white rounded-lg text-sm font-medium hover:bg-[#b91c1c] transition-colors"
         >
           <Building2 className="h-4 w-4" />
@@ -298,7 +298,7 @@ export default function GestaoClientesPage() {
               <Card
                 key={cliente.id}
                 className="cursor-pointer hover:shadow-md transition-shadow group"
-                onClick={() => setClienteSelecionado(cliente)}
+                onClick={() => router.push(`/app/admin/clientes/${cliente.id}`)}
               >
                 <CardContent className="p-5">
                   <div className="flex items-start justify-between mb-3">
@@ -412,7 +412,7 @@ export default function GestaoClientesPage() {
               <div
                 key={cliente.id}
                 className="grid grid-cols-12 gap-4 px-4 py-3 border-b last:border-0 hover:bg-gray-50 transition-colors items-center cursor-pointer"
-                onClick={() => setClienteSelecionado(cliente)}
+                onClick={() => router.push(`/app/admin/clientes/${cliente.id}`)}
               >
                 <div className="col-span-3 flex items-center gap-3">
                   <div className="w-8 h-8 rounded bg-[#d81220] flex items-center justify-center text-white font-bold text-sm shrink-0">
@@ -450,7 +450,7 @@ export default function GestaoClientesPage() {
                     <Trash2 className="h-4 w-4 text-red-400" />
                   </button>
                   <button
-                    onClick={(e) => { e.stopPropagation(); setClienteSelecionado(cliente); }}
+                    onClick={(e) => { e.stopPropagation(); router.push(`/app/admin/clientes/${cliente.id}`); }}
                     className="p-1.5 hover:bg-gray-100 rounded"
                   >
                     <ExternalLink className="h-4 w-4 text-gray-400" />
