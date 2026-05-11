@@ -11,6 +11,11 @@ const nextConfig: NextConfig = {
   typescript: {
     ignoreBuildErrors: false,
   },
+  async redirects() {
+    return [
+      { source: '/novo', destination: '/app/admin/clientes/novo', permanent: false },
+    ];
+  },
 };
 
 export default nextConfig;
