@@ -1,17 +1,27 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { Suspense, useState, useEffect } from 'react';
 import { createSPASassClient } from '@/lib/supabase/client';
-import { useRouter } from 'next/navigation';
+import { useRouter, useSearchParams } from 'next/navigation';
 import { CheckCircle, Key } from 'lucide-react';
 
 export default function ResetPasswordPage() {
+    return (
+        <Suspense fallback={<div className="bg-canvas py-8 px-4 shadow sm:rounded-lg sm:px-10" />}>
+            <ResetPasswordPageInner />
+        </Suspense>
+    );
+}
+
+function ResetPasswordPageInner() {
     const [newPassword, setNewPassword] = useState('');
     const [confirmPassword, setConfirmPassword] = useState('');
     const [error, setError] = useState('');
     const [loading, setLoading] = useState(false);
     const [success, setSuccess] = useState(false);
     const router = useRouter();
+    const searchParams = useSearchParams();
+    const isInvite = searchParams.get('invite') === 'true';
 
     // Check if we have a valid recovery session
     useEffect(() => {
@@ -57,7 +67,7 @@ export default function ResetPasswordPage() {
 
             setSuccess(true);
             setTimeout(() => {
-                router.push('/app');
+                router.push(isInvite ? '/app/meu-cadastro' : '/app');
             }, 3000);
         } catch (err) {
             if (err instanceof Error) {
@@ -79,12 +89,13 @@ export default function ResetPasswordPage() {
                     </div>
 
                     <h2 className="text-2xl font-bold text-ink mb-2">
-                        Password reset successful
+                        {isInvite ? 'Senha criada com sucesso' : 'Password reset successful'}
                     </h2>
 
                     <p className="text-body mb-8">
-                        Your password has been successfully reset.
-                        You will be redirected to the app in a moment.
+                        {isInvite
+                            ? 'Estamos te direcionando para preencher os dados da sua empresa…'
+                            : 'Your password has been successfully reset. You will be redirected to the app in a moment.'}
                     </p>
                 </div>
             </div>
@@ -97,9 +108,14 @@ export default function ResetPasswordPage() {
                 <div className="flex justify-center mb-4">
                     <Key className="h-12 w-12 text-rausch" />
                 </div>
-                <h2 className="text-2xl font-bold text-center text-ink mb-8">
-                    Create new password
+                <h2 className="text-2xl font-bold text-center text-ink mb-2">
+                    {isInvite ? 'Bem-vindo! Crie sua senha' : 'Create new password'}
                 </h2>
+                {isInvite && (
+                    <p className="text-sm text-center text-body mb-6">
+                        Defina uma senha para acessar o portal. Depois você preencherá os dados da sua empresa.
+                    </p>
+                )}
             </div>
 
             {error && (
