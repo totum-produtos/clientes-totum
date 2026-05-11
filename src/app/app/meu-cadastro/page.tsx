@@ -22,7 +22,7 @@ const SECTIONS = [
 export default function MinhasEmpresaPage() {
   const { user, client, loading: globalLoading, refreshData } = useGlobal();
   const [clientData, setClientData] = useState<any>(null);
-  const [editMode, setEditMode] = useState(false);
+  const [editMode, setEditMode] = useState(true);
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState("");
   const [expanded, setExpanded] = useState<string[]>(["empresa"]);
