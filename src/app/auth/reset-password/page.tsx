@@ -23,22 +23,50 @@ function ResetPasswordPageInner() {
     const searchParams = useSearchParams();
     const isInvite = searchParams.get('invite') === 'true';
 
-    // Check if we have a valid recovery session
+    // Initialise session from invite link.
+    // The Supabase admin-generated invite redirects with tokens in the URL fragment
+    // (#access_token=...&refresh_token=...) when PKCE is not negotiated. The
+    // @supabase/ssr browser client defaults to PKCE so it does NOT auto-parse
+    // the fragment, so we parse it ourselves and call setSession.
     useEffect(() => {
-        const checkSession = async () => {
-            try {
-                const supabase = await createSPASassClient();
-                const { data: { user }, error } = await supabase.getSupabaseClient().auth.getUser();
+        let mounted = true;
 
-                if (error || !user) {
-                    setError('Invalid or expired reset link. Please request a new password reset.');
+        const initSession = async () => {
+            const supabase = await createSPASassClient();
+            const client = supabase.getSupabaseClient();
+
+            // Try to extract tokens from URL fragment
+            if (typeof window !== 'undefined' && window.location.hash) {
+                const hashParams = new URLSearchParams(window.location.hash.substring(1));
+                const accessToken = hashParams.get('access_token');
+                const refreshToken = hashParams.get('refresh_token');
+
+                if (accessToken && refreshToken) {
+                    const { error: setErr } = await client.auth.setSession({
+                        access_token: accessToken,
+                        refresh_token: refreshToken,
+                    });
+                    if (!mounted) return;
+                    if (setErr) {
+                        setError('Invalid or expired reset link. Please request a new password reset.');
+                        return;
+                    }
+                    // Clear sensitive fragment from URL
+                    window.history.replaceState(null, '', window.location.pathname + window.location.search);
+                    return;
                 }
-            } catch {
-                setError('Failed to verify reset session');
+            }
+
+            // No fragment: maybe we already have a session (forgot-password flow)
+            const { data: { session } } = await client.auth.getSession();
+            if (!mounted) return;
+            if (!session) {
+                setError('Invalid or expired reset link. Please request a new password reset.');
             }
         };
 
-        checkSession();
+        initSession();
+        return () => { mounted = false; };
     }, []);
 
     const handleSubmit = async (e: React.FormEvent) => {

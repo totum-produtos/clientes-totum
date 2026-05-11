@@ -123,10 +123,12 @@ export async function POST(request: Request) {
     const origin =
       request.headers.get("origin") ||
       process.env.NEXT_PUBLIC_SITE_URL ||
-      "https://apps.grupototum.com";
-    const redirectTo = `${origin}/api/auth/callback?next=${encodeURIComponent(
-      "/auth/reset-password?invite=true",
-    )}`;
+      "https://cliente.grupototum.com";
+    // Vai direto para a tela de criar senha. O createBrowserClient do
+    // @supabase/ssr processa o fragment (#access_token=...) automaticamente
+    // via detectSessionInUrl, então não precisamos passar pelo callback
+    // server-side (que só lê query, não fragment).
+    const redirectTo = `${origin}/auth/reset-password?invite=true`;
 
     const { data: linkData, error: linkErr } = await admin.auth.admin.generateLink({
       type: "invite",
