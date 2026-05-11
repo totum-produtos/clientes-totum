@@ -5,6 +5,7 @@ import { createSSRSassClient } from "@/lib/supabase/server";
 export async function GET(request: Request) {
     const requestUrl = new URL(request.url)
     const code = requestUrl.searchParams.get('code')
+    const next = requestUrl.searchParams.get('next')
 
     if (code) {
         const supabase = await createSSRSassClient()
@@ -24,6 +25,12 @@ export async function GET(request: Request) {
         // If user needs to complete MFA verification
         if (aal.nextLevel === 'aal2' && aal.nextLevel !== aal.currentLevel) {
             return NextResponse.redirect(new URL('/auth/2fa', request.url))
+        }
+
+        // If `next` was provided (e.g. invite flow → /auth/reset-password?invite=true),
+        // honour it as long as it's a same-origin relative path.
+        if (next && next.startsWith('/')) {
+            return NextResponse.redirect(new URL(next, request.url))
         }
 
         // If MFA is not required or already verified, proceed to app

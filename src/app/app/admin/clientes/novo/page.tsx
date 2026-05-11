@@ -2,12 +2,11 @@
 
 import React, { useState, useRef } from "react";
 import { useRouter } from "next/navigation";
-import { createSPASassClient } from "@/lib/supabase/client";
 import {
   Building2, Briefcase, Target, Palette, Phone, Check, ChevronRight,
   User, Globe, Mail, Type, Paintbrush, Eye, Clock, Calendar,
   MessageSquare, Hash, Users, CircleDot, Award, Star, Upload,
-  FolderOpen, AlertCircle, X, Plus, Trash2
+  FolderOpen, AlertCircle, X, Plus, Trash2, Copy, Link2
 } from "lucide-react";
 
 const STEPS = [
@@ -38,6 +37,8 @@ export default function NovoClientePage() {
   const [step, setStep] = useState(1);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
+  const [inviteLink, setInviteLink] = useState<string | null>(null);
+  const [copied, setCopied] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const [form, setForm] = useState({
@@ -88,45 +89,116 @@ export default function NovoClientePage() {
 
   const removeImage = (idx: number) => setForm(f => ({ ...f, key_visual_images: f.key_visual_images.filter((_, i) => i !== idx) }));
 
-  const gerarSlug = (nome: string) => nome.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "");
-
   const handleSubmit = async () => {
     setLoading(true); setError("");
     try {
-      const supabase = await createSPASassClient();
-      const { error: insertError } = await supabase.getSupabaseClient().from("portal_clients").insert({
-        nome: form.nome,
-        slug: gerarSlug(form.nome) || `cliente-${Date.now()}`,
-        email_responsavel: form.email_responsavel,
-        contato_principal: form.telefone,
-        status: "ativo",
-        cnpj: form.cnpj, nome_responsavel: form.nome_responsavel, telefone: form.telefone, site: form.site,
-        cor_primaria: form.cor_primaria, cor_secundaria: form.cor_secundaria,
-        ramo_atuacao: form.ramo_atuacao, tempo_mercado: form.tempo_mercado,
-        descricao_negocio: form.descricao_negocio, produtos_servicos: form.produtos_servicos,
-        tamanho_empresa: form.tamanho_empresa, faturamento_mensal: form.faturamento_mensal,
-        profile_data: {
-          nicho_principal: form.nicho_principal, dores_principais: form.dores_principais,
-          desejos_objetivos: form.desejos_objetivos, faixa_etaria: form.faixa_etaria,
-          genero_alvo: form.genero_alvo, localizacao_alvo: form.localizacao_alvo,
-          classe_social: form.classe_social, tom_voz: form.tom_voz,
-          fontes: form.fontes, key_visual_desc: form.key_visual_desc,
-          key_visual_images: form.key_visual_images, personalidade_visual: form.personalidade_visual,
-          canais_atendimento: form.canais_atendimento, crm_utilizado: form.crm_utilizado,
-          sla_resposta: form.sla_resposta, horario_inicio: form.horario_inicio,
-          horario_fim: form.horario_fim, dias_atendimento: form.dias_atendimento,
-          informacoes_adicionais: form.informacoes_adicionais,
-          personas: form.personas, circulo_dourado: form.circulo_dourado,
-          caracteristicas_marca: form.caracteristicas_marca, puv: form.puv,
-        },
+      const res = await fetch("/api/admin/clientes/criar", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          nome: form.nome,
+          email_responsavel: form.email_responsavel,
+          cnpj: form.cnpj, nome_responsavel: form.nome_responsavel,
+          telefone: form.telefone, site: form.site,
+          cor_primaria: form.cor_primaria, cor_secundaria: form.cor_secundaria,
+          ramo_atuacao: form.ramo_atuacao, tempo_mercado: form.tempo_mercado,
+          descricao_negocio: form.descricao_negocio, produtos_servicos: form.produtos_servicos,
+          tamanho_empresa: form.tamanho_empresa, faturamento_mensal: form.faturamento_mensal,
+          profile_data: {
+            nicho_principal: form.nicho_principal, dores_principais: form.dores_principais,
+            desejos_objetivos: form.desejos_objetivos, faixa_etaria: form.faixa_etaria,
+            genero_alvo: form.genero_alvo, localizacao_alvo: form.localizacao_alvo,
+            classe_social: form.classe_social, tom_voz: form.tom_voz,
+            fontes: form.fontes, key_visual_desc: form.key_visual_desc,
+            key_visual_images: form.key_visual_images, personalidade_visual: form.personalidade_visual,
+            canais_atendimento: form.canais_atendimento, crm_utilizado: form.crm_utilizado,
+            sla_resposta: form.sla_resposta, horario_inicio: form.horario_inicio,
+            horario_fim: form.horario_fim, dias_atendimento: form.dias_atendimento,
+            informacoes_adicionais: form.informacoes_adicionais,
+            personas: form.personas, circulo_dourado: form.circulo_dourado,
+            caracteristicas_marca: form.caracteristicas_marca, puv: form.puv,
+          },
+        }),
       });
-      if (insertError) throw insertError;
-      router.push("/app/admin");
+      const data = await res.json();
+      if (!res.ok || !data.success) {
+        throw new Error(data.error || "Erro ao criar cliente");
+      }
+      setInviteLink(data.inviteLink);
     } catch (err: any) { setError(err.message || "Erro ao criar cliente"); }
     finally { setLoading(false); }
   };
 
+  const copiarLink = async () => {
+    if (!inviteLink) return;
+    await navigator.clipboard.writeText(inviteLink);
+    setCopied(true);
+    setTimeout(() => setCopied(false), 2000);
+  };
+
   const StepIcon = STEPS[step - 1].icon;
+
+  if (inviteLink) {
+    return (
+      <div className="min-h-screen bg-surface-soft pb-12 flex items-center justify-center px-4">
+        <div className="max-w-2xl w-full bg-canvas rounded-lg border shadow-airbnb p-8">
+          <div className="flex justify-center mb-6">
+            <div className="w-16 h-16 rounded-full bg-success-bg flex items-center justify-center">
+              <Check className="w-8 h-8 text-success-text" />
+            </div>
+          </div>
+          <h1 className="text-2xl font-bold text-ink text-center mb-2">Cliente criado!</h1>
+          <p className="text-sm text-body text-center mb-6">
+            Copie o link abaixo e envie ao cliente (WhatsApp, email, etc).
+            Ele será direcionado para criar a senha e preencher os dados da empresa.
+          </p>
+
+          <div className="bg-surface-soft border border-hairline rounded-md p-4 mb-4">
+            <div className="flex items-center gap-2 mb-2">
+              <Link2 className="w-4 h-4 text-rausch" />
+              <span className="text-xs font-semibold uppercase tracking-wide text-muted">Link de convite</span>
+            </div>
+            <div className="flex items-stretch gap-2">
+              <input
+                type="text"
+                value={inviteLink}
+                readOnly
+                onClick={(e) => (e.target as HTMLInputElement).select()}
+                className="flex-1 bg-canvas border border-hairline rounded-md px-3 py-2 text-xs font-mono text-ink select-all"
+              />
+              <button
+                onClick={copiarLink}
+                className={`flex items-center gap-2 px-4 py-2 rounded-md text-sm font-medium transition-all ${
+                  copied ? "bg-success text-white" : "bg-rausch text-white hover:bg-rausch-active"
+                }`}
+              >
+                {copied ? <><Check className="w-4 h-4" /> Copiado</> : <><Copy className="w-4 h-4" /> Copiar</>}
+              </button>
+            </div>
+          </div>
+
+          <div className="bg-warning-bg border border-warning-bg rounded-md p-4 mb-6 text-sm text-warning-text">
+            <strong>Atenção:</strong> o link é de uso único. Após o cliente clicar e criar a senha, ele não funcionará mais.
+          </div>
+
+          <div className="flex gap-3">
+            <button
+              onClick={() => router.push("/app/admin")}
+              className="flex-1 px-6 py-3 bg-rausch text-white rounded-full text-sm font-medium hover:bg-rausch-active transition-all shadow-airbnb"
+            >
+              Ir para Admin
+            </button>
+            <button
+              onClick={() => { setInviteLink(null); window.location.reload(); }}
+              className="px-6 py-3 border border-hairline text-body rounded-full text-sm font-medium hover:bg-surface-soft transition-all"
+            >
+              Criar outro cliente
+            </button>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-surface-soft pb-12">
