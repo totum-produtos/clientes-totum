@@ -23,22 +23,45 @@ function ResetPasswordPageInner() {
     const searchParams = useSearchParams();
     const isInvite = searchParams.get('invite') === 'true';
 
-    // Check if we have a valid recovery session
+    // Check if we have a valid recovery session.
+    // For invite flow, the Supabase access_token comes in the URL fragment
+    // (#access_token=...) and detectSessionInUrl processes it asynchronously.
+    // We listen for onAuthStateChange to know when init is complete.
     useEffect(() => {
-        const checkSession = async () => {
-            try {
-                const supabase = await createSPASassClient();
-                const { data: { user }, error } = await supabase.getSupabaseClient().auth.getUser();
+        let mounted = true;
+        let resolved = false;
 
-                if (error || !user) {
+        const setup = async () => {
+            const supabase = await createSPASassClient();
+            const client = supabase.getSupabaseClient();
+
+            const { data: { subscription } } = client.auth.onAuthStateChange((event, session) => {
+                if (!mounted) return;
+                if (event === 'INITIAL_SESSION' || event === 'SIGNED_IN' || event === 'TOKEN_REFRESHED') {
+                    resolved = true;
+                    if (!session) {
+                        setError('Invalid or expired reset link. Please request a new password reset.');
+                    }
+                }
+            });
+
+            // Fallback: if no event in 3s, check current session directly
+            setTimeout(async () => {
+                if (!mounted || resolved) return;
+                const { data: { session } } = await client.auth.getSession();
+                if (!session) {
                     setError('Invalid or expired reset link. Please request a new password reset.');
                 }
-            } catch {
-                setError('Failed to verify reset session');
-            }
+            }, 3000);
+
+            return () => subscription.unsubscribe();
         };
 
-        checkSession();
+        const cleanupPromise = setup();
+        return () => {
+            mounted = false;
+            cleanupPromise.then(fn => fn && fn());
+        };
     }, []);
 
     const handleSubmit = async (e: React.FormEvent) => {
