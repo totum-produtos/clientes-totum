@@ -123,7 +123,7 @@ export async function POST(request: Request) {
     const origin =
       request.headers.get("origin") ||
       process.env.NEXT_PUBLIC_SITE_URL ||
-      "https://cliente-totum.vercel.app";
+      "https://apps.grupototum.com";
     const redirectTo = `${origin}/api/auth/callback?next=${encodeURIComponent(
       "/auth/reset-password?invite=true",
     )}`;
