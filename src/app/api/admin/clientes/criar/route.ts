@@ -16,8 +16,11 @@
 // criar a senha e em seguida é redirecionado para /app/meu-cadastro.
 
 import { NextResponse } from "next/server";
+import { createClient } from "@supabase/supabase-js";
 import { createSSRClient } from "@/lib/supabase/server";
-import { createServerAdminClient } from "@/lib/supabase/serverAdminClient";
+
+const SUPABASE_URL = process.env.NEXT_PUBLIC_SUPABASE_URL || "";
+const SERVICE_ROLE_KEY = process.env.PRIVATE_SUPABASE_SERVICE_KEY || "";
 
 type Body = {
   nome: string;
@@ -50,7 +53,9 @@ function gerarSlug(nome: string) {
 
 export async function POST(request: Request) {
   let createdClientId: string | null = null;
-  const admin = await createServerAdminClient();
+  const admin = createClient(SUPABASE_URL, SERVICE_ROLE_KEY, {
+    auth: { autoRefreshToken: false, persistSession: false },
+  });
 
   try {
     const body = (await request.json()) as Body;
