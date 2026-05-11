@@ -23,45 +23,50 @@ function ResetPasswordPageInner() {
     const searchParams = useSearchParams();
     const isInvite = searchParams.get('invite') === 'true';
 
-    // Check if we have a valid recovery session.
-    // For invite flow, the Supabase access_token comes in the URL fragment
-    // (#access_token=...) and detectSessionInUrl processes it asynchronously.
-    // We listen for onAuthStateChange to know when init is complete.
+    // Initialise session from invite link.
+    // The Supabase admin-generated invite redirects with tokens in the URL fragment
+    // (#access_token=...&refresh_token=...) when PKCE is not negotiated. The
+    // @supabase/ssr browser client defaults to PKCE so it does NOT auto-parse
+    // the fragment, so we parse it ourselves and call setSession.
     useEffect(() => {
         let mounted = true;
-        let resolved = false;
 
-        const setup = async () => {
+        const initSession = async () => {
             const supabase = await createSPASassClient();
             const client = supabase.getSupabaseClient();
 
-            const { data: { subscription } } = client.auth.onAuthStateChange((event, session) => {
-                if (!mounted) return;
-                if (event === 'INITIAL_SESSION' || event === 'SIGNED_IN' || event === 'TOKEN_REFRESHED') {
-                    resolved = true;
-                    if (!session) {
+            // Try to extract tokens from URL fragment
+            if (typeof window !== 'undefined' && window.location.hash) {
+                const hashParams = new URLSearchParams(window.location.hash.substring(1));
+                const accessToken = hashParams.get('access_token');
+                const refreshToken = hashParams.get('refresh_token');
+
+                if (accessToken && refreshToken) {
+                    const { error: setErr } = await client.auth.setSession({
+                        access_token: accessToken,
+                        refresh_token: refreshToken,
+                    });
+                    if (!mounted) return;
+                    if (setErr) {
                         setError('Invalid or expired reset link. Please request a new password reset.');
+                        return;
                     }
+                    // Clear sensitive fragment from URL
+                    window.history.replaceState(null, '', window.location.pathname + window.location.search);
+                    return;
                 }
-            });
+            }
 
-            // Fallback: if no event in 3s, check current session directly
-            setTimeout(async () => {
-                if (!mounted || resolved) return;
-                const { data: { session } } = await client.auth.getSession();
-                if (!session) {
-                    setError('Invalid or expired reset link. Please request a new password reset.');
-                }
-            }, 3000);
-
-            return () => subscription.unsubscribe();
+            // No fragment: maybe we already have a session (forgot-password flow)
+            const { data: { session } } = await client.auth.getSession();
+            if (!mounted) return;
+            if (!session) {
+                setError('Invalid or expired reset link. Please request a new password reset.');
+            }
         };
 
-        const cleanupPromise = setup();
-        return () => {
-            mounted = false;
-            cleanupPromise.then(fn => fn && fn());
-        };
+        initSession();
+        return () => { mounted = false; };
     }, []);
 
     const handleSubmit = async (e: React.FormEvent) => {
