@@ -6,7 +6,8 @@ import { createSPASassClient } from "@/lib/supabase/client";
 import {
   Building2, Briefcase, Target, Palette, Phone, Check, ChevronRight,
   Users, CircleDot, Award, Star, Upload, AlertCircle, X, Plus, Trash2,
-  Edit3, Save, ArrowLeft, Lock
+  Edit3, Save, ArrowLeft, Lock, Link2, KeyRound, Copy, Eye, EyeOff,
+  RefreshCw
 } from "lucide-react";
 
 const STEPS = [
@@ -44,6 +45,17 @@ export default function EditarClientePage() {
   const [editMode, setEditMode] = useState(false);
   const [message, setMessage] = useState("");
   const fileInputRef = useRef<HTMLInputElement>(null);
+
+  // Acesso do cliente
+  const [showAccessPanel, setShowAccessPanel] = useState(false);
+  const [accessLoading, setAccessLoading] = useState(false);
+  const [accessError, setAccessError] = useState("");
+  const [accessMessage, setAccessMessage] = useState("");
+  const [inviteLink, setInviteLink] = useState("");
+  const [inviteCopied, setInviteCopied] = useState(false);
+  const [showPasswordForm, setShowPasswordForm] = useState(false);
+  const [newPassword, setNewPassword] = useState("");
+  const [showNewPassword, setShowNewPassword] = useState(false);
 
   const [form, setForm] = useState({
     nome: "", cnpj: "", nome_responsavel: "", email_responsavel: "", telefone: "", site: "",
@@ -160,6 +172,56 @@ export default function EditarClientePage() {
 
   const removeImage = (idx: number) => setForm(f => ({ ...f, key_visual_images: f.key_visual_images.filter((_, i) => i !== idx) }));
 
+  const handleReenviarConvite = async () => {
+    setAccessLoading(true); setAccessError(""); setAccessMessage(""); setInviteLink(""); setInviteCopied(false);
+    try {
+      const res = await fetch("/api/admin/clientes/acesso", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ action: "reenviar-convite", clientId }),
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || "Erro ao gerar link");
+      setInviteLink(data.inviteLink);
+      setAccessMessage(`Link gerado para ${data.email}`);
+    } catch (err: any) {
+      setAccessError(err.message || "Erro ao gerar link de convite");
+    } finally {
+      setAccessLoading(false);
+    }
+  };
+
+  const handleCopyLink = async () => {
+    if (!inviteLink) return;
+    await navigator.clipboard.writeText(inviteLink);
+    setInviteCopied(true);
+    setTimeout(() => setInviteCopied(false), 2000);
+  };
+
+  const handleCriarSenha = async () => {
+    if (!newPassword || newPassword.length < 6) {
+      setAccessError("A senha deve ter pelo menos 6 caracteres");
+      return;
+    }
+    setAccessLoading(true); setAccessError(""); setAccessMessage(""); setInviteLink("");
+    try {
+      const res = await fetch("/api/admin/clientes/acesso", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ action: "criar-senha", clientId, senha: newPassword }),
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || "Erro ao definir senha");
+      setAccessMessage(`Senha definida para ${data.email}. Compartilhe as credenciais com o cliente.`);
+      setShowPasswordForm(false);
+      setNewPassword("");
+    } catch (err: any) {
+      setAccessError(err.message || "Erro ao definir senha");
+    } finally {
+      setAccessLoading(false);
+    }
+  };
+
   const handleSave = async () => {
     setSaving(true); setError(""); setMessage("");
     try {
@@ -241,8 +303,14 @@ export default function EditarClientePage() {
             </div>
           </div>
           <div className="flex items-center gap-3">
+            <button
+              onClick={() => { setShowAccessPanel(p => !p); setAccessError(""); setAccessMessage(""); setInviteLink(""); setShowPasswordForm(false); setNewPassword(""); }}
+              className="flex items-center gap-2 px-5 py-2.5 border border-hairline text-body rounded-md text-sm font-medium hover:bg-surface-soft transition-all"
+            >
+              <KeyRound className="w-4 h-4" /> Acesso do Cliente
+            </button>
             {!editMode ? (
-              <button onClick={() => setEditMode(true)} className="flex items-center gap-2 px-5 py-2.5 bg-rausch text-white rounded-md text-sm font-medium hover:bg-rausch-active transition-all shadow-airbnb shadow-airbnb">
+              <button onClick={() => setEditMode(true)} className="flex items-center gap-2 px-5 py-2.5 bg-rausch text-white rounded-md text-sm font-medium hover:bg-rausch-active transition-all shadow-airbnb">
                 <Edit3 className="w-4 h-4" /> Editar
               </button>
             ) : (
@@ -250,7 +318,7 @@ export default function EditarClientePage() {
                 <button onClick={() => { setEditMode(false); setMessage(""); setError(""); }} className="flex items-center gap-2 px-5 py-2.5 text-body hover:text-ink rounded-md text-sm font-medium transition-colors">
                   <X className="w-4 h-4" /> Cancelar
                 </button>
-                <button onClick={handleSave} disabled={saving} className="flex items-center gap-2 px-5 py-2.5 bg-success text-white rounded-md text-sm font-medium hover:bg-success-text disabled:opacity-50 transition-all shadow-airbnb shadow-airbnb">
+                <button onClick={handleSave} disabled={saving} className="flex items-center gap-2 px-5 py-2.5 bg-success text-white rounded-md text-sm font-medium hover:bg-success-text disabled:opacity-50 transition-all shadow-airbnb">
                   {saving ? <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" /> : <><Save className="w-4 h-4" /> Salvar</>}
                 </button>
               </div>
@@ -258,6 +326,116 @@ export default function EditarClientePage() {
           </div>
         </div>
       </div>
+
+      {/* Painel de Acesso do Cliente */}
+      {showAccessPanel && (
+        <div className="max-w-7xl mx-auto px-6 pt-4">
+          <div className="bg-canvas border border-hairline rounded-lg p-6 shadow-airbnb">
+            <div className="flex items-center justify-between mb-4">
+              <div className="flex items-center gap-3">
+                <div className="w-9 h-9 rounded-md bg-surface-soft flex items-center justify-center">
+                  <KeyRound className="w-4 h-4 text-rausch" />
+                </div>
+                <div>
+                  <h3 className="text-sm font-semibold text-ink">Acesso do Cliente</h3>
+                  <p className="text-xs text-muted">{form.email_responsavel || "Email não informado"}</p>
+                </div>
+              </div>
+              <button onClick={() => setShowAccessPanel(false)} className="p-1.5 text-muted hover:text-body rounded-md transition-colors">
+                <X className="w-4 h-4" />
+              </button>
+            </div>
+
+            {accessError && (
+              <div className="mb-4 p-3 bg-danger-bg border border-danger-bg rounded-md text-sm text-danger-text flex items-start gap-2">
+                <AlertCircle className="w-4 h-4 shrink-0 mt-0.5" />
+                {accessError}
+              </div>
+            )}
+            {accessMessage && (
+              <div className="mb-4 p-3 bg-success-bg border border-success/20 rounded-md text-sm text-success-text flex items-start gap-2">
+                <Check className="w-4 h-4 shrink-0 mt-0.5" />
+                {accessMessage}
+              </div>
+            )}
+
+            {/* Link copiável */}
+            {inviteLink && (
+              <div className="mb-4 p-3 bg-surface-soft border border-hairline rounded-md">
+                <p className="text-xs font-medium text-ink mb-2">Link de convite gerado:</p>
+                <div className="flex items-center gap-2">
+                  <input
+                    readOnly
+                    value={inviteLink}
+                    className="flex-1 text-xs bg-canvas border border-hairline rounded px-3 py-2 text-body font-mono truncate"
+                  />
+                  <button
+                    onClick={handleCopyLink}
+                    className={`flex items-center gap-1.5 px-3 py-2 rounded-md text-xs font-medium transition-all ${inviteCopied ? "bg-success text-white" : "bg-rausch text-white hover:bg-rausch-active"}`}
+                  >
+                    {inviteCopied ? <><Check className="w-3.5 h-3.5" /> Copiado!</> : <><Copy className="w-3.5 h-3.5" /> Copiar</>}
+                  </button>
+                </div>
+                <p className="text-xs text-muted mt-2">Envie este link para o cliente via WhatsApp ou Email. O link é de uso único.</p>
+              </div>
+            )}
+
+            {/* Form senha */}
+            {showPasswordForm && (
+              <div className="mb-4 p-4 bg-surface-soft border border-hairline rounded-md">
+                <p className="text-xs font-medium text-ink mb-3">Defina uma senha para o cliente acessar com email + senha:</p>
+                <div className="flex items-center gap-2">
+                  <div className="relative flex-1">
+                    <input
+                      type={showNewPassword ? "text" : "password"}
+                      value={newPassword}
+                      onChange={e => setNewPassword(e.target.value)}
+                      placeholder="Mínimo 6 caracteres"
+                      className="w-full bg-canvas border border-hairline rounded-md px-3 py-2 pr-10 text-sm text-ink placeholder-muted focus:outline-none focus:border-rausch focus:ring-2 focus:ring-rausch/20"
+                    />
+                    <button
+                      type="button"
+                      onClick={() => setShowNewPassword(p => !p)}
+                      className="absolute right-3 top-1/2 -translate-y-1/2 text-muted hover:text-body"
+                    >
+                      {showNewPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                    </button>
+                  </div>
+                  <button
+                    onClick={handleCriarSenha}
+                    disabled={accessLoading}
+                    className="flex items-center gap-1.5 px-4 py-2 bg-rausch text-white rounded-md text-sm font-medium hover:bg-rausch-active disabled:opacity-50 transition-all"
+                  >
+                    {accessLoading ? <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" /> : <><Check className="w-3.5 h-3.5" /> Definir</>}
+                  </button>
+                  <button onClick={() => { setShowPasswordForm(false); setNewPassword(""); setAccessError(""); }} className="px-3 py-2 text-body hover:text-ink text-sm rounded-md transition-colors">
+                    <X className="w-4 h-4" />
+                  </button>
+                </div>
+                <p className="text-xs text-muted mt-2">O cliente usará o email <strong>{form.email_responsavel}</strong> e esta senha para entrar.</p>
+              </div>
+            )}
+
+            <div className="flex flex-wrap items-center gap-3">
+              <button
+                onClick={handleReenviarConvite}
+                disabled={accessLoading}
+                className="flex items-center gap-2 px-4 py-2.5 border border-hairline rounded-md text-sm font-medium text-body hover:bg-surface-soft hover:text-ink disabled:opacity-50 transition-all"
+              >
+                {accessLoading && !showPasswordForm ? <div className="w-4 h-4 border-2 border-body/30 border-t-body rounded-full animate-spin" /> : <RefreshCw className="w-4 h-4" />}
+                Reenviar link de convite
+              </button>
+              <button
+                onClick={() => { setShowPasswordForm(p => !p); setAccessError(""); setInviteLink(""); setAccessMessage(""); setNewPassword(""); }}
+                className="flex items-center gap-2 px-4 py-2.5 border border-hairline rounded-md text-sm font-medium text-body hover:bg-surface-soft hover:text-ink transition-all"
+              >
+                <KeyRound className="w-4 h-4" />
+                {showPasswordForm ? "Cancelar senha" : "Definir senha inicial"}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
 
       {(error || message) && (
         <div className="max-w-7xl mx-auto px-6 pt-4">
