@@ -149,35 +149,23 @@ export default function GestaoClientesPage() {
 
   async function handleDeletar(cliente: Cliente) {
     setDeleteLoading(true);
-    const supabase = await createSPASassClient();
-    const sb = supabase.getSupabaseClient();
-
-    // Deleta dados relacionados (nao deleta drive_folder_cliente_id no Google Drive)
-    await sb.from('wanda_posts').delete().eq('portal_client_id', cliente.id);
-    await sb.from('tarefas').delete().eq('portal_client_id', cliente.id);
-    await sb.from('projetos').delete().eq('portal_client_id', cliente.id);
-    await sb.from('ad_campaigns').delete().eq('portal_client_id', cliente.id);
-    await sb.from('client_profile_changes').delete().eq('portal_client_id', cliente.id);
-    await sb.from('notifications').delete().eq('data->>client_id', cliente.id);
-    await sb.from('portal_client_users').delete().eq('client_id', cliente.id);
-
-    // Deleta arquivos do storage
-    const { data: files } = await sb.storage.from('client_files').list(cliente.id);
-    if (files && files.length > 0) {
-      await sb.storage.from('client_files').remove(files.map(f => `${cliente.id}/${f.name}`));
+    try {
+      const res = await fetch(`/api/admin/clientes/deletar?clientId=${cliente.id}`, {
+        method: 'DELETE',
+      });
+      const data = await res.json();
+      if (!res.ok) {
+        setActionMessage('Erro ao deletar: ' + (data.error || 'Erro desconhecido'));
+      } else {
+        setActionMessage(`Cliente "${data.nome}" deletado com sucesso.`);
+        setClienteParaDeletar(null);
+        fetchClientes();
+      }
+    } catch {
+      setActionMessage('Erro de rede ao deletar o cliente.');
+    } finally {
+      setDeleteLoading(false);
     }
-
-    // Deleta o cliente
-    const { error } = await sb.from('portal_clients').delete().eq('id', cliente.id);
-
-    if (error) {
-      setActionMessage('Erro ao deletar: ' + error.message);
-    } else {
-      setActionMessage('Cliente deletado com sucesso!');
-      setClienteParaDeletar(null);
-      fetchClientes();
-    }
-    setDeleteLoading(false);
   }
 
   if (loading) {
