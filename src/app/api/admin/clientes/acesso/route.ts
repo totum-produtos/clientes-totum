@@ -23,13 +23,18 @@ type Body =
   | { action: "reenviar-convite"; clientId: string }
   | { action: "criar-senha"; clientId: string; senha: string };
 
-/** Encontra um auth user pelo email usando listUsers (filtra localmente). */
+/**
+ * Encontra um auth user pelo email (comparação case-insensitive).
+ * Necessário porque portal_client pode ter "Biofuturas@gmail.com"
+ * enquanto auth.users registrou "biofuturas@gmail.com".
+ */
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 async function findAuthUserByEmail(admin: any, email: string) {
   const { data, error } = await admin.auth.admin.listUsers({ perPage: 1000 });
   if (error) return null;
+  const normalized = email.toLowerCase().trim();
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  return (data.users as any[]).find((u) => u.email === email) ?? null;
+  return (data.users as any[]).find((u) => u.email?.toLowerCase().trim() === normalized) ?? null;
 }
 
 /** Garante que portal_client_users e user_roles existem para o par (userId, clientId). */
@@ -125,9 +130,10 @@ export async function POST(request: Request) {
         // Garante vínculo mesmo que tenha sido perdido
         await ensureClientLink(admin, existingUser.id, body.clientId);
 
+        // Usa o email exato do auth (pode diferir em maiúsculas do portal_client)
         const { data: recoveryData, error: recoveryErr } = await admin.auth.admin.generateLink({
           type: "recovery",
-          email,
+          email: existingUser.email,
           options: { redirectTo },
         });
 
@@ -165,7 +171,7 @@ export async function POST(request: Request) {
       if (link?.user_id) {
         userId = link.user_id;
       } else {
-        // 2. Fallback: busca o auth user pelo email
+        // 2. Fallback: busca o auth user pelo email (case-insensitive)
         const existingUser = await findAuthUserByEmail(admin, email);
         if (existingUser) {
           userId = existingUser.id as string;
