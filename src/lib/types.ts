@@ -691,6 +691,47 @@ export type Database = {
         }
         Relationships: []
       }
+      client_invites: {
+        Row: {
+          client_id: string
+          created_at: string | null
+          created_by: string | null
+          email: string
+          expires_at: string | null
+          id: string
+          token: string
+          used_at: string | null
+        }
+        Insert: {
+          client_id: string
+          created_at?: string | null
+          created_by?: string | null
+          email: string
+          expires_at?: string | null
+          id?: string
+          token: string
+          used_at?: string | null
+        }
+        Update: {
+          client_id?: string
+          created_at?: string | null
+          created_by?: string | null
+          email?: string
+          expires_at?: string | null
+          id?: string
+          token?: string
+          used_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "client_invites_client_id_fkey"
+            columns: ["client_id"]
+            isOneToOne: false
+            referencedRelation: "portal_clients"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       client_profile_changes: {
         Row: {
           created_at: string | null
@@ -2769,6 +2810,7 @@ export type Database = {
           post_id: string
           published_at: string | null
           saves: number | null
+          status: string | null
           shares: number | null
           subject: string
           tiktok_url: string | null
@@ -2797,6 +2839,7 @@ export type Database = {
           published_at?: string | null
           saves?: number | null
           shares?: number | null
+          status?: string | null
           subject: string
           tiktok_url?: string | null
           tiktok_video_id?: string | null
@@ -2824,6 +2867,7 @@ export type Database = {
           published_at?: string | null
           saves?: number | null
           shares?: number | null
+          status?: string | null
           subject?: string
           tiktok_url?: string | null
           tiktok_video_id?: string | null

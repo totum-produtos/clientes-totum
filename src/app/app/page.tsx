@@ -25,7 +25,7 @@ export default function DashboardPage() {
         <div className="space-y-6 p-2">
             <div>
                 <h1 className="text-2xl font-bold text-ink">Olá, {client?.nome || 'Cliente'}! 👋</h1>
-                <p className="text-muted">Bem-vindo à sua Central de Conteúdo Totum</p>
+                <p className="text-muted">Bem-vindo ao portal do cliente</p>
             </div>
 
             {/* KPIs */}
