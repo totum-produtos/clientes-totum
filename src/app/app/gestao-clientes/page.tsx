@@ -6,9 +6,7 @@ import { useRouter } from 'next/navigation';
 import {
   Building2,
   Users,
-  FileText,
   CheckCircle2,
-  FolderOpen,
   Search,
   LayoutGrid,
   List,
@@ -21,14 +19,6 @@ import {
   Power,
   PowerOff,
   AlertTriangle,
-  X,
-  Target,
-  Palette,
-  Phone,
-  Star,
-  Award,
-  CircleDot,
-  Briefcase,
 } from 'lucide-react';
 
 type Cliente = {
@@ -64,7 +54,6 @@ export default function GestaoClientesPage() {
   const [busca, setBusca] = useState('');
   const [filtroStatus, setFiltroStatus] = useState<string>('todos');
   const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
-  const [clienteSelecionado, setClienteSelecionado] = useState<(Cliente & { stats?: ClienteStats; profile_data?: any }) | null>(null);
   const [clienteParaDeletar, setClienteParaDeletar] = useState<Cliente | null>(null);
   const [deleteLoading, setDeleteLoading] = useState(false);
   const [actionMessage, setActionMessage] = useState('');
@@ -77,37 +66,37 @@ export default function GestaoClientesPage() {
     const supabase = await createSPASassClient();
     const sb = supabase.getSupabaseClient();
 
-    const { data: clientesData, error: fetchError } = await sb
-      .from('portal_clients')
-      .select('*')
-      .order('created_at', { ascending: false });
+    // Uma única query via RPC em vez de N×4 queries (N+1 fix)
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const { data, error: fetchError } = await (sb as any).rpc('get_clientes_com_stats');
 
-    if (fetchError || !clientesData) {
+    if (fetchError || !data) {
       setError('Não foi possível carregar os clientes. Tente recarregar a página.');
       setLoading(false);
       return;
     }
 
-    const clientesComStats = await Promise.all(
-      clientesData.map(async (cliente: Cliente) => {
-        const [posts, tarefas, projetos, campanhas] = await Promise.all([
-          sb.from('wanda_posts').select('id', { count: 'exact', head: true }).eq('portal_client_id', cliente.id),
-          sb.from('tarefas').select('id', { count: 'exact', head: true }).eq('portal_client_id', cliente.id),
-          sb.from('projetos').select('id', { count: 'exact', head: true }).eq('portal_client_id', cliente.id),
-          sb.from('ad_campaigns').select('id', { count: 'exact', head: true }).eq('portal_client_id', cliente.id),
-        ]);
-
-        return {
-          ...cliente,
-          stats: {
-            totalPosts: posts.count || 0,
-            totalTarefas: tarefas.count || 0,
-            totalProjetos: projetos.count || 0,
-            totalCampanhas: campanhas.count || 0,
-          },
-        };
-      })
-    );
+    const clientesComStats = (data as Array<Cliente & {
+      total_posts: number; total_tarefas: number;
+      total_projetos: number; total_campanhas: number;
+    }>).map(row => ({
+      id: row.id,
+      nome: row.nome,
+      slug: row.slug,
+      email_responsavel: row.email_responsavel,
+      contato_principal: row.contato_principal,
+      status: row.status,
+      created_at: row.created_at,
+      meta_ad_account_id: row.meta_ad_account_id,
+      google_customer_id: row.google_customer_id,
+      drive_folder_cliente_id: row.drive_folder_cliente_id,
+      stats: {
+        totalPosts: Number(row.total_posts) || 0,
+        totalTarefas: Number(row.total_tarefas) || 0,
+        totalProjetos: Number(row.total_projetos) || 0,
+        totalCampanhas: Number(row.total_campanhas) || 0,
+      },
+    }));
 
     setClientes(clientesComStats);
     setLoading(false);
@@ -504,224 +493,7 @@ export default function GestaoClientesPage() {
         </div>
       )}
 
-      {/* Detail Modal / Dashboard */}
-      {clienteSelecionado && <ClienteDashboard cliente={clienteSelecionado} onClose={() => setClienteSelecionado(null)} />}
-    </div>
-  );
-}
 
-function ClienteDashboard({ cliente, onClose }: { cliente: Cliente & { stats?: ClienteStats }; onClose: () => void }) {
-  const [fullData, setFullData] = useState<Record<string, unknown> | null>(null);
-  const [loading, setLoading] = useState(true);
-  const [loadError, setLoadError] = useState('');
-  const pd = (fullData?.profile_data as Record<string, unknown>) || {};
-
-  useEffect(() => {
-    async function load() {
-      try {
-        const supabase = await createSPASassClient();
-        const { data, error: fetchError } = await supabase.getSupabaseClient()
-          .from('portal_clients')
-          .select('*')
-          .eq('id', cliente.id)
-          .single();
-        if (fetchError) throw fetchError;
-        setFullData(data);
-      } catch {
-        setLoadError('Erro ao carregar dados do cliente.');
-      } finally {
-        setLoading(false);
-      }
-    }
-    load();
-  }, [cliente.id]);
-
-  const statusCfg = STATUS_CONFIG[cliente.status || 'inactive'] || STATUS_CONFIG.inactive || { label: '—', bg: 'bg-surface-strong', text: 'text-body' };
-
-  return (
-    <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4" onClick={onClose}>
-      <div className="bg-canvas rounded-lg max-w-3xl w-full max-h-[90vh] overflow-y-auto" onClick={(e) => e.stopPropagation()}>
-        {/* Header */}
-        <div className="sticky top-0 bg-canvas border-b px-6 py-4 flex items-center justify-between z-10">
-          <div className="flex items-center gap-3">
-            <div className="w-12 h-12 rounded-md bg-rausch flex items-center justify-center text-white font-bold text-lg">
-              {cliente.nome.charAt(0).toUpperCase()}
-            </div>
-            <div>
-              <h2 className="text-lg font-bold text-ink">{cliente.nome}</h2>
-              <div className="flex items-center gap-2">
-                <span className={`text-xs px-2 py-0.5 rounded-full ${statusCfg.bg} ${statusCfg.text}`}>{statusCfg.label}</span>
-                <span className="text-xs text-muted-soft">@{cliente.slug}</span>
-              </div>
-            </div>
-          </div>
-          <button onClick={onClose} className="p-2 hover:bg-surface-strong rounded-lg transition-colors">
-            <X className="h-5 w-5 text-muted-soft" />
-          </button>
-        </div>
-
-        {loading ? (
-          <div className="flex justify-center py-20">
-            <div className="w-8 h-8 border-4 border-rausch border-t-transparent rounded-full animate-spin" />
-          </div>
-        ) : loadError ? (
-          <div className="p-6">
-            <div className="p-4 bg-danger-bg border border-danger-bg rounded-md text-sm text-danger-text flex items-center gap-2">
-              <AlertCircle className="w-4 h-4 shrink-0" />
-              {loadError}
-            </div>
-          </div>
-        ) : (
-          <div className="p-6 space-y-6">
-            {/* Stats */}
-            <div className="grid grid-cols-4 gap-3">
-              <div className="bg-surface-soft p-4 rounded-md text-center">
-                <FileText className="h-5 w-5 text-rausch mx-auto mb-1" />
-                <p className="text-2xl font-bold">{cliente.stats?.totalPosts || 0}</p>
-                <p className="text-[10px] text-muted uppercase">Posts</p>
-              </div>
-              <div className="bg-surface-soft p-4 rounded-md text-center">
-                <CheckCircle2 className="h-5 w-5 text-success-text mx-auto mb-1" />
-                <p className="text-2xl font-bold">{cliente.stats?.totalTarefas || 0}</p>
-                <p className="text-[10px] text-muted uppercase">Tarefas</p>
-              </div>
-              <div className="bg-surface-soft p-4 rounded-md text-center">
-                <FolderOpen className="h-5 w-5 text-rausch mx-auto mb-1" />
-                <p className="text-2xl font-bold">{cliente.stats?.totalProjetos || 0}</p>
-                <p className="text-[10px] text-muted uppercase">Projetos</p>
-              </div>
-              <div className="bg-surface-soft p-4 rounded-md text-center">
-                <TrendingUp className="h-5 w-5 text-ink mx-auto mb-1" />
-                <p className="text-2xl font-bold">{cliente.stats?.totalCampanhas || 0}</p>
-                <p className="text-[10px] text-muted uppercase">Campanhas</p>
-              </div>
-            </div>
-
-            {/* Info sections */}
-            <div className="space-y-4">
-              <DashSection icon={Building2} title="Informações da Empresa">
-                <DashGrid items={[
-                  { label: 'Nome', value: fullData?.nome as string },
-                  { label: 'CNPJ', value: fullData?.cnpj as string },
-                  { label: 'Responsável', value: fullData?.nome_responsavel as string },
-                  { label: 'Email', value: fullData?.email_responsavel as string },
-                  { label: 'Telefone', value: fullData?.telefone as string },
-                  { label: 'Site', value: fullData?.site as string },
-                ]} />
-              </DashSection>
-
-              <DashSection icon={Briefcase} title="Sobre o Negócio">
-                <DashGrid items={[
-                  { label: 'Ramo', value: fullData?.ramo_atuacao as string },
-                  { label: 'Tempo de mercado', value: fullData?.tempo_mercado as string },
-                  { label: 'Tamanho', value: fullData?.tamanho_empresa as string },
-                  { label: 'Faturamento', value: fullData?.faturamento_mensal as string },
-                ]} />
-                <DashText label="Descrição" value={fullData?.descricao_negocio as string} />
-                <DashText label="Produtos/Serviços" value={fullData?.produtos_servicos as string} />
-              </DashSection>
-
-              <DashSection icon={Target} title="Público-Alvo">
-                <DashGrid items={[
-                  { label: 'Nicho', value: pd.nicho_principal as string },
-                  { label: 'Gênero', value: pd.genero_alvo as string },
-                  { label: 'Localização', value: pd.localizacao_alvo as string },
-                  { label: 'Tom de voz', value: pd.tom_voz as string },
-                ]} />
-                <DashText label="Dores principais" value={pd.dores_principais as string} />
-                <DashText label="Desejos/Objetivos" value={pd.desejos_objetivos as string} />
-              </DashSection>
-
-              <DashSection icon={Palette} title="Identidade Visual">
-                <div className="grid grid-cols-2 gap-3 mb-3">
-                  <div>
-                    <span className="text-xs text-muted-soft uppercase">Cor primária</span>
-                    <div className="flex items-center gap-2 mt-1">
-                      <div className="w-8 h-8 rounded-lg border" style={{ backgroundColor: (fullData?.cor_primaria as string) || '#FF385C' }} />
-                      <span className="text-sm font-mono text-ink">{(fullData?.cor_primaria as string) || '—'}</span>
-                    </div>
-                  </div>
-                  <div>
-                    <span className="text-xs text-muted-soft uppercase">Cor secundária</span>
-                    <div className="flex items-center gap-2 mt-1">
-                      <div className="w-8 h-8 rounded-lg border" style={{ backgroundColor: (fullData?.cor_secundaria as string) || '#1a1a2e' }} />
-                      <span className="text-sm font-mono text-ink">{(fullData?.cor_secundaria as string) || '—'}</span>
-                    </div>
-                  </div>
-                </div>
-                <DashText label="Fontes" value={pd.fontes as string} />
-                <DashText label="Personalidade visual" value={pd.personalidade_visual as string} />
-              </DashSection>
-
-              <DashSection icon={Phone} title="Operação e Contatos">
-                <DashGrid items={[
-                  { label: 'CRM', value: pd.crm_utilizado as string },
-                  { label: 'SLA', value: pd.sla_resposta as string },
-                  { label: 'Horário', value: pd.horario_inicio && pd.horario_fim ? `${pd.horario_inicio} - ${pd.horario_fim}` : '' },
-                  { label: 'Dias', value: (pd.dias_atendimento as string[] | undefined)?.join(', ') },
-                ]} />
-                <DashText label="Informações adicionais" value={pd.informacoes_adicionais as string} />
-              </DashSection>
-
-              <DashSection icon={CircleDot} title="Círculo Dourado">
-                <DashText label="Porquê" value={(pd.circulo_dourado as Record<string, string> | undefined)?.porque} />
-                <DashText label="O que" value={(pd.circulo_dourado as Record<string, string> | undefined)?.o_que} />
-                <DashText label="Como" value={(pd.circulo_dourado as Record<string, string> | undefined)?.como} />
-              </DashSection>
-
-              <DashSection icon={Star} title="Características da Marca">
-                <DashText label="Missão" value={(pd.caracteristicas_marca as Record<string, string> | undefined)?.missao} />
-                <DashText label="Visão" value={(pd.caracteristicas_marca as Record<string, string> | undefined)?.visao} />
-                <DashText label="Valores" value={(pd.caracteristicas_marca as Record<string, string> | undefined)?.valores} />
-                <DashText label="Personalidade" value={(pd.caracteristicas_marca as Record<string, string> | undefined)?.personalidade} />
-              </DashSection>
-
-              <DashSection icon={Award} title="Proposta Única de Valor">
-                <DashText label="PUV" value={pd.puv as string} />
-              </DashSection>
-            </div>
-          </div>
-        )}
-      </div>
-    </div>
-  );
-}
-
-function DashSection({ icon: Icon, title, children }: {
-  icon: React.ElementType;
-  title: string;
-  children: React.ReactNode;
-}) {
-  return (
-    <div className="border rounded-md overflow-hidden">
-      <div className="flex items-center gap-2 px-4 py-3 bg-surface-soft border-b">
-        <Icon className="w-4 h-4 text-rausch" />
-        <h3 className="text-sm font-semibold text-ink">{title}</h3>
-      </div>
-      <div className="p-4">{children}</div>
-    </div>
-  );
-}
-
-function DashGrid({ items }: { items: { label: string; value: string | number | null | undefined }[] }) {
-  return (
-    <div className="grid grid-cols-2 gap-3 mb-3">
-      {items.map((item, i) => (
-        <div key={i}>
-          <span className="text-xs text-muted-soft uppercase">{item.label}</span>
-          <p className="text-sm text-ink">{item.value || <span className="text-muted-soft">—</span>}</p>
-        </div>
-      ))}
-    </div>
-  );
-}
-
-function DashText({ label, value }: { label: string; value: string | null | undefined }) {
-  if (!value) return null;
-  return (
-    <div className="mb-3 last:mb-0">
-      <span className="text-xs text-muted-soft uppercase">{label}</span>
-      <p className="text-sm text-ink mt-0.5 whitespace-pre-wrap">{value}</p>
     </div>
   );
 }
