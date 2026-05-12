@@ -102,6 +102,7 @@ export async function DELETE(request: Request) {
     await admin.from("notifications").delete().eq("data->>client_id" as never, clientId);
 
     // 6. Deleta arquivos do Storage (pasta raiz + subpastas)
+    let storageWarning = false;
     try {
       const { data: rootFiles } = await admin.storage
         .from("client_files")
@@ -127,8 +128,10 @@ export async function DELETE(request: Request) {
           await admin.storage.from("client_files").remove(allPaths);
         }
       }
-    } catch {
-      // Falha no storage não bloqueia a exclusão do cliente
+    } catch (storageErr) {
+      // Log but don't block — client record will still be deleted
+      console.warn('[deletar] Storage cleanup failed:', storageErr);
+      storageWarning = true;
     }
 
     // 7. Remove vínculos portal_client_users
@@ -154,6 +157,7 @@ export async function DELETE(request: Request) {
       success: true,
       nome: client.nome,
       authUsersDeleted: usersToDeleteFromAuth.length,
+      ...(storageWarning && { storageWarning: true }),
     });
   } catch (err) {
     const message = err instanceof Error ? err.message : "Erro desconhecido";
