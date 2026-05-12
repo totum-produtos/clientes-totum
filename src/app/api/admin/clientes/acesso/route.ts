@@ -23,7 +23,11 @@ type Body =
   | { action: "reenviar-convite"; clientId: string }
   | { action: "criar-senha"; clientId: string; senha: string };
 
-/** Encontra um auth user pelo email usando listUsers (comparação case-insensitive). */
+/**
+ * Encontra um auth user pelo email (comparação case-insensitive).
+ * Necessário porque portal_client pode ter "Biofuturas@gmail.com"
+ * enquanto auth.users registrou "biofuturas@gmail.com".
+ */
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 async function findAuthUserByEmail(admin: any, email: string) {
   const { data, error } = await admin.auth.admin.listUsers({ perPage: 1000 });
@@ -167,7 +171,7 @@ export async function POST(request: Request) {
       if (link?.user_id) {
         userId = link.user_id;
       } else {
-        // 2. Fallback: busca o auth user pelo email
+        // 2. Fallback: busca o auth user pelo email (case-insensitive)
         const existingUser = await findAuthUserByEmail(admin, email);
         if (existingUser) {
           userId = existingUser.id as string;
