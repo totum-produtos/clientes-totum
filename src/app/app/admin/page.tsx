@@ -2,7 +2,10 @@
 import React, { useEffect, useState } from 'react';
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
 import { createSPASassClient } from '@/lib/supabase/client';
-import { Plus, Link2, Users, Building2, Clock, CheckCircle, XCircle } from 'lucide-react';
+import { Plus, Link2, Users, Building2, Clock, CheckCircle, XCircle, Mail, Loader2 } from 'lucide-react';
+import type { Json } from '@/lib/types';
+
+type JsonObject = { [key: string]: Json | undefined };
 
 type PortalClient = {
     id: string;
@@ -39,6 +42,18 @@ type ProfileChange = {
     reviewed_at?: string;
 };
 
+function parseProfileValue(value: string): Json {
+    try {
+        return JSON.parse(value) as Json;
+    } catch {
+        return value;
+    }
+}
+
+function errorMessage(error: unknown) {
+    return error instanceof Error ? error.message : 'Erro desconhecido';
+}
+
 export default function AdminPage() {
     const [clients, setClients] = useState<PortalClient[]>([]);
     const [users, setUsers] = useState<PortalUser[]>([]);
@@ -52,6 +67,7 @@ export default function AdminPage() {
     const [message, setMessage] = useState('');
 
     const [newClient, setNewClient] = useState({ nome: '', slug: '', email_responsavel: '' });
+    const [sendingInvite, setSendingInvite] = useState<string | null>(null);
 
     async function fetchData() {
         const supabase = await createSPASassClient();
@@ -123,9 +139,8 @@ export default function AdminPage() {
         if (change.field_path.startsWith('profile_data.')) {
             const field = change.field_path.replace('profile_data.', '');
             const { data: pc } = await client.from('portal_clients').select('profile_data').eq('id', change.portal_client_id).single();
-            const current = (pc?.profile_data || {}) as Record<string, any>;
-            let newVal: any = change.new_value;
-            try { newVal = JSON.parse(newVal); } catch {}
+            const current = (pc?.profile_data || {}) as JsonObject;
+            const newVal = parseProfileValue(change.new_value);
             await client.from('portal_clients').update({ profile_data: { ...current, [field]: newVal } }).eq('id', change.portal_client_id);
         } else {
             await client.from('portal_clients').update({ [change.field_path]: change.new_value }).eq('id', change.portal_client_id);
@@ -149,6 +164,43 @@ export default function AdminPage() {
 
         setMessage('Alteração aprovada com sucesso!');
         fetchData();
+    }
+
+    async function handleSendInvite(clientId: string, email: string) {
+        if (!email) {
+            setMessage('Erro: Este cliente não tem email responsável cadastrado.');
+            return;
+        }
+        setSendingInvite(clientId);
+        setMessage('');
+        try {
+            const supabase = await createSPASassClient();
+            const { data: { session } } = await supabase.getSupabaseClient().auth.getSession();
+
+            const res = await fetch('/api/send-invite', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${session?.access_token}`
+                },
+                body: JSON.stringify({ client_id: clientId, email })
+            });
+
+            const data = await res.json();
+            if (res.ok) {
+                if (data.messageId) {
+                    setMessage('✅ Convite enviado com sucesso para ' + email);
+                } else {
+                    setMessage('⚠️ Convite criado, mas SMTP não configurado. Copie o link: ' + data.invite_url);
+                }
+            } else {
+                setMessage('Erro ao enviar convite: ' + (data.error || 'Erro desconhecido'));
+            }
+        } catch (err: unknown) {
+            setMessage('Erro ao enviar convite: ' + errorMessage(err));
+        } finally {
+            setSendingInvite(null);
+        }
     }
 
     async function handleReject(change: ProfileChange) {
@@ -272,9 +324,24 @@ export default function AdminPage() {
                                     <p className="font-medium text-sm">{c.nome}</p>
                                     <p className="text-xs text-muted">{c.slug} • {c.email_responsavel}</p>
                                 </div>
-                                <span className={`text-xs px-2 py-1 rounded-full ${c.status === 'active' ? 'bg-success-bg text-success-text' : 'bg-surface-strong text-ink'}`}>
-                                    {c.status}
-                                </span>
+                                <div className="flex items-center gap-2">
+                                    <button
+                                        onClick={() => handleSendInvite(c.id, c.email_responsavel)}
+                                        disabled={sendingInvite === c.id}
+                                        className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium border hover:bg-surface-soft transition-colors disabled:opacity-50"
+                                        title="Enviar convite por email"
+                                    >
+                                        {sendingInvite === c.id ? (
+                                            <Loader2 className="h-3 w-3 animate-spin" />
+                                        ) : (
+                                            <Mail className="h-3 w-3" />
+                                        )}
+                                        Enviar convite
+                                    </button>
+                                    <span className={`text-xs px-2 py-1 rounded-full ${c.status === 'active' ? 'bg-success-bg text-success-text' : 'bg-surface-strong text-ink'}`}>
+                                        {c.status}
+                                    </span>
+                                </div>
                             </div>
                         ))}
                         {clients.length === 0 && <p className="text-sm text-muted-soft">Nenhum cliente cadastrado.</p>}

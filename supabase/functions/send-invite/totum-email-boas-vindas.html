@@ -1,0 +1,321 @@
+<!DOCTYPE html>
+<html lang="pt-BR" xmlns="http://www.w3.org/1999/xhtml">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="format-detection" content="telephone=no,address=no,email=no,date=no,url=no">
+  <meta name="x-apple-disable-message-reformatting">
+  <meta name="color-scheme" content="light">
+  <meta name="supported-color-schemes" content="light">
+
+  <!--
+    === ANTI-SPAM CHECKLIST (implementar no servidor) ===
+    1. Enviar pelo domínio autenticado (SPF, DKIM, DMARC configurados)
+    2. Usar IP dedicado com boa reputação (ex: SendGrid, Mailgun, Amazon SES)
+    3. Linha de assunto: "Seu acesso à plataforma Totum está pronto"
+    4. Cabeçalhos obrigatórios no servidor:
+       List-Unsubscribe: <mailto:sair@totum.com.br>
+       List-Unsubscribe-Post: List-Unsubscribe=One-Click
+       Precedence: bulk
+       X-Mailer: Totum Platform v1
+  -->
+
+  <title>Bem-vindo à Totum</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body, html { margin: 0; padding: 0; width: 100%; }
+    body {
+      background-color: #F0EFED;
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif;
+      -webkit-text-size-adjust: 100%;
+      -ms-text-size-adjust: 100%;
+    }
+    table { border-collapse: collapse; mso-table-lspace: 0pt; mso-table-rspace: 0pt; }
+    img { border: 0; display: block; outline: none; text-decoration: none; -ms-interpolation-mode: bicubic; }
+    a { color: inherit; }
+
+    .email-wrapper {
+      background-color: #F0EFED;
+      padding: 40px 16px;
+    }
+
+    .email-card {
+      background-color: #FFFFFF;
+      max-width: 560px;
+      margin: 0 auto;
+      border-radius: 6px;
+      overflow: hidden;
+      box-shadow: 0 2px 20px rgba(0,0,0,0.08);
+    }
+
+    /* HEADER */
+    .email-header {
+      background-color: #D93025;
+      padding: 44px 48px;
+      text-align: center;
+    }
+
+    .email-header img {
+      height: 52px;
+      width: auto;
+      margin: 0 auto;
+      display: block;
+    }
+
+    /* BODY */
+    .email-body {
+      padding: 44px 48px 40px;
+    }
+
+    .label {
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: 0.15em;
+      text-transform: uppercase;
+      color: #D93025;
+      margin-bottom: 18px;
+    }
+
+    h1 {
+      font-size: 26px;
+      font-weight: 700;
+      color: #111111;
+      line-height: 1.3;
+      margin-bottom: 28px;
+      letter-spacing: -0.3px;
+    }
+
+    p {
+      font-size: 15px;
+      line-height: 1.75;
+      color: #444444;
+      margin-bottom: 18px;
+    }
+
+    p:last-of-type { margin-bottom: 0; }
+
+    hr {
+      border: none;
+      border-top: 1px solid #EBEBEB;
+      margin: 32px 0;
+    }
+
+    .steps-block {
+      background-color: #FAF9F7;
+      border-left: 3px solid #D93025;
+      border-radius: 0 4px 4px 0;
+      padding: 22px 26px;
+      margin: 32px 0;
+    }
+
+    .steps-label {
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: 0.13em;
+      text-transform: uppercase;
+      color: #D93025;
+      margin-bottom: 18px;
+    }
+
+    .step {
+      display: flex;
+      align-items: flex-start;
+      gap: 14px;
+      margin-bottom: 14px;
+    }
+
+    .step:last-child { margin-bottom: 0; }
+
+    .step-num {
+      flex-shrink: 0;
+      width: 22px;
+      height: 22px;
+      border-radius: 50%;
+      background-color: #D93025;
+      color: #FFFFFF;
+      font-size: 11px;
+      font-weight: 700;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin-top: 2px;
+    }
+
+    .step p {
+      font-size: 14px;
+      line-height: 1.6;
+      color: #444444;
+      margin-bottom: 0;
+    }
+
+    .step p strong { color: #111111; }
+
+    .cta-wrap {
+      text-align: center;
+      margin: 36px 0 28px;
+    }
+
+    .cta-btn {
+      display: inline-block;
+      background-color: #D93025;
+      color: #FFFFFF !important;
+      text-decoration: none;
+      font-size: 15px;
+      font-weight: 600;
+      letter-spacing: 0.02em;
+      padding: 15px 40px;
+      border-radius: 4px;
+    }
+
+    .cta-note {
+      font-size: 12px;
+      color: #999999;
+      text-align: center;
+      margin-top: 10px;
+      margin-bottom: 0;
+    }
+
+    .link-box {
+      background-color: #FAF9F7;
+      border: 1px dashed #DDDDDD;
+      border-radius: 4px;
+      padding: 14px 18px;
+      margin-top: 24px;
+    }
+
+    .link-box p {
+      font-family: 'Courier New', Courier, monospace;
+      font-size: 12px;
+      color: #777777;
+      line-height: 1.6;
+      margin-bottom: 4px;
+    }
+
+    .link-box a {
+      color: #D93025;
+      text-decoration: underline;
+      word-break: break-all;
+    }
+
+    /* FOOTER */
+    .email-footer {
+      background-color: #F0EFED;
+      border-top: 1px solid #E5E4E2;
+      padding: 28px 48px;
+      text-align: center;
+    }
+
+    .footer-brand {
+      font-size: 13px;
+      font-weight: 600;
+      color: #555555;
+      margin-bottom: 6px;
+    }
+
+    .footer-text {
+      font-size: 12px;
+      line-height: 1.7;
+      color: #999999;
+    }
+
+    .footer-text a {
+      color: #D93025;
+      text-decoration: none;
+    }
+
+    @media only screen and (max-width: 600px) {
+      .email-body, .email-header, .email-footer { padding-left: 24px !important; padding-right: 24px !important; }
+      h1 { font-size: 22px !important; }
+      .email-header img { height: 40px !important; }
+    }
+  </style>
+</head>
+<body>
+
+<div style="display:none;max-height:0;overflow:hidden;mso-hide:all;">Preparamos tudo para você. Clique e crie sua senha agora. ‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌</div>
+
+<div class="email-wrapper">
+  <div class="email-card">
+
+    <div class="email-header">
+      <img src="data:image/png;base64,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" alt="Totum" />
+    </div>
+
+    <div class="email-body">
+
+      <p class="label">Convite de acesso</p>
+
+      <h1>Oi, {{NOME_CLIENTE}}. Seu acesso está pronto.</h1>
+
+      <p>
+        Ficamos felizes de ter você aqui. A partir de agora, vamos trabalhar juntos de um jeito mais organizado e transparente. Tudo que envolver o seu projeto vai passar pela nossa plataforma: briefing, aprovações, entregas e resultados.
+      </p>
+
+      <p>
+        Criamos um acesso exclusivo para você. É rápido de configurar e você só precisa fazer isso uma vez.
+      </p>
+
+      <hr>
+
+      <div class="steps-block">
+        <p class="steps-label">Como acessar</p>
+
+        <div class="step">
+          <div class="step-num">1</div>
+          <p><strong>Clique no botão abaixo.</strong> Ele vai abrir uma página exclusiva para você.</p>
+        </div>
+
+        <div class="step">
+          <div class="step-num">2</div>
+          <p><strong>Crie a sua senha.</strong> Escolha uma que você vai lembrar, ela é só sua.</p>
+        </div>
+
+        <div class="step">
+          <div class="step-num">3</div>
+          <p><strong>Pronto, você já está dentro.</strong> O sistema vai te levar direto para o seu painel.</p>
+        </div>
+      </div>
+
+      <div class="cta-wrap">
+        <a href="{{LINK_CONVITE}}" class="cta-btn" target="_blank" rel="noopener noreferrer">
+          Criar minha senha e entrar
+        </a>
+        <p class="cta-note">Este link é só seu e expira em <strong>72 horas</strong>.</p>
+      </div>
+
+      <hr>
+
+      <p>
+        Se você não estava esperando este email, pode ignorar sem problema. Nenhuma conta foi criada e nenhuma informação sua foi usada sem que alguém da Totum tivesse cadastrado você.
+      </p>
+
+      <p>
+        Ficou com alguma dúvida? Responde este email mesmo, a gente está por aqui.
+      </p>
+
+      <div class="link-box">
+        <p>Se o botão não abrir, copie e cole este link no navegador:</p>
+        <p><a href="{{LINK_CONVITE}}">{{LINK_CONVITE}}</a></p>
+      </div>
+
+    </div>
+
+    <div class="email-footer">
+      <p class="footer-brand">Grupo Totum &mdash; Marketing para Resultados</p>
+      <p class="footer-text">
+        <a href="mailto:hello@totum.com.br">hello@totum.com.br</a>
+      </p>
+      <br>
+      <p class="footer-text">
+        Você recebeu este email porque foi cadastrado por um administrador da Totum.<br>
+        <a href="{{LINK_DESCADASTRO}}">Cancelar recebimento de emails</a>
+      </p>
+    </div>
+
+  </div>
+</div>
+
+</body>
+</html>
+o docido
