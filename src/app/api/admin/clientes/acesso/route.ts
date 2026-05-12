@@ -1,8 +1,13 @@
 // src/app/api/admin/clientes/acesso/route.ts
 //
 // Ações de acesso do cliente para o painel admin:
-//   - reenviar-convite: gera novo magic link de convite (tipo 'invite')
-//   - criar-senha: define senha diretamente para o usuário existente
+//   - reenviar-convite: gera link de acesso para o cliente
+//       - usuário novo  → type:'invite'
+//       - usuário já existe no auth → type:'recovery' (reset de senha)
+//       Em ambos os casos: garante portal_client_users vinculado.
+//   - criar-senha: define senha diretamente para o auth user
+//       - busca user_id via portal_client_users OU pelo email no auth
+//       - se encontrado por email mas sem vínculo → cria o vínculo antes
 //
 // Requer: caller com role 'master'
 // Usa: Supabase Admin API (service role key)
@@ -17,6 +22,29 @@ const SERVICE_ROLE_KEY = process.env.PRIVATE_SUPABASE_SERVICE_KEY || "";
 type Body =
   | { action: "reenviar-convite"; clientId: string }
   | { action: "criar-senha"; clientId: string; senha: string };
+
+/** Encontra um auth user pelo email usando listUsers (filtra localmente). */
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+async function findAuthUserByEmail(admin: any, email: string) {
+  const { data, error } = await admin.auth.admin.listUsers({ perPage: 1000 });
+  if (error) return null;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  return (data.users as any[]).find((u) => u.email === email) ?? null;
+}
+
+/** Garante que portal_client_users e user_roles existem para o par (userId, clientId). */
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+async function ensureClientLink(admin: any, userId: string, clientId: string) {
+  await admin
+    .from("user_roles")
+    .upsert({ user_id: userId, role: "cliente" }, { onConflict: "user_id" });
+
+  await admin
+    .from("portal_client_users")
+    .upsert({ user_id: userId, client_id: clientId, role: "cliente" }, {
+      onConflict: "user_id,client_id",
+    });
+}
 
 export async function POST(request: Request) {
   const admin = createClient(SUPABASE_URL, SERVICE_ROLE_KEY, {
@@ -64,6 +92,8 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: "Cliente não encontrado" }, { status: 404 });
     }
 
+    const email = client.email_responsavel;
+
     // ── Ação: reenviar convite ─────────────────────────────────────────────
     if (body.action === "reenviar-convite") {
       const origin =
@@ -72,26 +102,45 @@ export async function POST(request: Request) {
         "https://cliente.grupototum.com";
       const redirectTo = `${origin}/auth/reset-password?invite=true`;
 
-      const { data: linkData, error: linkErr } = await admin.auth.admin.generateLink({
+      // Tenta 'invite'. Se o usuário já existe no auth, usa 'recovery'.
+      let actionLink: string | undefined;
+
+      const { data: inviteData, error: inviteErr } = await admin.auth.admin.generateLink({
         type: "invite",
-        email: client.email_responsavel,
-        options: {
-          redirectTo,
-          data: {
-            portal_client_id: body.clientId,
-            must_change_password: true,
-          },
-        },
+        email,
+        options: { redirectTo, data: { portal_client_id: body.clientId, must_change_password: true } },
       });
 
-      if (linkErr || !linkData?.properties?.action_link) {
-        throw new Error(linkErr?.message || "Falha ao gerar link de convite");
+      if (!inviteErr && inviteData?.properties?.action_link) {
+        // Usuário novo — garante vínculo
+        await ensureClientLink(admin, inviteData.user.id, body.clientId);
+        actionLink = inviteData.properties.action_link;
+      } else {
+        // Usuário já existe → usa recovery (link de redefinição de senha)
+        const existingUser = await findAuthUserByEmail(admin, email);
+        if (!existingUser) {
+          throw new Error(inviteErr?.message || "Não foi possível gerar o link de acesso");
+        }
+
+        // Garante vínculo mesmo que tenha sido perdido
+        await ensureClientLink(admin, existingUser.id, body.clientId);
+
+        const { data: recoveryData, error: recoveryErr } = await admin.auth.admin.generateLink({
+          type: "recovery",
+          email,
+          options: { redirectTo },
+        });
+
+        if (recoveryErr || !recoveryData?.properties?.action_link) {
+          throw new Error(recoveryErr?.message || "Falha ao gerar link de recuperação");
+        }
+        actionLink = recoveryData.properties.action_link;
       }
 
       return NextResponse.json({
         success: true,
-        inviteLink: linkData.properties.action_link,
-        email: client.email_responsavel,
+        inviteLink: actionLink,
+        email,
       });
     }
 
@@ -104,32 +153,43 @@ export async function POST(request: Request) {
         );
       }
 
-      // Busca o auth user_id via portal_client_users
-      const { data: link, error: linkErr } = await admin
+      // 1. Tenta encontrar via portal_client_users
+      let userId: string | null = null;
+
+      const { data: link } = await admin
         .from("portal_client_users")
         .select("user_id")
         .eq("client_id", body.clientId)
         .maybeSingle();
 
-      if (linkErr || !link?.user_id) {
+      if (link?.user_id) {
+        userId = link.user_id;
+      } else {
+        // 2. Fallback: busca o auth user pelo email
+        const existingUser = await findAuthUserByEmail(admin, email);
+        if (existingUser) {
+          userId = existingUser.id as string;
+          // Recria o vínculo perdido
+          await ensureClientLink(admin, userId, body.clientId);
+        }
+      }
+
+      if (!userId) {
         return NextResponse.json(
-          { error: "Usuário de acesso não encontrado para este cliente. Envie o convite primeiro." },
+          { error: "Nenhum usuário encontrado com o email deste cliente. Envie o link de convite primeiro." },
           { status: 404 },
         );
       }
 
-      const { error: updateErr } = await admin.auth.admin.updateUserById(
-        link.user_id,
-        { password: body.senha },
-      );
+      const { error: updateErr } = await admin.auth.admin.updateUserById(userId, {
+        password: body.senha,
+      });
 
-      if (updateErr) {
-        throw new Error(updateErr.message);
-      }
+      if (updateErr) throw new Error(updateErr.message);
 
       return NextResponse.json({
         success: true,
-        email: client.email_responsavel,
+        email,
         message: "Senha definida com sucesso",
       });
     }
