@@ -1,5 +1,5 @@
 "use client";
-import React, { useEffect, useMemo, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { Card, CardContent } from '@/components/ui/card';
 import { createSPASassClient } from '@/lib/supabase/client';
 import { useRouter } from 'next/navigation';
@@ -17,9 +17,7 @@ import {
   Mail,
   CalendarDays,
   ExternalLink,
-  MoreHorizontal,
   Trash2,
-  ChevronDown,
   Power,
   PowerOff,
   AlertTriangle,
@@ -70,18 +68,22 @@ export default function GestaoClientesPage() {
   const [clienteParaDeletar, setClienteParaDeletar] = useState<Cliente | null>(null);
   const [deleteLoading, setDeleteLoading] = useState(false);
   const [actionMessage, setActionMessage] = useState('');
+  const [error, setError] = useState('');
+  const [togglingId, setTogglingId] = useState<string | null>(null);
 
-  async function fetchClientes() {
+  const fetchClientes = useCallback(async () => {
     setLoading(true);
+    setError('');
     const supabase = await createSPASassClient();
     const sb = supabase.getSupabaseClient();
 
-    const { data: clientesData, error } = await sb
+    const { data: clientesData, error: fetchError } = await sb
       .from('portal_clients')
       .select('*')
       .order('created_at', { ascending: false });
 
-    if (error || !clientesData) {
+    if (fetchError || !clientesData) {
+      setError('Não foi possível carregar os clientes. Tente recarregar a página.');
       setLoading(false);
       return;
     }
@@ -110,11 +112,11 @@ export default function GestaoClientesPage() {
     setClientes(clientesComStats);
     setLoading(false);
     setActionMessage('');
-  }
+  }, []);
 
   useEffect(() => {
     fetchClientes();
-  }, []);
+  }, [fetchClientes]);
 
   const clientesFiltrados = useMemo(() => {
     return clientes.filter((c) => {
@@ -127,23 +129,28 @@ export default function GestaoClientesPage() {
     });
   }, [clientes, busca, filtroStatus]);
 
-  const totalAtivos = clientes.filter((c) => c.status === 'active').length;
-  const totalInativos = clientes.filter((c) => c.status === 'inactive').length;
-  const totalPendentes = clientes.filter((c) => c.status === 'pending').length;
-  const totalComAds = clientes.filter((c) => c.meta_ad_account_id || c.google_customer_id).length;
+  const { totalAtivos, totalPendentes, totalComAds } = useMemo(() => ({
+    totalAtivos: clientes.filter(c => c.status === 'active').length,
+    totalPendentes: clientes.filter(c => c.status === 'pending').length,
+    totalComAds: clientes.filter(c => c.meta_ad_account_id || c.google_customer_id).length,
+  }), [clientes]);
 
   async function handleToggleStatus(cliente: Cliente) {
-    const novoStatus = cliente.status === 'inactive' ? 'active' : 'inactive';
-    const supabase = await createSPASassClient();
-    const { error } = await supabase.getSupabaseClient()
-      .from('portal_clients')
-      .update({ status: novoStatus })
-      .eq('id', cliente.id);
-    if (error) {
-      setActionMessage('Erro ao alterar status: ' + error.message);
-    } else {
+    setTogglingId(cliente.id);
+    try {
+      const novoStatus = cliente.status === 'inactive' ? 'active' : 'inactive';
+      const supabase = await createSPASassClient();
+      const { error: toggleError } = await supabase.getSupabaseClient()
+        .from('portal_clients')
+        .update({ status: novoStatus })
+        .eq('id', cliente.id);
+      if (toggleError) throw toggleError;
       setActionMessage(`Cliente ${novoStatus === 'active' ? 'ativado' : 'inativado'} com sucesso!`);
       fetchClientes();
+    } catch (err: unknown) {
+      setActionMessage('Erro ao alterar status: ' + (err instanceof Error ? err.message : 'Erro desconhecido'));
+    } finally {
+      setTogglingId(null);
     }
   }
 
@@ -235,6 +242,14 @@ export default function GestaoClientesPage() {
         </Card>
       </div>
 
+      {error && (
+        <div className="p-4 bg-danger-bg border border-danger-bg rounded-md text-sm text-danger-text flex items-center gap-2">
+          <AlertCircle className="w-4 h-4 shrink-0" />
+          {error}
+          <button onClick={fetchClientes} className="ml-auto text-xs underline">Tentar novamente</button>
+        </div>
+      )}
+
       {/* Filters */}
       <div className="flex flex-col lg:flex-row gap-3">
         <div className="relative flex-1">
@@ -293,8 +308,7 @@ export default function GestaoClientesPage() {
                   <div className="flex items-start justify-between mb-3">
                     <div className="flex items-center gap-3">
                       <div
-                        className="w-12 h-12 rounded-lg flex items-center justify-center text-white font-bold text-lg"
-                        style={{ backgroundColor: '#ff385c' }}
+                        className="w-12 h-12 rounded-lg flex items-center justify-center text-white font-bold text-lg bg-rausch"
                       >
                         {cliente.nome.charAt(0).toUpperCase()}
                       </div>
@@ -360,13 +374,14 @@ export default function GestaoClientesPage() {
                   <div className="flex gap-2 mt-3 pt-3 border-t border-hairline-soft">
                     <button
                       onClick={(e) => { e.stopPropagation(); handleToggleStatus(cliente); }}
-                      className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium transition-colors ${
+                      disabled={togglingId === cliente.id}
+                      className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium transition-colors disabled:opacity-50 ${
                         cliente.status === 'inactive'
                           ? 'bg-success-bg text-success-text hover:bg-success-bg'
                           : 'bg-surface-strong text-body hover:bg-surface-strong'
                       }`}
                     >
-                      {cliente.status === 'inactive' ? <Power className="w-3 h-3" /> : <PowerOff className="w-3 h-3" />}
+                      {togglingId === cliente.id ? <div className="w-3 h-3 border border-current border-t-transparent rounded-full animate-spin" /> : cliente.status === 'inactive' ? <Power className="w-3 h-3" /> : <PowerOff className="w-3 h-3" />}
                       {cliente.status === 'inactive' ? 'Ativar' : 'Inativar'}
                     </button>
                     <button
@@ -426,10 +441,11 @@ export default function GestaoClientesPage() {
                 <div className="col-span-2 flex justify-end gap-1">
                   <button
                     onClick={(e) => { e.stopPropagation(); handleToggleStatus(cliente); }}
-                    className="p-1.5 hover:bg-surface-strong rounded"
+                    disabled={togglingId === cliente.id}
+                    className="p-1.5 hover:bg-surface-strong rounded disabled:opacity-50"
                     title={cliente.status === 'inactive' ? 'Ativar' : 'Inativar'}
                   >
-                    {cliente.status === 'inactive' ? <Power className="h-4 w-4 text-success" /> : <PowerOff className="h-4 w-4 text-muted-soft" />}
+                    {togglingId === cliente.id ? <div className="h-4 w-4 border border-current border-t-transparent rounded-full animate-spin" /> : cliente.status === 'inactive' ? <Power className="h-4 w-4 text-success" /> : <PowerOff className="h-4 w-4 text-muted-soft" />}
                   </button>
                   <button
                     onClick={(e) => { e.stopPropagation(); setClienteParaDeletar(cliente); }}
@@ -494,21 +510,28 @@ export default function GestaoClientesPage() {
   );
 }
 
-function ClienteDashboard({ cliente, onClose }: { cliente: any; onClose: () => void }) {
-  const [fullData, setFullData] = useState<any>(null);
+function ClienteDashboard({ cliente, onClose }: { cliente: Cliente & { stats?: ClienteStats }; onClose: () => void }) {
+  const [fullData, setFullData] = useState<Record<string, unknown> | null>(null);
   const [loading, setLoading] = useState(true);
-  const pd = fullData?.profile_data || {};
+  const [loadError, setLoadError] = useState('');
+  const pd = (fullData?.profile_data as Record<string, unknown>) || {};
 
   useEffect(() => {
     async function load() {
-      const supabase = await createSPASassClient();
-      const { data } = await supabase.getSupabaseClient()
-        .from('portal_clients')
-        .select('*')
-        .eq('id', cliente.id)
-        .single();
-      setFullData(data);
-      setLoading(false);
+      try {
+        const supabase = await createSPASassClient();
+        const { data, error: fetchError } = await supabase.getSupabaseClient()
+          .from('portal_clients')
+          .select('*')
+          .eq('id', cliente.id)
+          .single();
+        if (fetchError) throw fetchError;
+        setFullData(data);
+      } catch {
+        setLoadError('Erro ao carregar dados do cliente.');
+      } finally {
+        setLoading(false);
+      }
     }
     load();
   }, [cliente.id]);
@@ -541,6 +564,13 @@ function ClienteDashboard({ cliente, onClose }: { cliente: any; onClose: () => v
           <div className="flex justify-center py-20">
             <div className="w-8 h-8 border-4 border-rausch border-t-transparent rounded-full animate-spin" />
           </div>
+        ) : loadError ? (
+          <div className="p-6">
+            <div className="p-4 bg-danger-bg border border-danger-bg rounded-md text-sm text-danger-text flex items-center gap-2">
+              <AlertCircle className="w-4 h-4 shrink-0" />
+              {loadError}
+            </div>
+          </div>
         ) : (
           <div className="p-6 space-y-6">
             {/* Stats */}
@@ -571,35 +601,35 @@ function ClienteDashboard({ cliente, onClose }: { cliente: any; onClose: () => v
             <div className="space-y-4">
               <DashSection icon={Building2} title="Informações da Empresa">
                 <DashGrid items={[
-                  { label: 'Nome', value: fullData?.nome },
-                  { label: 'CNPJ', value: fullData?.cnpj },
-                  { label: 'Responsável', value: fullData?.nome_responsavel },
-                  { label: 'Email', value: fullData?.email_responsavel },
-                  { label: 'Telefone', value: fullData?.telefone },
-                  { label: 'Site', value: fullData?.site },
+                  { label: 'Nome', value: fullData?.nome as string },
+                  { label: 'CNPJ', value: fullData?.cnpj as string },
+                  { label: 'Responsável', value: fullData?.nome_responsavel as string },
+                  { label: 'Email', value: fullData?.email_responsavel as string },
+                  { label: 'Telefone', value: fullData?.telefone as string },
+                  { label: 'Site', value: fullData?.site as string },
                 ]} />
               </DashSection>
 
               <DashSection icon={Briefcase} title="Sobre o Negócio">
                 <DashGrid items={[
-                  { label: 'Ramo', value: fullData?.ramo_atuacao },
-                  { label: 'Tempo de mercado', value: fullData?.tempo_mercado },
-                  { label: 'Tamanho', value: fullData?.tamanho_empresa },
-                  { label: 'Faturamento', value: fullData?.faturamento_mensal },
+                  { label: 'Ramo', value: fullData?.ramo_atuacao as string },
+                  { label: 'Tempo de mercado', value: fullData?.tempo_mercado as string },
+                  { label: 'Tamanho', value: fullData?.tamanho_empresa as string },
+                  { label: 'Faturamento', value: fullData?.faturamento_mensal as string },
                 ]} />
-                <DashText label="Descrição" value={fullData?.descricao_negocio} />
-                <DashText label="Produtos/Serviços" value={fullData?.produtos_servicos} />
+                <DashText label="Descrição" value={fullData?.descricao_negocio as string} />
+                <DashText label="Produtos/Serviços" value={fullData?.produtos_servicos as string} />
               </DashSection>
 
               <DashSection icon={Target} title="Público-Alvo">
                 <DashGrid items={[
-                  { label: 'Nicho', value: pd.nicho_principal },
-                  { label: 'Gênero', value: pd.genero_alvo },
-                  { label: 'Localização', value: pd.localizacao_alvo },
-                  { label: 'Tom de voz', value: pd.tom_voz },
+                  { label: 'Nicho', value: pd.nicho_principal as string },
+                  { label: 'Gênero', value: pd.genero_alvo as string },
+                  { label: 'Localização', value: pd.localizacao_alvo as string },
+                  { label: 'Tom de voz', value: pd.tom_voz as string },
                 ]} />
-                <DashText label="Dores principais" value={pd.dores_principais} />
-                <DashText label="Desejos/Objetivos" value={pd.desejos_objetivos} />
+                <DashText label="Dores principais" value={pd.dores_principais as string} />
+                <DashText label="Desejos/Objetivos" value={pd.desejos_objetivos as string} />
               </DashSection>
 
               <DashSection icon={Palette} title="Identidade Visual">
@@ -607,47 +637,47 @@ function ClienteDashboard({ cliente, onClose }: { cliente: any; onClose: () => v
                   <div>
                     <span className="text-xs text-muted-soft uppercase">Cor primária</span>
                     <div className="flex items-center gap-2 mt-1">
-                      <div className="w-8 h-8 rounded-lg border" style={{ backgroundColor: fullData?.cor_primaria || 'rausch' }} />
-                      <span className="text-sm font-mono text-ink">{fullData?.cor_primaria || '—'}</span>
+                      <div className="w-8 h-8 rounded-lg border" style={{ backgroundColor: (fullData?.cor_primaria as string) || '#FF385C' }} />
+                      <span className="text-sm font-mono text-ink">{(fullData?.cor_primaria as string) || '—'}</span>
                     </div>
                   </div>
                   <div>
                     <span className="text-xs text-muted-soft uppercase">Cor secundária</span>
                     <div className="flex items-center gap-2 mt-1">
-                      <div className="w-8 h-8 rounded-lg border" style={{ backgroundColor: fullData?.cor_secundaria || '#1a1a2e' }} />
-                      <span className="text-sm font-mono text-ink">{fullData?.cor_secundaria || '—'}</span>
+                      <div className="w-8 h-8 rounded-lg border" style={{ backgroundColor: (fullData?.cor_secundaria as string) || '#1a1a2e' }} />
+                      <span className="text-sm font-mono text-ink">{(fullData?.cor_secundaria as string) || '—'}</span>
                     </div>
                   </div>
                 </div>
-                <DashText label="Fontes" value={pd.fontes} />
-                <DashText label="Personalidade visual" value={pd.personalidade_visual} />
+                <DashText label="Fontes" value={pd.fontes as string} />
+                <DashText label="Personalidade visual" value={pd.personalidade_visual as string} />
               </DashSection>
 
               <DashSection icon={Phone} title="Operação e Contatos">
                 <DashGrid items={[
-                  { label: 'CRM', value: pd.crm_utilizado },
-                  { label: 'SLA', value: pd.sla_resposta },
+                  { label: 'CRM', value: pd.crm_utilizado as string },
+                  { label: 'SLA', value: pd.sla_resposta as string },
                   { label: 'Horário', value: pd.horario_inicio && pd.horario_fim ? `${pd.horario_inicio} - ${pd.horario_fim}` : '' },
-                  { label: 'Dias', value: pd.dias_atendimento?.join(', ') },
+                  { label: 'Dias', value: (pd.dias_atendimento as string[] | undefined)?.join(', ') },
                 ]} />
-                <DashText label="Informações adicionais" value={pd.informacoes_adicionais} />
+                <DashText label="Informações adicionais" value={pd.informacoes_adicionais as string} />
               </DashSection>
 
               <DashSection icon={CircleDot} title="Círculo Dourado">
-                <DashText label="Porquê" value={pd.circulo_dourado?.porque} />
-                <DashText label="O que" value={pd.circulo_dourado?.o_que} />
-                <DashText label="Como" value={pd.circulo_dourado?.como} />
+                <DashText label="Porquê" value={(pd.circulo_dourado as Record<string, string> | undefined)?.porque} />
+                <DashText label="O que" value={(pd.circulo_dourado as Record<string, string> | undefined)?.o_que} />
+                <DashText label="Como" value={(pd.circulo_dourado as Record<string, string> | undefined)?.como} />
               </DashSection>
 
               <DashSection icon={Star} title="Características da Marca">
-                <DashText label="Missão" value={pd.caracteristicas_marca?.missao} />
-                <DashText label="Visão" value={pd.caracteristicas_marca?.visao} />
-                <DashText label="Valores" value={pd.caracteristicas_marca?.valores} />
-                <DashText label="Personalidade" value={pd.caracteristicas_marca?.personalidade} />
+                <DashText label="Missão" value={(pd.caracteristicas_marca as Record<string, string> | undefined)?.missao} />
+                <DashText label="Visão" value={(pd.caracteristicas_marca as Record<string, string> | undefined)?.visao} />
+                <DashText label="Valores" value={(pd.caracteristicas_marca as Record<string, string> | undefined)?.valores} />
+                <DashText label="Personalidade" value={(pd.caracteristicas_marca as Record<string, string> | undefined)?.personalidade} />
               </DashSection>
 
               <DashSection icon={Award} title="Proposta Única de Valor">
-                <DashText label="PUV" value={pd.puv} />
+                <DashText label="PUV" value={pd.puv as string} />
               </DashSection>
             </div>
           </div>
@@ -657,7 +687,11 @@ function ClienteDashboard({ cliente, onClose }: { cliente: any; onClose: () => v
   );
 }
 
-function DashSection({ icon: Icon, title, children }: any) {
+function DashSection({ icon: Icon, title, children }: {
+  icon: React.ElementType;
+  title: string;
+  children: React.ReactNode;
+}) {
   return (
     <div className="border rounded-md overflow-hidden">
       <div className="flex items-center gap-2 px-4 py-3 bg-surface-soft border-b">
@@ -669,7 +703,7 @@ function DashSection({ icon: Icon, title, children }: any) {
   );
 }
 
-function DashGrid({ items }: { items: { label: string; value: any }[] }) {
+function DashGrid({ items }: { items: { label: string; value: string | number | null | undefined }[] }) {
   return (
     <div className="grid grid-cols-2 gap-3 mb-3">
       {items.map((item, i) => (
@@ -682,7 +716,7 @@ function DashGrid({ items }: { items: { label: string; value: any }[] }) {
   );
 }
 
-function DashText({ label, value }: { label: string; value: any }) {
+function DashText({ label, value }: { label: string; value: string | null | undefined }) {
   if (!value) return null;
   return (
     <div className="mb-3 last:mb-0">
