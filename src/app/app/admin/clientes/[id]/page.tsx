@@ -6,7 +6,7 @@ import { createSPASassClient } from "@/lib/supabase/client";
 import {
   Check, ChevronRight, AlertCircle, X,
   Edit3, Save, ArrowLeft, Lock, KeyRound, Copy, Eye, EyeOff,
-  RefreshCw
+  RefreshCw, FolderOpen
 } from "lucide-react";
 import { STEPS, FormState } from "@/lib/cliente-form-constants";
 import { useClienteForm } from "@/hooks/useClienteForm";
@@ -34,6 +34,11 @@ export default function EditarClientePage() {
   const [showPasswordForm, setShowPasswordForm] = useState(false);
   const [newPassword, setNewPassword] = useState("");
   const [showNewPassword, setShowNewPassword] = useState(false);
+
+  // Pasta do Google Drive (independente do wizard)
+  const [driveUrl, setDriveUrl] = useState("");
+  const [driveSaved, setDriveSaved] = useState("");
+  const [driveSaving, setDriveSaving] = useState(false);
 
   const { form, setForm, update, toggleArray, addPersona, removePersona, updatePersona } = useClienteForm();
 
@@ -100,6 +105,7 @@ export default function EditarClientePage() {
         caracteristicas_marca: (pd.caracteristicas_marca as FormState["caracteristicas_marca"]) || { missao: "", visao: "", valores: "", personalidade: "" },
         puv: (pd.puv as string) || "",
       });
+      setDriveUrl((data.google_drive_folder_url as string) || "");
     } catch (err: unknown) {
       setError(err instanceof Error ? err.message : "Erro ao carregar cliente");
     } finally {
@@ -154,6 +160,24 @@ export default function EditarClientePage() {
       setAccessError(err instanceof Error ? err.message : "Erro ao definir senha");
     } finally {
       setAccessLoading(false);
+    }
+  };
+
+  const handleSaveDrive = async () => {
+    setDriveSaving(true); setDriveSaved("");
+    try {
+      const supabase = await createSPASassClient();
+      const { error: e } = await supabase.getSupabaseClient()
+        .from("portal_clients")
+        .update({ google_drive_folder_url: driveUrl || null })
+        .eq("id", clientId);
+      if (e) throw e;
+      setDriveSaved("Pasta atualizada com sucesso");
+      setTimeout(() => setDriveSaved(""), 3000);
+    } catch (err: unknown) {
+      setDriveSaved("Erro: " + (err instanceof Error ? err.message : "falha ao salvar"));
+    } finally {
+      setDriveSaving(false);
     }
   };
 
@@ -371,6 +395,49 @@ export default function EditarClientePage() {
           </div>
         </div>
       )}
+
+      {/* Pasta do Google Drive */}
+      <div className="max-w-7xl mx-auto px-6 pt-4">
+        <div className="bg-canvas border border-hairline rounded-lg p-5 shadow-airbnb">
+          <div className="flex items-center gap-3 mb-3">
+            <div className="w-9 h-9 rounded-md bg-surface-soft flex items-center justify-center">
+              <FolderOpen className="w-4 h-4 text-rausch" />
+            </div>
+            <div>
+              <h3 className="text-sm font-semibold text-ink">Pasta no Google Drive</h3>
+              <p className="text-xs text-muted">Destino dos arquivos que o cliente enviar. Aparece como atalho na página de Arquivos do cliente.</p>
+            </div>
+          </div>
+          <div className="flex flex-col sm:flex-row gap-2 items-stretch">
+            <input
+              value={driveUrl}
+              onChange={e => setDriveUrl(e.target.value)}
+              placeholder="https://drive.google.com/drive/folders/..."
+              className="flex-1 input-field"
+            />
+            <button
+              onClick={handleSaveDrive}
+              disabled={driveSaving}
+              className="flex items-center justify-center gap-2 px-4 py-2 bg-rausch text-white rounded-md text-sm font-medium hover:bg-rausch-active disabled:opacity-50 transition-all"
+            >
+              {driveSaving ? <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" /> : <><Save className="w-4 h-4" /> Salvar pasta</>}
+            </button>
+            {driveUrl && (
+              <a
+                href={driveUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="flex items-center justify-center gap-2 px-4 py-2 border border-hairline text-body rounded-md text-sm font-medium hover:bg-surface-soft transition-colors"
+              >
+                <FolderOpen className="w-4 h-4" /> Abrir
+              </a>
+            )}
+          </div>
+          {driveSaved && (
+            <p className={`text-xs mt-2 ${driveSaved.startsWith("Erro") ? "text-danger-text" : "text-success-text"}`}>{driveSaved}</p>
+          )}
+        </div>
+      </div>
 
       {(error || message) && (
         <div className="max-w-7xl mx-auto px-6 pt-4">

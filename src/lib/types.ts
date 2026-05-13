@@ -1874,6 +1874,7 @@ export type Database = {
           faturamento_mensal: string | null
           google_customer_id: string | null
           google_developer_token: string | null
+          google_drive_folder_url: string | null
           google_refresh_token: string | null
           id: string
           meta_access_token: string | null
@@ -1908,6 +1909,7 @@ export type Database = {
           faturamento_mensal?: string | null
           google_customer_id?: string | null
           google_developer_token?: string | null
+          google_drive_folder_url?: string | null
           google_refresh_token?: string | null
           id?: string
           meta_access_token?: string | null
@@ -1942,6 +1944,7 @@ export type Database = {
           faturamento_mensal?: string | null
           google_customer_id?: string | null
           google_developer_token?: string | null
+          google_drive_folder_url?: string | null
           google_refresh_token?: string | null
           id?: string
           meta_access_token?: string | null

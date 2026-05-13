@@ -1,0 +1,321 @@
+<!DOCTYPE html>
+<html lang="pt-BR" xmlns="http://www.w3.org/1999/xhtml">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="format-detection" content="telephone=no,address=no,email=no,date=no,url=no">
+  <meta name="x-apple-disable-message-reformatting">
+  <meta name="color-scheme" content="light">
+  <meta name="supported-color-schemes" content="light">
+
+  <!--
+    === ANTI-SPAM CHECKLIST (implementar no servidor) ===
+    1. Enviar pelo domínio autenticado (SPF, DKIM, DMARC configurados)
+    2. Usar IP dedicado com boa reputação (ex: SendGrid, Mailgun, Amazon SES)
+    3. Linha de assunto: "Seu acesso à plataforma Totum está pronto"
+    4. Cabeçalhos obrigatórios no servidor:
+       List-Unsubscribe: <mailto:sair@totum.com.br>
+       List-Unsubscribe-Post: List-Unsubscribe=One-Click
+       Precedence: bulk
+       X-Mailer: Totum Platform v1
+  -->
+
+  <title>Bem-vindo à Totum</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body, html { margin: 0; padding: 0; width: 100%; }
+    body {
+      background-color: #F0EFED;
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif;
+      -webkit-text-size-adjust: 100%;
+      -ms-text-size-adjust: 100%;
+    }
+    table { border-collapse: collapse; mso-table-lspace: 0pt; mso-table-rspace: 0pt; }
+    img { border: 0; display: block; outline: none; text-decoration: none; -ms-interpolation-mode: bicubic; }
+    a { color: inherit; }
+
+    .email-wrapper {
+      background-color: #F0EFED;
+      padding: 40px 16px;
+    }
+
+    .email-card {
+      background-color: #FFFFFF;
+      max-width: 560px;
+      margin: 0 auto;
+      border-radius: 6px;
+      overflow: hidden;
+      box-shadow: 0 2px 20px rgba(0,0,0,0.08);
+    }
+
+    /* HEADER */
+    .email-header {
+      background-color: #D93025;
+      padding: 44px 48px;
+      text-align: center;
+    }
+
+    .email-header img {
+      height: 52px;
+      width: auto;
+      margin: 0 auto;
+      display: block;
+    }
+
+    /* BODY */
+    .email-body {
+      padding: 44px 48px 40px;
+    }
+
+    .label {
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: 0.15em;
+      text-transform: uppercase;
+      color: #D93025;
+      margin-bottom: 18px;
+    }
+
+    h1 {
+      font-size: 26px;
+      font-weight: 700;
+      color: #111111;
+      line-height: 1.3;
+      margin-bottom: 28px;
+      letter-spacing: -0.3px;
+    }
+
+    p {
+      font-size: 15px;
+      line-height: 1.75;
+      color: #444444;
+      margin-bottom: 18px;
+    }
+
+    p:last-of-type { margin-bottom: 0; }
+
+    hr {
+      border: none;
+      border-top: 1px solid #EBEBEB;
+      margin: 32px 0;
+    }
+
+    .steps-block {
+      background-color: #FAF9F7;
+      border-left: 3px solid #D93025;
+      border-radius: 0 4px 4px 0;
+      padding: 22px 26px;
+      margin: 32px 0;
+    }
+
+    .steps-label {
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: 0.13em;
+      text-transform: uppercase;
+      color: #D93025;
+      margin-bottom: 18px;
+    }
+
+    .step {
+      display: flex;
+      align-items: flex-start;
+      gap: 14px;
+      margin-bottom: 14px;
+    }
+
+    .step:last-child { margin-bottom: 0; }
+
+    .step-num {
+      flex-shrink: 0;
+      width: 22px;
+      height: 22px;
+      border-radius: 50%;
+      background-color: #D93025;
+      color: #FFFFFF;
+      font-size: 11px;
+      font-weight: 700;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin-top: 2px;
+    }
+
+    .step p {
+      font-size: 14px;
+      line-height: 1.6;
+      color: #444444;
+      margin-bottom: 0;
+    }
+
+    .step p strong { color: #111111; }
+
+    .cta-wrap {
+      text-align: center;
+      margin: 36px 0 28px;
+    }
+
+    .cta-btn {
+      display: inline-block;
+      background-color: #D93025;
+      color: #FFFFFF !important;
+      text-decoration: none;
+      font-size: 15px;
+      font-weight: 600;
+      letter-spacing: 0.02em;
+      padding: 15px 40px;
+      border-radius: 4px;
+    }
+
+    .cta-note {
+      font-size: 12px;
+      color: #999999;
+      text-align: center;
+      margin-top: 10px;
+      margin-bottom: 0;
+    }
+
+    .link-box {
+      background-color: #FAF9F7;
+      border: 1px dashed #DDDDDD;
+      border-radius: 4px;
+      padding: 14px 18px;
+      margin-top: 24px;
+    }
+
+    .link-box p {
+      font-family: 'Courier New', Courier, monospace;
+      font-size: 12px;
+      color: #777777;
+      line-height: 1.6;
+      margin-bottom: 4px;
+    }
+
+    .link-box a {
+      color: #D93025;
+      text-decoration: underline;
+      word-break: break-all;
+    }
+
+    /* FOOTER */
+    .email-footer {
+      background-color: #F0EFED;
+      border-top: 1px solid #E5E4E2;
+      padding: 28px 48px;
+      text-align: center;
+    }
+
+    .footer-brand {
+      font-size: 13px;
+      font-weight: 600;
+      color: #555555;
+      margin-bottom: 6px;
+    }
+
+    .footer-text {
+      font-size: 12px;
+      line-height: 1.7;
+      color: #999999;
+    }
+
+    .footer-text a {
+      color: #D93025;
+      text-decoration: none;
+    }
+
+    @media only screen and (max-width: 600px) {
+      .email-body, .email-header, .email-footer { padding-left: 24px !important; padding-right: 24px !important; }
+      h1 { font-size: 22px !important; }
+      .email-header img { height: 40px !important; }
+    }
+  </style>
+</head>
+<body>
+
+<div style="display:none;max-height:0;overflow:hidden;mso-hide:all;">Preparamos tudo para você. Clique e crie sua senha agora. ‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌</div>
+
+<div class="email-wrapper">
+  <div class="email-card">
+
+    <div class="email-header">
+      <img src="cid:logo-totum" alt="Totum" />
+    </div>
+
+    <div class="email-body">
+
+      <p class="label">Convite de acesso</p>
+
+      <h1>Oi, {{NOME_CLIENTE}}. Seu acesso está pronto.</h1>
+
+      <p>
+        Ficamos felizes de ter você aqui. A partir de agora, vamos trabalhar juntos de um jeito mais organizado e transparente. Tudo que envolver o seu projeto vai passar pela nossa plataforma: briefing, aprovações, entregas e resultados.
+      </p>
+
+      <p>
+        Criamos um acesso exclusivo para você. É rápido de configurar e você só precisa fazer isso uma vez.
+      </p>
+
+      <hr>
+
+      <div class="steps-block">
+        <p class="steps-label">Como acessar</p>
+
+        <div class="step">
+          <div class="step-num">1</div>
+          <p><strong>Clique no botão abaixo.</strong> Ele vai abrir uma página exclusiva para você.</p>
+        </div>
+
+        <div class="step">
+          <div class="step-num">2</div>
+          <p><strong>Crie a sua senha.</strong> Escolha uma que você vai lembrar, ela é só sua.</p>
+        </div>
+
+        <div class="step">
+          <div class="step-num">3</div>
+          <p><strong>Pronto, você já está dentro.</strong> O sistema vai te levar direto para o seu painel.</p>
+        </div>
+      </div>
+
+      <div class="cta-wrap">
+        <a href="{{LINK_CONVITE}}" class="cta-btn" target="_blank" rel="noopener noreferrer">
+          Criar minha senha e entrar
+        </a>
+        <p class="cta-note">Este link é só seu e expira em <strong>72 horas</strong>.</p>
+      </div>
+
+      <hr>
+
+      <p>
+        Se você não estava esperando este email, pode ignorar sem problema. Nenhuma conta foi criada e nenhuma informação sua foi usada sem que alguém da Totum tivesse cadastrado você.
+      </p>
+
+      <p>
+        Ficou com alguma dúvida? Responde este email mesmo, a gente está por aqui.
+      </p>
+
+      <div class="link-box">
+        <p>Se o botão não abrir, copie e cole este link no navegador:</p>
+        <p><a href="{{LINK_CONVITE}}">{{LINK_CONVITE}}</a></p>
+      </div>
+
+    </div>
+
+    <div class="email-footer">
+      <p class="footer-brand">Grupo Totum &mdash; Marketing para Resultados</p>
+      <p class="footer-text">
+        <a href="mailto:hello@totum.com.br">hello@totum.com.br</a>
+      </p>
+      <br>
+      <p class="footer-text">
+        Você recebeu este email porque foi cadastrado por um administrador da Totum.<br>
+        <a href="{{LINK_DESCADASTRO}}">Cancelar recebimento de emails</a>
+      </p>
+    </div>
+
+  </div>
+</div>
+
+</body>
+</html>
+o docido
