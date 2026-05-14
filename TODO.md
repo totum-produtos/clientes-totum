@@ -1,6 +1,6 @@
 # TODO.md — Central do Cliente Totum
 
-**Atualizado:** 2026-05-10
+**Atualizado:** 2026-05-13
 **Sistema:** Vibe Coding Totum v3.0
 **Base:** Revisão Pré-Produção 6 categorias (ver BUGS.md)
 
@@ -8,7 +8,10 @@
 
 ## 🔴 CRÍTICO — Antes do próximo deploy
 
-*(nenhum crítico no momento — projeto em boa saúde)*
+- [ ] **[SECURITY]** Rotacionar Supabase service role key exposta em worktree local `.claude/`
+  - `.claude/` foi adicionada ao `.gitignore` para não aparecer como untracked
+  - Chave e senhas de teste hardcoded foram removidas dos scripts auxiliares
+  - Rotacionar no Supabase e atualizar ambientes Vercel/VPS/n8n que dependam dela
 
 ---
 
@@ -72,6 +75,8 @@
 - [x] KIMI.md criado v1.0
 - [x] BUGS.md criado com revisão pré-produção completa (6 categorias)
 - [x] `console.log` de debug removido de `MFAVerification.tsx`
+- [x] `.claude/` adicionada ao `.gitignore` para esconder worktrees locais com envs/artefatos
+- [x] Service role e senhas hardcoded removidas de scripts auxiliares
 
 ---
 

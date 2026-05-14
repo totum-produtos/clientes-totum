@@ -1,7 +1,20 @@
 const { createClient } = require('@supabase/supabase-js');
 
-const SUPABASE_URL = 'https://cgpkfhrqprqptvehatad.supabase.co';
-const SERVICE_ROLE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImNncGtmaHJxcHJxcHR2ZWhhdGFkIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc3NTIyNDI2MiwiZXhwIjoyMDkwODAwMjYyfQ.kV_iFypk00cXplJNUnSW8FEz04v2HD9z5lO5X9eJFag';
+const SUPABASE_URL = process.env.NEXT_PUBLIC_SUPABASE_URL || 'https://cgpkfhrqprqptvehatad.supabase.co';
+const SERVICE_ROLE_KEY = process.env.PRIVATE_SUPABASE_SERVICE_KEY || process.env.SUPABASE_SERVICE_ROLE_KEY;
+
+if (!SERVICE_ROLE_KEY) {
+  console.error('PRIVATE_SUPABASE_SERVICE_KEY ou SUPABASE_SERVICE_ROLE_KEY é obrigatória para rodar este script.');
+  process.exit(1);
+}
+
+const DEV_PASSWORD = process.env.SETUP_DEV_PASSWORD;
+const CLIENT_PASSWORD = process.env.SETUP_CLIENT_PASSWORD;
+
+if (!DEV_PASSWORD || !CLIENT_PASSWORD) {
+  console.error('SETUP_DEV_PASSWORD e SETUP_CLIENT_PASSWORD são obrigatórias para criar usuários de teste.');
+  process.exit(1);
+}
 
 const supabase = createClient(SUPABASE_URL, SERVICE_ROLE_KEY, {
   auth: { autoRefreshToken: false, persistSession: false }
@@ -40,7 +53,7 @@ async function setup() {
     console.log('   ⚠️ Usuário dev@grupototum.com não encontrado, criando...');
     const { data: newDev, error: createDevErr } = await supabase.auth.admin.createUser({
       email: 'dev@grupototum.com',
-      password: 'Totum@2025',
+      password: DEV_PASSWORD,
       email_confirm: true,
     });
     if (createDevErr) {
@@ -77,7 +90,7 @@ async function setup() {
     console.log('   ⚠️ Usuário teste@grupototum.com não encontrado, criando...');
     const { data: newTeste, error: createTesteErr } = await supabase.auth.admin.createUser({
       email: 'teste@grupototum.com',
-      password: 'Cliente@2025',
+      password: CLIENT_PASSWORD,
       email_confirm: true,
     });
     if (createTesteErr) {
@@ -213,8 +226,8 @@ async function setup() {
 
   console.log('\n🎉 Setup concluído com sucesso!');
   console.log('\n📋 Credenciais de acesso:');
-  console.log('   Master:   dev@grupototum.com / Totum@2025');
-  console.log('   Cliente:  teste@grupototum.com / Cliente@2025');
+  console.log('   Master:   dev@grupototum.com / [senha via SETUP_DEV_PASSWORD]');
+  console.log('   Cliente:  teste@grupototum.com / [senha via SETUP_CLIENT_PASSWORD]');
   console.log('\n🌐 Acesse: https://cliente.grupototum.com');
 }
 
