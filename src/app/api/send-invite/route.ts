@@ -20,6 +20,21 @@ function errorMessage(error: unknown) {
   return error instanceof Error ? error.message : 'Erro desconhecido';
 }
 
+function isSupabaseAdminBearer(token: string) {
+  if (token.startsWith('sb_secret_')) {
+    return true;
+  }
+
+  try {
+    const [, payload] = token.split('.');
+    if (!payload) return false;
+
+    return JSON.parse(atob(payload)).role === 'service_role';
+  } catch {
+    return false;
+  }
+}
+
 export async function POST(req: NextRequest) {
   try {
     const body = await req.json();
@@ -48,15 +63,9 @@ export async function POST(req: NextRequest) {
     let userId: string | undefined;
     let isServiceRole = false;
 
-    // Verifica se é service_role key
-    try {
-      const payload = JSON.parse(atob(jwt.split('.')[1]));
-      if (payload.role === 'service_role') {
-        isServiceRole = true;
-        userId = '00000000-0000-0000-0000-000000000000';
-      }
-    } catch {
-      // não é JWT válido
+    if (isSupabaseAdminBearer(jwt)) {
+      isServiceRole = true;
+      userId = '00000000-0000-0000-0000-000000000000';
     }
 
     if (!isServiceRole) {
