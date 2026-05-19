@@ -488,6 +488,23 @@ export default function MeuCadastroPage() {
           );
         })}
       </div>
+
+      {/* Barra fixa inferior para Salvar (Sticky UX) */}
+      {editMode && (
+        <div className="fixed bottom-0 left-0 right-0 p-4 bg-white dark:bg-ink border-t border-hairline z-50 shadow-[0_-4px_15px_rgba(0,0,0,0.05)] flex items-center justify-center animate-in slide-in-from-bottom-5">
+          <div className="w-full max-w-5xl flex items-center justify-between px-6">
+            <span className="text-sm font-medium text-muted hidden md:block">Você possui alterações não salvas no briefing.</span>
+            <div className="flex items-center gap-3 w-full md:w-auto justify-end">
+              <button onClick={() => { setEditMode(false); setMessage(""); }} className="flex items-center justify-center gap-2 px-4 py-2 text-body hover:text-ink rounded-md text-sm font-medium transition-colors">
+                <X className="w-4 h-4" /> Cancelar
+              </button>
+              <button onClick={handleSubmitChanges} disabled={loading} className="flex items-center justify-center gap-2 px-6 py-2.5 bg-success text-white rounded-md text-sm font-medium hover:bg-success-text shadow-sm disabled:opacity-50 transition-colors">
+                {loading ? <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" /> : <><Save className="w-4 h-4" /> {isAdmin ? "Salvar" : "Salvar alterações"}</>}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

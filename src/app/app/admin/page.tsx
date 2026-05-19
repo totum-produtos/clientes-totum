@@ -2,7 +2,8 @@
 import React, { useEffect, useState } from 'react';
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
 import { createSPASassClient } from '@/lib/supabase/client';
-import { Plus, Link2, Users, Building2, Clock, CheckCircle, XCircle, Mail, Loader2 } from 'lucide-react';
+import { Plus, Link2, Users, Building2, Clock, CheckCircle, XCircle, Mail, Loader2, Edit3 } from 'lucide-react';
+import Link from 'next/link';
 import type { Json } from '@/lib/types';
 
 type JsonObject = { [key: string]: Json | undefined };
@@ -131,6 +132,47 @@ export default function AdminPage() {
         }
     }
 
+    async function handleApproveAll() {
+        if (pendingChanges.length === 0) return;
+        const supabase = await createSPASassClient();
+        const client = supabase.getSupabaseClient();
+        
+        let successCount = 0;
+        for (const change of pendingChanges) {
+            try {
+                if (change.field_path.startsWith('profile_data.')) {
+                    const field = change.field_path.replace('profile_data.', '');
+                    const { data: pc } = await client.from('portal_clients').select('profile_data').eq('id', change.portal_client_id).single();
+                    const current = (pc?.profile_data || {}) as JsonObject;
+                    const newVal = parseProfileValue(change.new_value);
+                    await client.from('portal_clients').update({ profile_data: { ...current, [field]: newVal } }).eq('id', change.portal_client_id);
+                } else {
+                    await client.from('portal_clients').update({ [change.field_path]: change.new_value }).eq('id', change.portal_client_id);
+                }
+
+                await client.from('client_profile_changes').update({
+                    status: 'aprovado',
+                    reviewed_at: new Date().toISOString()
+                }).eq('id', change.id);
+
+                await client.from('notifications').insert({
+                    user_id: change.requested_by,
+                    type: 'alteracao_aprovada',
+                    title: 'Alteração aprovada',
+                    message: `Sua alteração no campo "${change.field_path}" foi aprovada.`,
+                    data: { change_id: change.id },
+                    read: false
+                });
+                successCount++;
+            } catch (err) {
+                console.error("Erro ao aprovar mudança em lote", err);
+            }
+        }
+        
+        setMessage(`${successCount} alterações aprovadas com sucesso!`);
+        fetchData();
+    }
+
     async function handleApprove(change: ProfileChange) {
         const supabase = await createSPASassClient();
         const client = supabase.getSupabaseClient();
@@ -245,11 +287,14 @@ export default function AdminPage() {
             {/* Alterações Pendentes */}
             {pendingChanges.length > 0 && (
                 <Card className="border-warning-bg">
-                    <CardHeader>
+                    <CardHeader className="flex flex-row items-center justify-between">
                         <CardTitle className="flex items-center gap-2 text-warning-text">
                             <Clock className="h-5 w-5" />
                             Alterações pendentes de aprovação ({pendingChanges.length})
                         </CardTitle>
+                        <button onClick={handleApproveAll} className="btn-primary bg-success hover:bg-success-text text-white px-3 py-1.5 rounded-lg text-sm flex items-center gap-1.5 transition-colors shadow-sm">
+                            <CheckCircle className="w-4 h-4" /> Aprovar Todos
+                        </button>
                     </CardHeader>
                     <CardContent className="space-y-3">
                         {pendingChanges.map(change => {
@@ -325,6 +370,14 @@ export default function AdminPage() {
                                     <p className="text-xs text-muted">{c.slug} • {c.email_responsavel}</p>
                                 </div>
                                 <div className="flex items-center gap-2">
+                                    <Link
+                                        href={`/app/admin/clientes/${c.id}`}
+                                        className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium border border-rausch/30 text-rausch hover:bg-rausch hover:text-white transition-colors"
+                                        title="Abrir detalhes e briefing"
+                                    >
+                                        <Edit3 className="h-3 w-3" />
+                                        Ver Briefing
+                                    </Link>
                                     <button
                                         onClick={() => handleSendInvite(c.id, c.email_responsavel)}
                                         disabled={sendingInvite === c.id}
