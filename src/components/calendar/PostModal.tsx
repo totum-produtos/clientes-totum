@@ -12,12 +12,13 @@ interface Props {
   isOpen: boolean;
   date: Date | null;
   post: any;
+  clientName?: string;
   onSave: (data: any) => void;
   onDelete: (id: number) => void;
   onClose: () => void;
 }
 
-export default function PostModal({ isOpen, date, post, onSave, onDelete, onClose }: Props) {
+export default function PostModal({ isOpen, date, post, clientName, onSave, onDelete, onClose }: Props) {
   if (!isOpen) return null;
   const [subject, setSubject] = useState('');
   const [tipo, setTipo] = useState('porque');
@@ -62,7 +63,10 @@ export default function PostModal({ isOpen, date, post, onSave, onDelete, onClos
     <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4" onClick={onClose}>
       <div className="bg-canvas rounded-md max-w-md w-full" onClick={(e) => e.stopPropagation()}>
         <div className="flex items-center justify-between p-4 border-b">
-          <h2 className="text-lg font-bold">{post ? 'Editar Post' : 'Novo Post'}</h2>
+          <h2 className="text-lg font-bold">
+            {post ? 'Editar Post' : 'Novo Post'}
+            {clientName && <span className="text-muted font-normal text-sm ml-2">({clientName})</span>}
+          </h2>
           <button onClick={onClose} className="p-1 hover:bg-surface-strong rounded">
             <X className="h-5 w-5 text-muted" />
           </button>

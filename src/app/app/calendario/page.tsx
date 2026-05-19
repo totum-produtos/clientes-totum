@@ -2,12 +2,14 @@
 import React, { useEffect, useState } from "react";
 import { useGlobal } from "@/lib/context/GlobalContext";
 import { createSPASassClient } from "@/lib/supabase/client";
-import { Plus, Upload, RefreshCw, CalendarDays } from "lucide-react";
+import { Plus, Upload, RefreshCw, CalendarDays, ArrowLeft } from "lucide-react";
 import CalendarGrid from "@/components/calendar/CalendarGrid";
 import PostModal from "@/components/calendar/PostModal";
 import BulkPostModal from "@/components/calendar/BulkPostModal";
 import { useToast } from "@/components/ui/ToastProvider";
 import ConfirmDialog from "@/components/ConfirmDialog";
+import { useSearchParams } from "next/navigation";
+import Link from "next/link";
 
 type Post = {
   id: number;
@@ -22,6 +24,9 @@ type Post = {
 export default function CalendarioPage() {
   const { client, user } = useGlobal();
   const { showSuccess, showError } = useToast();
+  const searchParams = useSearchParams();
+  const clientIdParam = searchParams.get("client"); // Filtro por cliente (vindo da Central de Conteúdos)
+  const isMaster = user?.role === "master" || user?.role === "admin";
   const [currentMonth, setCurrentMonth] = useState(new Date());
   const [posts, setPosts] = useState<Post[]>([]);
   const [loading, setLoading] = useState(true);
@@ -31,16 +36,29 @@ export default function CalendarioPage() {
   const [selectedDate, setSelectedDate] = useState<Date | undefined>(undefined);
   const [confirmOpen, setConfirmOpen] = useState(false);
   const [pendingDeleteId, setPendingDeleteId] = useState<number | null>(null);
+  const [overrideClientName, setOverrideClientName] = useState<string>("");
 
   async function fetchPosts() {
-    if (!client) return;
+    const targetClientId = clientIdParam || client?.id;
+    if (!targetClientId) return;
     setLoading(true);
     const supabase = await createSPASassClient();
-    const { data, error } = await supabase
-      .getSupabaseClient()
+    const db = supabase.getSupabaseClient();
+
+    // If browsing via Central de Conteúdos, also fetch client name
+    if (clientIdParam && clientIdParam !== client?.id) {
+      const { data: clientInfo } = await db
+        .from("portal_clients")
+        .select("nome")
+        .eq("id", clientIdParam)
+        .single();
+      if (clientInfo) setOverrideClientName(clientInfo.nome);
+    }
+
+    const { data, error } = await db
       .from("wanda_posts")
       .select("id, subject, tipo, published_at, views, likes, engagement_rate")
-      .eq("portal_client_id", client.id)
+      .eq("portal_client_id", targetClientId)
       .order("published_at", { ascending: false });
     if (error) {
       showError("Erro ao carregar posts");
@@ -53,7 +71,7 @@ export default function CalendarioPage() {
 
   useEffect(() => {
     fetchPosts();
-  }, [client]);
+  }, [client, clientIdParam]);
 
   const events = posts
     .filter((p) => p.published_at)
@@ -65,6 +83,7 @@ export default function CalendarioPage() {
     }));
 
   const handleDayClick = (date: Date) => {
+    if (!isMaster) return; // Clientes não podem criar posts
     setSelectedDate(date);
     setSelectedPost(null);
     setModalOpen(true);
@@ -178,16 +197,25 @@ export default function CalendarioPage() {
     return d.getMonth() === currentMonth.getMonth() && d.getFullYear() === currentMonth.getFullYear();
   });
 
+  const currentClientName = overrideClientName || client?.nome || "";
+
   return (
     <div className="min-h-screen bg-surface-soft pb-12">
       {/* Header */}
       <div className="bg-canvas border-b border-hairline">
         <div className="max-w-6xl mx-auto px-6 py-6">
+          {/* Back button when browsing from Central */}
+          {clientIdParam && (
+            <Link href="/app/central-conteudo" className="inline-flex items-center gap-2 text-sm text-muted hover:text-ink mb-4 transition-colors">
+              <ArrowLeft className="w-4 h-4" /> Voltar para Central de Conteúdos
+            </Link>
+          )}
           <div className="flex items-center justify-between">
             <div>
               <h1 className="text-display-lg font-cereal text-ink flex items-center gap-3">
                 <CalendarDays className="w-7 h-7 text-rausch" />
                 Calendário de postagens
+                {currentClientName && <span className="text-lg font-normal text-muted">{currentClientName}</span>}
               </h1>
               <p className="text-body-sm text-muted mt-1">
                 Visualize e gerencie o conteúdo programado
@@ -202,24 +230,28 @@ export default function CalendarioPage() {
               >
                 <RefreshCw className="h-4 w-4" />
               </button>
-              <button
-                onClick={() => setBulkModalOpen(true)}
-                disabled={loading}
-                className="btn-ghost flex items-center gap-2"
-              >
-                <Upload className="h-4 w-4" /> Em massa
-              </button>
-              <button
-                onClick={() => {
-                  setSelectedPost(null);
-                  setSelectedDate(new Date());
-                  setModalOpen(true);
-                }}
-                disabled={loading}
-                className="btn-primary flex items-center gap-2"
-              >
-                <Plus className="h-4 w-4" /> Novo post
-              </button>
+              {isMaster && (
+                <>
+                  <button
+                    onClick={() => setBulkModalOpen(true)}
+                    disabled={loading}
+                    className="btn-ghost flex items-center gap-2"
+                  >
+                    <Upload className="h-4 w-4" /> Em massa
+                  </button>
+                  <button
+                    onClick={() => {
+                      setSelectedPost(null);
+                      setSelectedDate(new Date());
+                      setModalOpen(true);
+                    }}
+                    disabled={loading}
+                    className="btn-primary flex items-center gap-2"
+                  >
+                    <Plus className="h-4 w-4" /> Novo post
+                  </button>
+                </>
+              )}
             </div>
           </div>
         </div>
@@ -305,6 +337,7 @@ export default function CalendarioPage() {
         onDelete={handleDeletePost}
         post={selectedPost}
         date={selectedDate || null}
+        clientName={currentClientName}
       />
 
       <BulkPostModal

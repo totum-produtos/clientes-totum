@@ -20,6 +20,7 @@ import {
     Sun,
     ClipboardList,
     Bell,
+    LayoutGrid
 } from 'lucide-react';
 import { useGlobal } from "@/lib/context/GlobalContext";
 import { createSPASassClient } from "@/lib/supabase/client";
@@ -37,22 +38,45 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
     const { isDark, toggle } = useDarkMode();
     const isMaster = user?.role === 'master';
 
-    const allNavigation = [
-        { name: 'Início', href: '/app', icon: Home, clientOnly: true },
-        { name: 'Calendário', href: '/app/calendario', icon: CalendarDays, clientOnly: true },
-        { name: 'Feed de Postagens', href: '/app/feed-postagens', icon: List, clientOnly: true },
-        { name: 'Arquivos do Cliente', href: '/app/arquivos', icon: FolderOpen, clientOnly: true },
-        { name: 'Totum Drive', href: '/app/drive', icon: Cloud, clientOnly: true },
-        { name: 'Minhas Empresa', href: '/app/meu-cadastro', icon: ClipboardList, clientOnly: true },
-        { name: 'Notificações', href: '/app/notificacoes', icon: Bell, clientOnly: false },
-        // { name: 'Totum Suite', href: '/app/central-conteudo', icon: LayoutGrid, clientOnly: false },
-        { name: 'Contrato', href: '/app/contrato', icon: FileText, clientOnly: false },
-        { name: 'Campanhas', href: '/app/campanhas', icon: BarChart3, clientOnly: false },
-        { name: 'Central de Clientes', href: '/app/gestao-clientes', icon: Building2, clientOnly: false },
-        { name: 'Admin', href: '/app/admin', icon: User, clientOnly: false },
+    const navigationGroups = [
+        {
+            title: "Meu Negócio",
+            icon: Building2,
+            items: [
+                { name: 'Início', href: '/app', icon: Home, clientOnly: true },
+                { name: 'Minha Empresa', href: '/app/meu-cadastro', icon: ClipboardList, clientOnly: true },
+                { name: 'Notificações', href: '/app/notificacoes', icon: Bell, clientOnly: false },
+            ]
+        },
+        {
+            title: "Operação & Marketing",
+            icon: BarChart3,
+            items: [
+                { name: 'Calendário', href: '/app/calendario', icon: CalendarDays, clientOnly: true },
+                { name: 'Feed de Postagens', href: '/app/feed-postagens', icon: List, clientOnly: true },
+                { name: 'Campanhas', href: '/app/campanhas', icon: BarChart3, clientOnly: false },
+            ]
+        },
+        {
+            title: "Documentos & Arquivos",
+            icon: FolderOpen,
+            items: [
+                { name: 'Arquivos do Cliente', href: '/app/arquivos', icon: FolderOpen, clientOnly: true },
+                { name: 'Totum Drive', href: '/app/drive', icon: Cloud, clientOnly: true },
+                { name: 'Contratos', href: '/app/contrato', icon: FileText, clientOnly: false },
+            ]
+        },
+        {
+            title: "Gestão Totum",
+            icon: User,
+            adminOnly: true,
+            items: [
+                { name: 'Central de Conteúdos', href: '/app/central-conteudo', icon: LayoutGrid, clientOnly: false },
+                { name: 'Central de Clientes', href: '/app/gestao-clientes', icon: Building2, clientOnly: false },
+                { name: 'Admin', href: '/app/admin', icon: User, clientOnly: false },
+            ]
+        }
     ];
-
-    const navigation = allNavigation.filter(item => isMaster || item.clientOnly);
 
     const handleLogout = async () => {
         try {
@@ -104,32 +128,17 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
 
                 {/* Navigation */}
                 <nav className="mt-4 px-2" aria-label="Navegação principal">
-                    <ul className="space-y-1">
-                        {navigation.map((item) => {
-                            const isActive = pathname === item.href;
-                            return (
-                                <li key={item.name}>
-                                    <Link
-                                        href={item.href}
-                                        aria-current={isActive ? "page" : undefined}
-                                        className={`group flex items-center px-2 py-2 text-sm font-medium rounded-md ${
-                                            isActive
-                                                ? 'bg-rausch/5 text-rausch'
-                                                : 'text-body hover:bg-surface-soft hover:text-ink'
-                                        }`}
-                                    >
-                                        <item.icon
-                                            aria-hidden="true"
-                                            className={`mr-3 h-5 w-5 ${
-                                                isActive ? 'text-rausch' : 'text-muted-soft group-hover:text-muted'
-                                            }`}
-                                        />
-                                        {item.name}
-                                    </Link>
-                                </li>
-                            );
-                        })}
-                    </ul>
+                    <div className="space-y-4">
+                        {navigationGroups.map((group) => (
+                            <SidebarGroup 
+                                key={group.title} 
+                                group={group} 
+                                pathname={pathname} 
+                                isMaster={isMaster} 
+                                closeSidebar={() => setSidebarOpen(false)}
+                            />
+                        ))}
+                    </div>
                 </nav>
 
             </div>
@@ -244,6 +253,65 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
                         {children}
                     </div>
                 </main>
+            </div>
+        </div>
+    );
+}
+
+function SidebarGroup({ group, pathname, isMaster, closeSidebar }: { group: any; pathname: string; isMaster: boolean; closeSidebar: () => void }) {
+    // Check if any item in this group is currently active
+    const hasActiveItem = group.items.some((item: any) => pathname.startsWith(item.href) && (item.href !== '/app' || pathname === '/app'));
+    
+    // We open the group by default if it has an active item, or if it's the "Meu Negócio" group
+    const [isOpen, setIsOpen] = useState(hasActiveItem || group.title === "Meu Negócio");
+
+    // Filter items based on user role
+    const visibleItems = group.items.filter((item: any) => isMaster || item.clientOnly);
+
+    if (visibleItems.length === 0) return null;
+    if (group.adminOnly && !isMaster) return null;
+
+    return (
+        <div className="mb-2">
+            <button
+                onClick={() => setIsOpen(!isOpen)}
+                className="w-full flex items-center justify-between px-3 py-2 text-xs font-semibold text-muted uppercase tracking-wider hover:text-ink transition-colors group"
+            >
+                <div className="flex items-center gap-2">
+                    <group.icon className="w-4 h-4 text-muted-soft group-hover:text-muted" />
+                    {group.title}
+                </div>
+                <ChevronDown className={`w-4 h-4 transition-transform duration-200 ${isOpen ? "rotate-180" : ""}`} />
+            </button>
+            
+            <div 
+                className={`mt-1 space-y-1 overflow-hidden transition-all duration-300 ease-in-out ${
+                    isOpen ? "max-h-96 opacity-100" : "max-h-0 opacity-0"
+                }`}
+            >
+                {visibleItems.map((item: any) => {
+                    const isActive = pathname === item.href;
+                    return (
+                        <Link
+                            key={item.name}
+                            href={item.href}
+                            onClick={closeSidebar}
+                            className={`group flex items-center pl-9 pr-2 py-2 text-sm font-medium rounded-md transition-colors relative ${
+                                isActive
+                                    ? 'bg-rausch/10 text-rausch'
+                                    : 'text-body hover:bg-surface-soft hover:text-ink'
+                            }`}
+                        >
+                            {isActive && <div className="absolute left-0 top-0 bottom-0 w-1 bg-rausch rounded-r-full" />}
+                            <item.icon
+                                className={`mr-3 h-4 w-4 ${
+                                    isActive ? 'text-rausch' : 'text-muted-soft group-hover:text-muted'
+                                }`}
+                            />
+                            {item.name}
+                        </Link>
+                    );
+                })}
             </div>
         </div>
     );

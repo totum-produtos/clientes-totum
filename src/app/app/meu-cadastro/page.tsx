@@ -283,6 +283,28 @@ export default function MeuCadastroPage() {
     if (!clientData || !user) return;
     setLoading(true); setMessage("");
 
+    // Validação de campos obrigatórios
+    const requiredFields = [
+      { key: "nome", label: "Nome da empresa" },
+      { key: "cnpj", label: "CNPJ" },
+      { key: "email_responsavel", label: "E-mail corporativo" },
+      { key: "telefone", label: "Telefone" },
+      { key: "ramo_atuacao", label: "Setor" },
+      { key: "finalidade_briefing", label: "Finalidade do briefing" }
+    ];
+
+    for (const req of requiredFields) {
+      const fieldConfig = SECTIONS.flatMap(s => s.fields).find(f => f.key === req.key);
+      if (fieldConfig) {
+        const val = getValue(fieldConfig);
+        if (!val || String(val).trim() === "") {
+          setMessage(`❌ O campo obrigatório "${req.label}" precisa ser preenchido.`);
+          setLoading(false);
+          return;
+        }
+      }
+    }
+
     try {
       const supabase = await createSPASassClient();
       const sb = supabase.getSupabaseClient();
