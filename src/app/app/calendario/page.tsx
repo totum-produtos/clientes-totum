@@ -1,5 +1,5 @@
 "use client";
-import React, { useEffect, useState } from "react";
+import React, { Suspense, useEffect, useState } from "react";
 import { useGlobal } from "@/lib/context/GlobalContext";
 import { createSPASassClient } from "@/lib/supabase/client";
 import { Plus, Upload, RefreshCw, CalendarDays, ArrowLeft } from "lucide-react";
@@ -21,7 +21,7 @@ type Post = {
   engagement_rate: number | null;
 };
 
-export default function CalendarioPage() {
+function CalendarioContent() {
   const { client, user } = useGlobal();
   const { showSuccess, showError } = useToast();
   const searchParams = useSearchParams();
@@ -358,5 +358,17 @@ export default function CalendarioPage() {
         }}
       />
     </div>
+  );
+}
+
+export default function CalendarioPage() {
+  return (
+    <Suspense fallback={
+      <div className="flex items-center justify-center min-h-[50vh]">
+        <div className="w-8 h-8 border-4 border-rausch border-t-transparent rounded-full animate-spin" />
+      </div>
+    }>
+      <CalendarioContent />
+    </Suspense>
   );
 }
