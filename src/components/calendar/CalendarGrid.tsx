@@ -33,6 +33,7 @@ interface Props {
   events: CalendarEvent[];
   onDayClick: (date: Date) => void;
   onEventClick: (event: CalendarEvent) => void;
+  isAdmin?: boolean;
 }
 
 export default function CalendarGrid({
@@ -41,6 +42,7 @@ export default function CalendarGrid({
   events,
   onDayClick,
   onEventClick,
+  isAdmin = false,
 }: Props) {
   const monthStart = startOfMonth(currentMonth);
   const monthEnd = endOfMonth(monthStart);
@@ -88,10 +90,12 @@ export default function CalendarGrid({
             return (
               <div
                 key={day.toISOString()}
-                onClick={() => onDayClick(day)}
-                className={`min-h-[80px] border rounded-lg p-1.5 cursor-pointer transition-colors hover:bg-surface-soft ${
+                onClick={() => isAdmin && onDayClick(day)}
+                className={`min-h-[80px] border rounded-lg p-1.5 transition-colors ${
                   !isCurrentMonth ? "bg-surface-soft/50 opacity-50" : "bg-canvas"
-                } ${isToday ? "ring-2 ring-rausch ring-offset-1" : ""}`}
+                } ${isToday ? "ring-2 ring-rausch ring-offset-1" : ""} ${
+                  isAdmin ? "cursor-pointer hover:bg-surface-soft" : "cursor-default"
+                }`}
               >
                 <span className={`text-sm font-medium ${isToday ? "text-rausch" : "text-ink"}`}>
                   {format(day, "d")}

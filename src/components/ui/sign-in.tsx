@@ -1,6 +1,7 @@
 "use client";
 import React, { useState, useEffect } from 'react';
-import { Eye, EyeOff, ArrowLeft } from 'lucide-react';
+import { Eye, EyeOff } from 'lucide-react';
+import Image from 'next/image';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { createSPASassClient } from '@/lib/supabase/client';
@@ -48,7 +49,7 @@ const AnimatedSignIn: React.FC = () => {
       } else {
         router.push('/app');
       }
-    } catch (err: any) {
+    } catch (err: unknown) {
       setError(err instanceof Error ? err.message : 'Erro ao fazer login');
     } finally {
       setIsLoading(false);
@@ -75,11 +76,13 @@ const AnimatedSignIn: React.FC = () => {
               }}
             >
               <div className="grid grid-cols-2 grid-rows-3 gap-4 h-full min-h-[560px]">
-                <div className="overflow-hidden rounded-md">
-                  <img
+                <div className="overflow-hidden rounded-md relative h-full">
+                  <Image
                     src="https://images.unsplash.com/photo-1552664730-d307ca884978?auto=format&fit=crop&w=600&q=80"
                     alt="Equipe Totum"
-                    className="w-full h-full object-cover"
+                    fill
+                    className="object-cover"
+                    unoptimized
                   />
                 </div>
                 <div
@@ -94,18 +97,22 @@ const AnimatedSignIn: React.FC = () => {
                   <h2 className="text-5xl font-bold mb-2">36</h2>
                   <p className="text-center text-sm">posts publicados este mês</p>
                 </div>
-                <div className="overflow-hidden rounded-md">
-                  <img
+                <div className="overflow-hidden rounded-md relative h-full">
+                  <Image
                     src="https://images.unsplash.com/photo-1460925895917-afdab827c52f?auto=format&fit=crop&w=600&q=80"
                     alt="Marketing digital"
-                    className="w-full h-full object-cover"
+                    fill
+                    className="object-cover"
+                    unoptimized
                   />
                 </div>
-                <div className="overflow-hidden rounded-md">
-                  <img
+                <div className="overflow-hidden rounded-md relative h-full">
+                  <Image
                     src="https://images.unsplash.com/photo-1551434678-e076c223a692?auto=format&fit=crop&w=600&q=80"
                     alt="Estratégia"
-                    className="w-full h-full object-cover"
+                    fill
+                    className="object-cover"
+                    unoptimized
                   />
                 </div>
                 <div
@@ -120,11 +127,13 @@ const AnimatedSignIn: React.FC = () => {
                   <h2 className="text-5xl font-bold mb-2">4.2x</h2>
                   <p className="text-center text-sm">ROAS médio das campanhas</p>
                 </div>
-                <div className="overflow-hidden rounded-md">
-                  <img
+                <div className="overflow-hidden rounded-md relative h-full">
+                  <Image
                     src="https://images.unsplash.com/photo-1533750349088-cd871a92f312?auto=format&fit=crop&w=600&q=80"
                     alt="Campanha"
-                    className="w-full h-full object-cover"
+                    fill
+                    className="object-cover"
+                    unoptimized
                   />
                 </div>
               </div>

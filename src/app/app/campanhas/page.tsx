@@ -3,7 +3,7 @@ import React, { useEffect, useState } from 'react';
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
 import { useGlobal } from '@/lib/context/GlobalContext';
 import { createSPASassClient } from '@/lib/supabase/client';
-import { TrendingUp, Eye, Heart, BarChart3, Megaphone, Link2, Unlink, RefreshCw, DollarSign, Target, MousePointerClick } from 'lucide-react';
+import { TrendingUp, Eye, Heart, BarChart3, Megaphone, DollarSign, Target, MousePointerClick } from 'lucide-react';
 import { useToast } from "@/components/ui/ToastProvider";
 import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianGrid } from 'recharts';
 

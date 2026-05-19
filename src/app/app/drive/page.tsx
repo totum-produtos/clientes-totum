@@ -3,7 +3,7 @@ import React, { useEffect, useState } from 'react';
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
 import { useGlobal } from '@/lib/context/GlobalContext';
 import { createSPASassClient } from '@/lib/supabase/client';
-import { Folder, ExternalLink, Link2, Unlink, Cloud } from 'lucide-react';
+import { Folder, ExternalLink, Unlink, Cloud } from 'lucide-react';
 import { useToast } from "@/components/ui/ToastProvider";
 import ConfirmDialog from "@/components/ConfirmDialog";
 
@@ -173,7 +173,7 @@ export default function DrivePage() {
       )}
 
       <p className="text-xs text-muted-soft">
-        Dica: se a pré-visualização não carregar, clique em "Abrir no Google Drive" para acessar diretamente.
+        Dica: se a pré-visualização não carregar, clique em &quot;Abrir no Google Drive&quot; para acessar diretamente.
       </p>
 
       <ConfirmDialog

@@ -20,6 +20,7 @@ type BriefingField = {
   source: FieldSource;
   options?: string[];
   hint?: string;
+  required?: boolean;
 };
 
 type BriefingSection = {
@@ -37,14 +38,14 @@ const SECTIONS: BriefingSection[] = [
     label: "Informações da Empresa",
     icon: Building2,
     fields: [
-      { key: "nome", label: "Nome da empresa", type: "text", source: "column" },
-      { key: "cnpj", label: "CNPJ", type: "text", source: "column" },
-      { key: "ramo_atuacao", label: "Setor", type: "text", source: "column" },
+      { key: "nome", label: "Nome da empresa", type: "text", source: "column", required: true },
+      { key: "cnpj", label: "CNPJ", type: "text", source: "column", required: true },
+      { key: "ramo_atuacao", label: "Setor", type: "text", source: "column", required: true },
       { key: "nome_responsavel", label: "Nome do contato", type: "text", source: "column" },
-      { key: "telefone", label: "Telefone", type: "text", source: "column" },
-      { key: "email_responsavel", label: "E-mail corporativo", type: "text", source: "column" },
+      { key: "telefone", label: "Telefone", type: "text", source: "column", required: true },
+      { key: "email_responsavel", label: "E-mail corporativo", type: "text", source: "column", required: true },
       { key: "como_chegou", label: "Como chegou até a gente", type: "text", source: "profile" },
-      { key: "finalidade_briefing", label: "Finalidade do briefing", type: "select", source: "profile", options: ["Para Kickoff", "Para enviar orçamento"] },
+      { key: "finalidade_briefing", label: "Finalidade do briefing", type: "select", source: "profile", options: ["Para Kickoff", "Para enviar orçamento"], required: true },
     ],
   },
   {
@@ -298,6 +299,10 @@ export default function MeuCadastroPage() {
       if (fieldConfig) {
         const val = getValue(fieldConfig);
         if (!val || String(val).trim() === "") {
+          const section = SECTIONS.find(s => s.fields.some(f => f.key === req.key));
+          if (section) {
+            setExpanded(prev => prev.includes(section.id) ? prev : [...prev, section.id]);
+          }
           setMessage(`❌ O campo obrigatório "${req.label}" precisa ser preenchido.`);
           setLoading(false);
           return;
@@ -560,7 +565,9 @@ function FieldRenderer({ field, editMode, value, onChange, driveUrl }: any) {
   if (field.type === "file-link") {
     return (
       <div className="md:col-span-2">
-        <label className="block text-sm font-medium text-ink mb-2">{field.label}</label>
+        <label className="block text-sm font-medium text-ink mb-2">
+          {field.label} {field.required && <span className="text-rausch">*</span>}
+        </label>
         <div className="flex flex-col sm:flex-row gap-2 items-start">
           <a
             href="/app/arquivos"
@@ -591,7 +598,9 @@ function FieldRenderer({ field, editMode, value, onChange, driveUrl }: any) {
   if (field.type === "textarea") {
     return (
       <div className="md:col-span-2">
-        <label className="block text-sm font-medium text-ink mb-2">{field.label}</label>
+        <label className="block text-sm font-medium text-ink mb-2">
+          {field.label} {field.required && <span className="text-rausch">*</span>}
+        </label>
         {editMode ? (
           <textarea
             value={value || ""}
@@ -612,7 +621,9 @@ function FieldRenderer({ field, editMode, value, onChange, driveUrl }: any) {
   if (field.type === "select") {
     return (
       <div>
-        <label className="block text-sm font-medium text-ink mb-2">{field.label}</label>
+        <label className="block text-sm font-medium text-ink mb-2">
+          {field.label} {field.required && <span className="text-rausch">*</span>}
+        </label>
         {editMode ? (
           <select
             value={value || ""}
@@ -635,7 +646,9 @@ function FieldRenderer({ field, editMode, value, onChange, driveUrl }: any) {
 
   return (
     <div>
-      <label className="block text-sm font-medium text-ink mb-2">{field.label}</label>
+      <label className="block text-sm font-medium text-ink mb-2">
+        {field.label} {field.required && <span className="text-rausch">*</span>}
+      </label>
       {editMode ? (
         <input
           value={value || ""}

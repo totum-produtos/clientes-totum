@@ -3,7 +3,8 @@ import React, { useEffect, useState } from 'react';
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
 import { useGlobal } from '@/lib/context/GlobalContext';
 import { createSPASassClient } from '@/lib/supabase/client';
-import { FileText, CheckCircle2, Clock, Calendar } from 'lucide-react';
+import { FileText, CheckCircle2, Clock } from 'lucide-react';
+import type { RealtimeChannel } from '@supabase/supabase-js';
 
 type Tarefa = {
     id: string;
@@ -39,7 +40,7 @@ export default function ContratoPage() {
     // Realtime subscription: atualiza tarefas sem refresh
     useEffect(() => {
         if (!client) return;
-        let channel: any = null;
+        let channel: RealtimeChannel | null = null;
 
         async function setupRealtime() {
             const supabase = await createSPASassClient();

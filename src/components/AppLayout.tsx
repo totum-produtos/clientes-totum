@@ -45,7 +45,7 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
             items: [
                 { name: 'Início', href: '/app', icon: Home, clientOnly: true },
                 { name: 'Minha Empresa', href: '/app/meu-cadastro', icon: ClipboardList, clientOnly: true },
-                { name: 'Central de Conteúdos', href: '/app/central-conteudo', icon: LayoutGrid, clientOnly: true },
+                { name: 'Central de Conteúdos', href: '/app/central-conteudo', icon: LayoutGrid, clientOnly: false },
                 { name: 'Notificações', href: '/app/notificacoes', icon: Bell, clientOnly: false },
             ]
         },

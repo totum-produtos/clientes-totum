@@ -18,7 +18,7 @@ export async function createNotification({
   type: 'alteracao_pendente' | 'alteracao_aprovada' | 'alteracao_rejeitada' | 'geral';
   title: string;
   message: string;
-  data?: Record<string, any>;
+  data?: Record<string, unknown>;
 }) {
   const { error } = await serviceClient
     .from('notifications')

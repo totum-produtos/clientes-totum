@@ -17,7 +17,7 @@ interface BulkPostModalProps {
 
 const tipos = ['porque', 'o_que', 'como'];
 
-export default function BulkPostModal({ isOpen, onClose, onSave, clientId }: BulkPostModalProps) {
+export default function BulkPostModal({ isOpen, onClose, onSave }: BulkPostModalProps) {
     const [posts, setPosts] = useState<BulkPost[]>([
         { subject: '', tipo: 'porque', published_at: new Date().toISOString().slice(0, 16) },
     ]);

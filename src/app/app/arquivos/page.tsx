@@ -55,10 +55,10 @@ export default function ArquivosPage() {
         }
         setArquivos([]);
       } else {
-        setArquivos((data || []).filter((f: any) => f.name !== '.emptyFolderPlaceholder'));
+        setArquivos((data || []).filter((f: { name: string }) => f.name !== '.emptyFolderPlaceholder'));
       }
-    } catch (e: any) {
-      setError(e.message);
+    } catch (e: unknown) {
+      setError(e instanceof Error ? e.message : 'Erro desconhecido');
     } finally {
       setLoading(false);
     }
@@ -177,7 +177,7 @@ export default function ArquivosPage() {
             <div className="text-center py-8">
               <FileText className="h-10 w-10 text-muted-soft mx-auto mb-2" />
               <p className="text-sm text-muted-soft">Nenhum arquivo enviado ainda.</p>
-              <p className="text-xs text-muted-soft mt-1">Clique em "Enviar arquivo" para começar.</p>
+              <p className="text-xs text-muted-soft mt-1">Clique em &quot;Enviar arquivo&quot; para começar.</p>
             </div>
           ) : (
             arquivos.map((arquivo) => (

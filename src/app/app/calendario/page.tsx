@@ -104,11 +104,12 @@ function CalendarioContent() {
   };
 
   const handleSavePost = async (postData: any) => {
-    if (!client) return;
+    const targetClientId = clientIdParam || client?.id;
+    if (!targetClientId) return;
     const supabase = await createSPASassClient();
     const payload = {
       ...postData,
-      portal_client_id: client.id,
+      portal_client_id: targetClientId,
       creator: user?.id,
       published_at: new Date(postData.published_at).toISOString(),
     };
@@ -169,11 +170,12 @@ function CalendarioContent() {
   };
 
   const handleBulkSave = async (bulkPosts: any[]) => {
-    if (!client) return;
+    const targetClientId = clientIdParam || client?.id;
+    if (!targetClientId) return;
     const supabase = await createSPASassClient();
     const payload = bulkPosts.map((p, idx) => ({
       ...p,
-      portal_client_id: client.id,
+      portal_client_id: targetClientId,
       post_id: `post_${Date.now()}_${idx}`,
       published_at: new Date(p.published_at).toISOString(),
     }));
@@ -285,6 +287,7 @@ function CalendarioContent() {
             events={events}
             onDayClick={handleDayClick}
             onEventClick={handleEventClick}
+            isAdmin={isMaster}
           />
         )}
 
@@ -338,13 +341,14 @@ function CalendarioContent() {
         post={selectedPost}
         date={selectedDate || null}
         clientName={currentClientName}
+        isAdmin={isMaster}
       />
 
       <BulkPostModal
         isOpen={bulkModalOpen}
         onClose={() => setBulkModalOpen(false)}
         onSave={handleBulkSave}
-        clientId={client?.id || ""}
+        clientId={clientIdParam || client?.id || ""}
       />
 
       <ConfirmDialog

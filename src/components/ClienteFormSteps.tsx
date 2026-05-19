@@ -43,26 +43,26 @@ export function ClienteFormSteps({
   if (step === 1) return (
     <div className="space-y-5">
       <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
-        <Field label="Nome da empresa" editMode={editMode}><input value={form.nome} onChange={e => update("nome", e.target.value)} placeholder="Ex: Totum Digital" className="input-field" readOnly={!editMode} /></Field>
-        <Field label="CNPJ" editMode={editMode}><input value={form.cnpj} onChange={e => update("cnpj", e.target.value)} placeholder="00.000.000/0000-00" className="input-field" readOnly={!editMode} /></Field>
+        <Field label="Nome da empresa" editMode={editMode} required><input value={form.nome} onChange={e => update("nome", e.target.value)} placeholder="Ex: Totum Digital" className="input-field" readOnly={!editMode} required /></Field>
+        <Field label="CNPJ" editMode={editMode} required><input value={form.cnpj} onChange={e => update("cnpj", e.target.value)} placeholder="00.000.000/0000-00" className="input-field" readOnly={!editMode} required /></Field>
       </div>
       <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
-        <Field label="Ramo de atuação" editMode={editMode}>
-          <select value={form.ramo_atuacao} onChange={e => update("ramo_atuacao", e.target.value)} className="input-field" disabled={!editMode}>
+        <Field label="Ramo de atuação" editMode={editMode} required>
+          <select value={form.ramo_atuacao} onChange={e => update("ramo_atuacao", e.target.value)} className="input-field" disabled={!editMode} required>
             <option value="">Selecione</option>{RAMOS.map(r => <option key={r} value={r}>{r}</option>)}
           </select>
         </Field>
         <Field label="Nome do responsável" editMode={editMode}><input value={form.nome_responsavel} onChange={e => update("nome_responsavel", e.target.value)} placeholder="Nome completo" className="input-field" readOnly={!editMode} /></Field>
       </div>
       <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
-        <Field label="Email corporativo" editMode={editMode}><input type="email" value={form.email_responsavel} onChange={e => update("email_responsavel", e.target.value)} placeholder="email@empresa.com" className="input-field" readOnly={!editMode} /></Field>
-        <Field label="Telefone" editMode={editMode}><input value={form.telefone} onChange={e => update("telefone", e.target.value)} placeholder="(00) 00000-0000" className="input-field" readOnly={!editMode} /></Field>
+        <Field label="Email corporativo" editMode={editMode} required><input type="email" value={form.email_responsavel} onChange={e => update("email_responsavel", e.target.value)} placeholder="email@empresa.com" className="input-field" readOnly={!editMode} required /></Field>
+        <Field label="Telefone" editMode={editMode} required><input value={form.telefone} onChange={e => update("telefone", e.target.value)} placeholder="(00) 00000-0000" className="input-field" readOnly={!editMode} required /></Field>
       </div>
       <Field label="Site" editMode={editMode}><input value={form.site} onChange={e => update("site", e.target.value)} placeholder="https://www.empresa.com" className="input-field" readOnly={!editMode} /></Field>
       <div className="grid grid-cols-1 md:grid-cols-2 gap-5 border-t pt-5">
         <Field label="Como chegou até a gente" editMode={editMode}><input value={form.como_chegou} onChange={e => update("como_chegou", e.target.value)} placeholder="Ex: Indicação" className="input-field" readOnly={!editMode} /></Field>
-        <Field label="Finalidade do briefing" editMode={editMode}>
-          <select value={form.finalidade_briefing} onChange={e => update("finalidade_briefing", e.target.value)} className="input-field" disabled={!editMode}>
+        <Field label="Finalidade do briefing" editMode={editMode} required>
+          <select value={form.finalidade_briefing} onChange={e => update("finalidade_briefing", e.target.value)} className="input-field" disabled={!editMode} required>
             <option value="">Selecione</option>{FINALIDADES.map(r => <option key={r} value={r}>{r}</option>)}
           </select>
         </Field>
@@ -429,10 +429,12 @@ export function ClienteFormSteps({
   return null;
 }
 
-function Field({ label, editMode: _editMode, children }: { label: string; editMode: boolean; children: React.ReactNode }) {
+function Field({ label, editMode: _editMode, required, children }: { label: string; editMode: boolean; required?: boolean; children: React.ReactNode }) {
   return (
     <div>
-      <label className="block text-sm font-medium text-ink mb-2">{label}</label>
+      <label className="block text-sm font-medium text-ink mb-2">
+        {label} {required && <span className="text-rausch">*</span>}
+      </label>
       {children}
     </div>
   );

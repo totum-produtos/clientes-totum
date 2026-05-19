@@ -20,7 +20,7 @@ type PortalClient = {
     slug: string;
     email_responsavel: string;
     status: string;
-    profile_data?: any;
+    profile_data?: Record<string, unknown>;
 } | null;
 
 type WandaPost = Tables<'wanda_posts'>;
@@ -88,8 +88,15 @@ export function GlobalProvider({ children }: { children: React.ReactNode }) {
                     .maybeSingle();
 
                 let clientId: string | null = null;
-                if (clientData && (clientData as any).portal_clients) {
-                    const pc = (clientData as any).portal_clients;
+                type PortalClientJoin = {
+                    portal_clients: {
+                        id: string; nome: string; slug: string;
+                        email_responsavel: string; status: string;
+                        profile_data?: Record<string, unknown>;
+                    } | null;
+                };
+                if (clientData && (clientData as PortalClientJoin).portal_clients) {
+                    const pc = (clientData as PortalClientJoin).portal_clients!;
                     clientId = pc.id;
                     setClient({
                         id: pc.id,

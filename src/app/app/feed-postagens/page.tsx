@@ -145,7 +145,6 @@ export default function FeedPostagensPage() {
   }, [postsFiltrados]);
 
   const totalViews = postsFiltrados.reduce((s, p) => s + (p.views || 0), 0);
-  const totalLikes = postsFiltrados.reduce((s, p) => s + (p.likes || 0), 0);
   const avgEngagement = postsFiltrados.length > 0
     ? (postsFiltrados.reduce((s, p) => s + (p.engagement_rate || 0), 0) / postsFiltrados.length).toFixed(1)
     : '0';
