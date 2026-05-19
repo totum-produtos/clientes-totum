@@ -33,7 +33,7 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
     const pathname = usePathname();
     const router = useRouter();
 
-    const { user, profile } = useGlobal();
+    const { user, profile, client } = useGlobal();
     const { isDark, toggle } = useDarkMode();
     const isMaster = user?.role === 'master';
 
