@@ -45,6 +45,7 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
             items: [
                 { name: 'Início', href: '/app', icon: Home, clientOnly: true },
                 { name: 'Minha Empresa', href: '/app/meu-cadastro', icon: ClipboardList, clientOnly: true },
+                { name: 'Central de Conteúdos', href: '/app/central-conteudo', icon: LayoutGrid, clientOnly: true },
                 { name: 'Notificações', href: '/app/notificacoes', icon: Bell, clientOnly: false },
             ]
         },
@@ -71,7 +72,6 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
             icon: User,
             adminOnly: true,
             items: [
-                { name: 'Central de Conteúdos', href: '/app/central-conteudo', icon: LayoutGrid, clientOnly: false },
                 { name: 'Central de Clientes', href: '/app/gestao-clientes', icon: Building2, clientOnly: false },
                 { name: 'Admin', href: '/app/admin', icon: User, clientOnly: false },
             ]

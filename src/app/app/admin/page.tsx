@@ -80,9 +80,14 @@ export default function AdminPage() {
         const { data: usersData } = await client.from('portal_client_users').select('*');
         setUsers(usersData || []);
 
-        // Buscar auth users via admin API (service role)
-        const { data: authData } = await client.auth.admin.listUsers();
-        setAuthUsers(authData?.users?.map(u => ({ id: u.id, email: u.email || '', created_at: u.created_at })) || []);
+        // Buscar auth users via API route segura (service role server-side)
+        try {
+            const res = await fetch('/api/admin/usuarios');
+            if (res.ok) {
+                const json = await res.json();
+                setAuthUsers(json.users || []);
+            }
+        } catch { /* silencia se não autorizado */ }
 
         const { data: changesData } = await client.from('client_profile_changes').select('*').eq('status', 'pendente').order('created_at', { ascending: false });
         setPendingChanges((changesData || []) as ProfileChange[]);

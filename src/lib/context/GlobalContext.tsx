@@ -85,7 +85,7 @@ export function GlobalProvider({ children }: { children: React.ReactNode }) {
                     .from('portal_client_users')
                     .select('client_id, portal_clients(id, nome, slug, email_responsavel, status, profile_data)')
                     .eq('user_id', user.id)
-                    .single();
+                    .maybeSingle();
 
                 let clientId: string | null = null;
                 if (clientData && (clientData as any).portal_clients) {
