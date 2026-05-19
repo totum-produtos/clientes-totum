@@ -10,9 +10,9 @@ export function useClienteForm(initial?: Partial<FormState>) {
     setForm(f => ({ ...f, [field]: value }));
   }, []);
 
-  const toggleArray = useCallback((field: "classe_social" | "canais_atendimento" | "dias_atendimento", value: string) => {
+  const toggleArray = useCallback((field: "classe_social" | "canais_atendimento" | "dias_atendimento" | "meses_alta_faturamento" | "meses_baixa_faturamento" | "dias_fortes_semana" | "dias_fracos_semana" | "canais_comunicacao_possuidos" | "canais_vendas", value: string) => {
     setForm(f => {
-      const arr = f[field];
+      const arr = (f[field] as string[]) || [];
       return { ...f, [field]: arr.includes(value) ? arr.filter(v => v !== value) : [...arr, value] };
     });
   }, []);
