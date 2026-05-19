@@ -38,13 +38,13 @@ const SECTIONS: BriefingSection[] = [
     icon: Building2,
     fields: [
       { key: "nome", label: "Nome da empresa", type: "text", source: "column" },
-      { key: "ramo_atuacao", label: "Segmento da empresa", type: "text", source: "column" },
-      { key: "regiao_atuacao", label: "Região de atuação", type: "text", source: "profile" },
-      { key: "tempo_mercado", label: "Há quanto tempo a empresa existe?", type: "text", source: "column" },
       { key: "cnpj", label: "CNPJ", type: "text", source: "column" },
-      { key: "nome_responsavel", label: "Nome do responsável", type: "text", source: "column" },
-      { key: "email_responsavel", label: "Email corporativo", type: "text", source: "column" },
+      { key: "ramo_atuacao", label: "Setor", type: "text", source: "column" },
+      { key: "nome_responsavel", label: "Nome do contato", type: "text", source: "column" },
       { key: "telefone", label: "Telefone", type: "text", source: "column" },
+      { key: "email_responsavel", label: "E-mail corporativo", type: "text", source: "column" },
+      { key: "como_chegou", label: "Como chegou até a gente", type: "text", source: "profile" },
+      { key: "finalidade_briefing", label: "Finalidade do briefing", type: "select", source: "profile", options: ["Para Kickoff", "Para enviar orçamento"] },
     ],
   },
   {
@@ -52,13 +52,24 @@ const SECTIONS: BriefingSection[] = [
     label: "Sobre o Negócio",
     icon: Briefcase,
     fields: [
-      { key: "produtos_servicos", label: "Qual o principal produto ou serviço?", type: "textarea", source: "column" },
-      { key: "ticket_medio", label: "Qual o ticket médio?", type: "text", source: "profile" },
-      { key: "clientes_mes", label: "Quantos clientes atende por mês?", type: "text", source: "profile" },
-      { key: "faturamento_mensal", label: "Qual o faturamento médio mensal?", type: "text", source: "column" },
-      { key: "meta_crescimento", label: "Qual a meta de crescimento atual?", type: "textarea", source: "profile" },
-      { key: "descricao_negocio", label: "Descrição do negócio", type: "textarea", source: "column" },
-      { key: "tamanho_empresa", label: "Tamanho da empresa", type: "text", source: "column" },
+      { key: "descricao_negocio", label: "O que a empresa faz?", type: "textarea", source: "column" },
+      { key: "modelo_negocio", label: "Qual o modelo de negócio?", type: "textarea", source: "profile" },
+      { key: "diferencial_competitivo", label: "Diferencial frente aos concorrentes", type: "textarea", source: "profile" },
+      { key: "produto_mais_forte", label: "Produto ou serviço mais forte", type: "text", source: "profile" },
+      { key: "produto_desejado_forte", label: "Produto que gostaria que fosse o mais forte", type: "text", source: "profile" },
+      { key: "produto_mais_fraco", label: "Produto ou serviço mais fraco", type: "text", source: "profile" },
+      { key: "ticket_medio_atual", label: "Ticket médio Atual", type: "text", source: "profile" },
+      { key: "ticket_medio_ideal", label: "Ticket médio Ideal", type: "text", source: "profile" },
+    ],
+  },
+  {
+    id: "objetivos",
+    label: "Objetivos e Metas",
+    icon: TrendingUp,
+    fields: [
+      { key: "maior_objetivo_mkt", label: "Maior objetivo com o marketing digital hoje", type: "textarea", source: "profile" },
+      { key: "principal_meta", label: "Principal meta", type: "textarea", source: "profile" },
+      { key: "meta_mensuravel", label: "É possível mensurar a meta? Como?", type: "textarea", source: "profile" },
     ],
   },
   {
@@ -66,15 +77,79 @@ const SECTIONS: BriefingSection[] = [
     label: "Público-Alvo",
     icon: Target,
     fields: [
-      { key: "cliente_ideal", label: "Quem é o cliente ideal hoje?", type: "textarea", source: "profile" },
-      { key: "cliente_mais_lucro", label: "Qual tipo de cliente mais gera lucro?", type: "textarea", source: "profile" },
-      { key: "nicho_prioritario", label: "Existe um nicho específico prioritário?", type: "textarea", source: "profile" },
-      { key: "dores_principais", label: "Qual é a principal dor do cliente?", type: "textarea", source: "profile" },
-      { key: "gatilhos_compra", label: "O que normalmente faz o cliente comprar?", type: "textarea", source: "profile" },
-      { key: "objecoes_comuns", label: "Quais objeções mais aparecem?", type: "textarea", source: "profile" },
-      { key: "genero_alvo", label: "Gênero predominante", type: "text", source: "profile" },
-      { key: "localizacao_alvo", label: "Localização", type: "text", source: "profile" },
-      { key: "classe_social", label: "Classe social", type: "text", source: "profile" },
+      { key: "porcentagem_homens", label: "Porcentagem de Homens", type: "text", source: "profile" },
+      { key: "porcentagem_mulheres", label: "Porcentagem de Mulheres", type: "text", source: "profile" },
+      { key: "abrangencia_geografica", label: "Abrangência (Regional, nacional, internacional...)", type: "text", source: "profile" },
+      { key: "cliente_ideal", label: "Cliente ideal na carteira (Como ele é?)", type: "textarea", source: "profile" },
+      { key: "dores_principais", label: "Principais dúvidas e dores ao contatar a empresa", type: "textarea", source: "profile" },
+      { key: "base_dados_clientes", label: "Existe uma base com dados destes clientes?", type: "select", source: "profile", options: ["Sim", "Não"] },
+      { key: "tamanho_base", label: "Tamanho da base (se existir)", type: "text", source: "profile" },
+      { key: "classe_social", label: "Renda média do cliente", type: "text", source: "profile", hint: "Ex: A+, B, C, D" },
+    ],
+  },
+  {
+    id: "sazonalidade",
+    label: "Sazonalidade",
+    icon: Clock,
+    fields: [
+      { key: "meses_alta_faturamento", label: "Meses de aumento de faturamento", type: "text", source: "profile", hint: "Ex: JAN, DEZ" },
+      { key: "meses_baixa_faturamento", label: "Meses de baixa de faturamento", type: "text", source: "profile", hint: "Ex: FEV, MAR" },
+      { key: "periodo_forte_mes", label: "Período mais forte do mês", type: "select", source: "profile", options: ["Primeira semana", "Segunda semana", "Terceira semana", "Última semana"] },
+      { key: "periodo_fraco_mes", label: "Período mais fraco do mês", type: "select", source: "profile", options: ["Primeira semana", "Segunda semana", "Terceira semana", "Última semana"] },
+      { key: "dias_fortes_semana", label: "Dias mais fortes da semana", type: "text", source: "profile", hint: "Ex: SEG, TER, QUA" },
+      { key: "dias_fracos_semana", label: "Dias mais fracos da semana", type: "text", source: "profile", hint: "Ex: SAB, DOM" },
+    ],
+  },
+  {
+    id: "concorrencia",
+    label: "Concorrência / Referência",
+    icon: Sparkles,
+    fields: [
+      { key: "concorrentes_referencia", label: "Principais concorrentes", type: "textarea", source: "profile" },
+      { key: "concorrente_mais_forte", label: "Qual concorrente é o mais forte? Por quê?", type: "textarea", source: "profile" },
+      { key: "referencia_comunicacao", label: "Referência de comunicação bacana", type: "textarea", source: "profile" },
+      { key: "pontos_fracos_concorrencia", label: "Onde seus produtos/serviços perdem dos concorrentes?", type: "textarea", source: "profile" },
+      { key: "visao_mercado", label: "Como você enxerga o mercado", type: "select", source: "profile", options: ["Saturado", "Tranquilo/tem espaço", "Promissor"] },
+    ],
+  },
+  {
+    id: "comunicacao",
+    label: "Comunicação",
+    icon: Megaphone,
+    fields: [
+      { key: "canais_comunicacao_possuidos", label: "Canais de comunicação que já possui", type: "textarea", source: "profile", hint: "E-mail, Site, Instagram, Telefone, etc." },
+      { key: "canal_maior_retorno", label: "Qual canal dá mais retorno?", type: "text", source: "profile" },
+      { key: "monitoramento_canais", label: "Estes canais são monitorados e atualizados?", type: "textarea", source: "profile" },
+      { key: "canais_preferencia_contato", label: "Através de quais canais preferiria ser contatado?", type: "text", source: "profile" },
+      { key: "acoes_passadas", label: "Ações de marketing efetivas no passado", type: "textarea", source: "profile" },
+      { key: "plano_marketing_existente", label: "Já existiu plano de marketing na empresa?", type: "textarea", source: "profile" },
+      { key: "trabalhou_agencia", label: "A empresa já trabalhou com agência? Como foi?", type: "textarea", source: "profile" },
+      { key: "equipe_marketing", label: "Equipe ou colaborador dedicado ao marketing digital?", type: "textarea", source: "profile" },
+    ],
+  },
+  {
+    id: "vendas",
+    label: "Processo de Vendas",
+    icon: ShoppingCart,
+    fields: [
+      { key: "processo_vendas_estruturado", label: "Como é o processo de vendas? É estruturado?", type: "textarea", source: "profile" },
+      { key: "crm_utilizado", label: "Utiliza CRM para vendas?", type: "text", source: "profile" },
+      { key: "funil_vendas_conversao", label: "Existe funil desenhado? Porcentagem de conversão?", type: "textarea", source: "profile" },
+      { key: "equipe_vendas", label: "Pessoas dedicadas à venda (quantas)?", type: "text", source: "profile" },
+      { key: "canais_vendas", label: "Canais utilizados para vender", type: "text", source: "profile", hint: "Cara a cara, Telefone, E-mail, Redes sociais" },
+      { key: "custo_aquisicao_cac", label: "Custo de aquisição de clientes (CAC)", type: "text", source: "profile" },
+      { key: "informacoes_adicionais", label: "Observações Adicionais", type: "textarea", source: "profile", hint: "Serviços específicos, páginas, formulários" },
+    ],
+  },
+  {
+    id: "acessos",
+    label: "Acessos e Materiais",
+    icon: Link2,
+    fields: [
+      { key: "site", label: "Site Principal", type: "text", source: "column", hint: "URL principal" },
+      { key: "arquivo_logos", label: "Logos e identidade visual", type: "file-link", source: "profile" },
+      { key: "arquivo_institucional", label: "Materiais institucionais", type: "file-link", source: "profile" },
+      { key: "arquivo_midia", label: "Vídeos e fotos disponíveis", type: "file-link", source: "profile" },
     ],
   },
   {
@@ -91,134 +166,6 @@ const SECTIONS: BriefingSection[] = [
       { key: "persona_motivacoes", label: "Motivações e desejos", type: "textarea", source: "profile" },
       { key: "persona_canais", label: "Canais que frequenta", type: "textarea", source: "profile" },
       { key: "persona_objecoes", label: "Objeções e medos", type: "textarea", source: "profile" },
-    ],
-  },
-  {
-    id: "comercial",
-    label: "Processo Comercial",
-    icon: ShoppingCart,
-    fields: [
-      { key: "como_chegam_clientes", label: "Como os clientes chegam hoje?", type: "textarea", source: "profile" },
-      { key: "canais_aquisicao", label: "Quais canais geram mais clientes?", type: "textarea", source: "profile" },
-      { key: "equipe_comercial", label: "Existe equipe comercial? Quantas pessoas?", type: "text", source: "profile" },
-      { key: "followup_processo", label: "Existe processo de follow-up?", type: "textarea", source: "profile" },
-      { key: "crm_utilizado", label: "Existe CRM atualmente? Qual?", type: "text", source: "profile" },
-      { key: "atendimento_inicial", label: "Como funciona o atendimento inicial?", type: "textarea", source: "profile" },
-      { key: "tempo_resposta_lead", label: "Quanto tempo o lead demora para receber resposta?", type: "text", source: "profile" },
-      { key: "fecha_primeira_conversa", label: "O cliente fecha na primeira conversa?", type: "select", source: "profile", options: ["Sim", "Às vezes", "Não"] },
-    ],
-  },
-  {
-    id: "marketing",
-    label: "Marketing Atual",
-    icon: Megaphone,
-    fields: [
-      { key: "tem_trafego_pago", label: "A empresa roda tráfego pago atualmente?", type: "select", source: "profile", options: ["Sim", "Não", "Já rodou"] },
-      { key: "investimento_ads", label: "Qual valor médio investido em anúncios?", type: "text", source: "profile" },
-      { key: "redes_sociais_usadas", label: "Quais redes sociais utiliza?", type: "textarea", source: "profile" },
-      { key: "calendario_conteudo", label: "Existe calendário de conteúdo?", type: "select", source: "profile", options: ["Sim", "Parcial", "Não"] },
-      { key: "producao_videos", label: "Existe produção de vídeos?", type: "select", source: "profile", options: ["Sim", "Eventualmente", "Não"] },
-      { key: "trabalhou_agencia", label: "Já trabalhou com agência antes?", type: "textarea", source: "profile" },
-      { key: "funcionou_nao_funcionou", label: "O que funcionou e o que não funcionou?", type: "textarea", source: "profile" },
-    ],
-  },
-  {
-    id: "digital",
-    label: "Estrutura Digital",
-    icon: Globe,
-    fields: [
-      { key: "site", label: "Possui site? (URL)", type: "text", source: "column" },
-      { key: "possui_landing_pages", label: "Possui landing pages?", type: "textarea", source: "profile" },
-      { key: "whatsapp_comercial", label: "Possui WhatsApp comercial? (número)", type: "text", source: "profile" },
-      { key: "automacoes", label: "Possui automações?", type: "textarea", source: "profile" },
-      { key: "email_marketing", label: "Usa e-mail marketing? Qual ferramenta?", type: "text", source: "profile" },
-      { key: "google_meu_negocio", label: "Possui Google Meu Negócio otimizado?", type: "select", source: "profile", options: ["Sim, otimizado", "Sim, sem otimização", "Não"] },
-      { key: "integracoes_sistemas", label: "Existem integrações entre sistemas?", type: "textarea", source: "profile" },
-    ],
-  },
-  {
-    id: "objetivos",
-    label: "Objetivos e Dores",
-    icon: TrendingUp,
-    fields: [
-      { key: "principal_dificuldade", label: "Qual a principal dificuldade hoje?", type: "textarea", source: "profile" },
-      { key: "trava_crescimento", label: "O que mais trava o crescimento?", type: "textarea", source: "profile" },
-      { key: "cenario_ideal_12m", label: "Qual seria o cenário ideal nos próximos 12 meses?", type: "textarea", source: "profile" },
-      { key: "prioridade_melhoria", label: "O que gostaria de melhorar primeiro?", type: "textarea", source: "profile" },
-      { key: "maior_desperdicio", label: "Qual o maior desperdício atual da empresa?", type: "textarea", source: "profile" },
-    ],
-  },
-  {
-    id: "operacional",
-    label: "Estrutura Operacional",
-    icon: Users,
-    fields: [
-      { key: "pessoas_operacao", label: "Quantas pessoas existem na operação?", type: "text", source: "profile" },
-      { key: "tomadores_decisao", label: "Quem toma as decisões?", type: "textarea", source: "profile" },
-      { key: "equipe_atendimento", label: "Existe equipe de atendimento?", type: "text", source: "profile" },
-      { key: "equipe_vendas", label: "Existe equipe de vendas?", type: "text", source: "profile" },
-      { key: "equipe_marketing", label: "Existe equipe de marketing?", type: "text", source: "profile" },
-      { key: "comunicacao_interna", label: "Como funciona a comunicação interna?", type: "textarea", source: "profile" },
-    ],
-  },
-  {
-    id: "diferenciais",
-    label: "Diferenciais e Posicionamento",
-    icon: Sparkles,
-    fields: [
-      { key: "diferencial_empresa", label: "O que faz sua empresa ser diferente?", type: "textarea", source: "profile" },
-      { key: "porque_escolhem", label: "Por que um cliente escolhe vocês?", type: "textarea", source: "profile" },
-      { key: "diferencial_competitivo", label: "Qual é o maior diferencial competitivo?", type: "textarea", source: "profile" },
-      { key: "concorrentes_referencia", label: "Quais concorrentes você considera referência?", type: "textarea", source: "profile" },
-    ],
-  },
-  {
-    id: "expectativas",
-    label: "Expectativas do Projeto",
-    icon: Flag,
-    fields: [
-      { key: "expectativa_totum", label: "O que espera da Totum?", type: "textarea", source: "profile" },
-      { key: "otimo_resultado", label: "Qual seria um ótimo resultado para você?", type: "textarea", source: "profile" },
-      { key: "prazo_meta", label: "Existe prazo ou meta importante?", type: "textarea", source: "profile" },
-      { key: "prioridade_imediata", label: "Existe alguma prioridade imediata?", type: "textarea", source: "profile" },
-    ],
-  },
-  {
-    id: "acessos",
-    label: "Acessos e Materiais",
-    icon: Link2,
-    fields: [
-      { key: "link_instagram", label: "Instagram", type: "text", source: "profile", hint: "URL do perfil" },
-      { key: "link_facebook", label: "Facebook", type: "text", source: "profile", hint: "URL da página" },
-      { key: "link_gmb", label: "Google Meu Negócio", type: "text", source: "profile", hint: "URL do perfil" },
-      { key: "link_site", label: "Site", type: "text", source: "profile", hint: "URL principal" },
-      { key: "conta_anuncios", label: "Conta de anúncios (Meta/Google Ads)", type: "textarea", source: "profile", hint: "IDs ou e-mails de acesso" },
-      { key: "arquivo_logos", label: "Logos e identidade visual", type: "file-link", source: "profile" },
-      { key: "arquivo_institucional", label: "Materiais institucionais", type: "file-link", source: "profile" },
-      { key: "arquivo_midia", label: "Vídeos e fotos disponíveis", type: "file-link", source: "profile" },
-    ],
-  },
-  {
-    id: "identidade",
-    label: "Identidade Visual",
-    icon: Palette,
-    fields: [
-      { key: "cor_primaria", label: "Cor primária", type: "text", source: "column" },
-      { key: "cor_secundaria", label: "Cor secundária", type: "text", source: "column" },
-      { key: "fontes", label: "Fontes", type: "text", source: "profile" },
-      { key: "personalidade_visual", label: "Personalidade visual", type: "textarea", source: "profile" },
-    ],
-  },
-  {
-    id: "operacao",
-    label: "Operação e Contatos",
-    icon: Phone,
-    fields: [
-      { key: "sla_resposta", label: "SLA de resposta", type: "text", source: "profile" },
-      { key: "horario_inicio", label: "Horário início", type: "text", source: "profile" },
-      { key: "horario_fim", label: "Horário fim", type: "text", source: "profile" },
-      { key: "dias_atendimento", label: "Dias de atendimento", type: "text", source: "profile" },
-      { key: "informacoes_adicionais", label: "Informações adicionais", type: "textarea", source: "profile" },
     ],
   },
   {
@@ -410,6 +357,23 @@ export default function MeuCadastroPage() {
         refreshData();
       } else if (!isAdmin && created > 0) {
         setMessage(`✅ ${created} alteração(ões) enviada(s) para aprovação.`);
+        
+        // If the briefing wasn't completed yet, mark it as completed now
+        if (!clientData.profile_data?.briefing_completed) {
+            try {
+                const session = await supabase.getSupabaseClient().auth.getSession();
+                const token = session.data.session?.access_token;
+                if (token) {
+                    await fetch('/api/client/briefing/complete', {
+                        method: 'POST',
+                        headers: { 'Authorization': `Bearer ${token}` }
+                    });
+                }
+            } catch (e) {
+                console.error("Failed to mark briefing as completed", e);
+            }
+        }
+
         loadPendingCount();
         setEditMode(false);
         refreshData();

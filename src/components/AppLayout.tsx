@@ -225,8 +225,24 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
                     </div>
                 </div>
 
-                <main className="p-4">
-                    {children}
+                <main className="p-4 relative">
+                    {!isMaster && client && !client.profile_data?.briefing_completed && pathname !== '/app/meu-cadastro' && (
+                        <div className="absolute inset-0 bg-canvas/80 backdrop-blur-sm z-50 flex flex-col items-center justify-center p-6 text-center rounded-lg">
+                            <div className="bg-white dark:bg-ink border p-8 rounded-xl shadow-xl max-w-md w-full">
+                                <ClipboardList className="w-12 h-12 text-rausch mx-auto mb-4" />
+                                <h2 className="text-xl font-bold text-ink mb-2">Briefing Obrigatório Pendente</h2>
+                                <p className="text-muted text-sm mb-6">
+                                    Para liberar o acesso completo ao portal e continuarmos com a estratégia, precisamos que você preencha as informações do seu negócio.
+                                </p>
+                                <Link href="/app/meu-cadastro" className="block w-full py-3 bg-rausch text-white font-medium rounded-lg hover:bg-rausch-active transition-colors">
+                                    Preencher Briefing Agora
+                                </Link>
+                            </div>
+                        </div>
+                    )}
+                    <div className={!isMaster && client && !client.profile_data?.briefing_completed && pathname !== '/app/meu-cadastro' ? 'opacity-20 pointer-events-none blur-sm' : ''}>
+                        {children}
+                    </div>
                 </main>
             </div>
         </div>

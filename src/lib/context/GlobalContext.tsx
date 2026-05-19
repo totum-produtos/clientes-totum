@@ -20,6 +20,7 @@ type PortalClient = {
     slug: string;
     email_responsavel: string;
     status: string;
+    profile_data?: any;
 } | null;
 
 type WandaPost = Tables<'wanda_posts'>;
@@ -82,7 +83,7 @@ export function GlobalProvider({ children }: { children: React.ReactNode }) {
                 // Buscar cliente vinculado ao usuário
                 const { data: clientData } = await client
                     .from('portal_client_users')
-                    .select('client_id, portal_clients(id, nome, slug, email_responsavel, status)')
+                    .select('client_id, portal_clients(id, nome, slug, email_responsavel, status, profile_data)')
                     .eq('user_id', user.id)
                     .single();
 
@@ -96,6 +97,7 @@ export function GlobalProvider({ children }: { children: React.ReactNode }) {
                         slug: pc.slug,
                         email_responsavel: pc.email_responsavel,
                         status: pc.status,
+                        profile_data: pc.profile_data,
                     });
                 }
 
