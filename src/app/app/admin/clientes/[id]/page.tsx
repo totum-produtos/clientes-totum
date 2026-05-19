@@ -8,7 +8,7 @@ import {
   Edit3, Save, ArrowLeft, Lock, KeyRound, Copy, Eye, EyeOff,
   RefreshCw, FolderOpen
 } from "lucide-react";
-import { STEPS, FormState } from "@/lib/cliente-form-constants";
+import { STEPS, FormState, DEFAULT_FORM_STATE } from "@/lib/cliente-form-constants";
 import { useClienteForm } from "@/hooks/useClienteForm";
 import { ClienteFormSteps } from "@/components/ClienteFormSteps";
 
@@ -65,6 +65,7 @@ export default function EditarClientePage() {
 
       const pd = (data.profile_data || {}) as Record<string, unknown>;
       setForm({
+        ...DEFAULT_FORM_STATE,
         nome: (data.nome as string) || "",
         cnpj: (data.cnpj as string) || "",
         nome_responsavel: (data.nome_responsavel as string) || "",
@@ -104,6 +105,50 @@ export default function EditarClientePage() {
         circulo_dourado: (pd.circulo_dourado as FormState["circulo_dourado"]) || { porque: "", o_que: "", como: "" },
         caracteristicas_marca: (pd.caracteristicas_marca as FormState["caracteristicas_marca"]) || { missao: "", visao: "", valores: "", personalidade: "" },
         puv: (pd.puv as string) || "",
+        
+        como_chegou: (pd.como_chegou as string) || "",
+        finalidade_briefing: (pd.finalidade_briefing as string) || "",
+        modelo_negocio: (pd.modelo_negocio as string) || "",
+        diferencial_competitivo: (pd.diferencial_competitivo as string) || "",
+        produto_mais_forte: (pd.produto_mais_forte as string) || "",
+        produto_desejado_forte: (pd.produto_desejado_forte as string) || "",
+        produto_mais_fraco: (pd.produto_mais_fraco as string) || "",
+        ticket_medio_atual: (pd.ticket_medio_atual as string) || "",
+        ticket_medio_ideal: (pd.ticket_medio_ideal as string) || "",
+        maior_objetivo_mkt: (pd.maior_objetivo_mkt as string) || "",
+        principal_meta: (pd.principal_meta as string) || "",
+        meta_mensuravel: (pd.meta_mensuravel as string) || "",
+        porcentagem_homens: (pd.porcentagem_homens as string) || "",
+        porcentagem_mulheres: (pd.porcentagem_mulheres as string) || "",
+        abrangencia_geografica: (pd.abrangencia_geografica as string) || "",
+        cliente_ideal: (pd.cliente_ideal as string) || "",
+        base_dados_clientes: (pd.base_dados_clientes as string) || "",
+        tamanho_base: (pd.tamanho_base as string) || "",
+        meses_alta_faturamento: (pd.meses_alta_faturamento as string[]) || [],
+        meses_baixa_faturamento: (pd.meses_baixa_faturamento as string[]) || [],
+        periodo_forte_mes: (pd.periodo_forte_mes as string) || "",
+        periodo_fraco_mes: (pd.periodo_fraco_mes as string) || "",
+        dias_fortes_semana: (pd.dias_fortes_semana as string[]) || [],
+        dias_fracos_semana: (pd.dias_fracos_semana as string[]) || [],
+        concorrentes_referencia: (pd.concorrentes_referencia as string) || "",
+        concorrente_mais_forte: (pd.concorrente_mais_forte as string) || "",
+        referencia_comunicacao: (pd.referencia_comunicacao as string) || "",
+        pontos_fracos_concorrencia: (pd.pontos_fracos_concorrencia as string) || "",
+        visao_mercado: (pd.visao_mercado as string) || "",
+        canais_comunicacao_possuidos: (pd.canais_comunicacao_possuidos as string[]) || [],
+        canal_maior_retorno: (pd.canal_maior_retorno as string) || "",
+        monitoramento_canais: (pd.monitoramento_canais as string) || "",
+        canais_preferencia_contato: (pd.canais_preferencia_contato as string) || "",
+        acoes_passadas: (pd.acoes_passadas as string) || "",
+        plano_marketing_existente: (pd.plano_marketing_existente as string) || "",
+        trabalhou_agencia: (pd.trabalhou_agencia as string) || "",
+        equipe_marketing: (pd.equipe_marketing as string) || "",
+        processo_vendas_estruturado: (pd.processo_vendas_estruturado as string) || "",
+        funil_vendas_conversao: (pd.funil_vendas_conversao as string) || "",
+        equipe_vendas: (pd.equipe_vendas as string) || "",
+        canais_vendas: (pd.canais_vendas as string[]) || [],
+        custo_aquisicao_cac: (pd.custo_aquisicao_cac as string) || "",
+        briefing_completed: (pd.briefing_completed as boolean) || false,
       });
       setDriveUrl((data.google_drive_folder_url as string) || "");
     } catch (err: unknown) {
