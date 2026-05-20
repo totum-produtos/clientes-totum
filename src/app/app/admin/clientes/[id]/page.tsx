@@ -108,9 +108,6 @@ export default function EditarClientePage() {
         circulo_dourado: (pd.circulo_dourado as FormState["circulo_dourado"]) || { porque: "", o_que: "", como: "" },
         caracteristicas_marca: (pd.caracteristicas_marca as FormState["caracteristicas_marca"]) || { missao: "", visao: "", valores: "", personalidade: "" },
         puv: (pd.puv as string) || "",
-        
-        como_chegou: (pd.como_chegou as string) || "",
-        finalidade_briefing: (pd.finalidade_briefing as string) || "",
       });
       setDriveUrl((data.google_drive_folder_url as string) || "");
     } catch (err: unknown) {
