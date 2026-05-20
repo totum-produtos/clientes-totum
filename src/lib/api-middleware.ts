@@ -45,8 +45,8 @@ export function withAuth(
                     .eq("user_id", user.id)
                     .single();
                 
-                if (linkData?.client_id) {
-                    clientId = linkData.client_id;
+                if ((linkData as any)?.client_id) {
+                    clientId = (linkData as any).client_id;
                 }
             }
 
