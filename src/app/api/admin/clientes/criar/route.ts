@@ -96,7 +96,7 @@ export async function POST(request: Request) {
         slug: gerarSlug(body.nome),
         email_responsavel: body.email_responsavel,
         contato_principal: body.telefone ?? null,
-        status: "ativo",
+        status: "active",
         cnpj: body.cnpj ?? null,
         nome_responsavel: body.nome_responsavel ?? null,
         telefone: body.telefone ?? null,
