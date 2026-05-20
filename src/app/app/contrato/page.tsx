@@ -1,5 +1,6 @@
 "use client";
 import React, { useEffect, useState } from 'react';
+import Link from 'next/link';
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
 import { useGlobal } from '@/lib/context/GlobalContext';
 import { createSPASassClient } from '@/lib/supabase/client';
@@ -17,12 +18,18 @@ type Tarefa = {
 };
 
 export default function ContratoPage() {
-    const { client } = useGlobal();
+    const { client, loading: globalLoading, user } = useGlobal();
     const [tarefas, setTarefas] = useState<Tarefa[]>([]);
     const [loading, setLoading] = useState(true);
 
+    const isMaster = user?.role === "master" || user?.role === "admin";
+
     async function fetchTarefas() {
-        if (!client) return;
+        if (!client) {
+            setLoading(false);
+            return;
+        }
+        setLoading(true);
         const supabase = await createSPASassClient();
         const { data } = await supabase.getSupabaseClient()
             .from('tarefas')
@@ -65,6 +72,37 @@ export default function ContratoPage() {
             }
         };
     }, [client]);
+
+    if (globalLoading) {
+        return (
+            <div className="min-h-screen bg-surface-soft flex items-center justify-center">
+                <div className="w-8 h-8 border-4 border-rausch border-t-transparent rounded-full animate-spin" />
+            </div>
+        );
+    }
+
+    if (!client) {
+        return (
+            <div className="min-h-screen bg-surface-soft flex flex-col items-center justify-center p-6 text-center">
+                <div className="bg-canvas border p-8 rounded-xl shadow-xl max-w-md w-full">
+                    <FileText className="w-12 h-12 text-rausch mx-auto mb-4" />
+                    <h2 className="text-xl font-bold text-ink mb-2">Nenhum Cliente Selecionado</h2>
+                    <p className="text-muted text-sm mb-6">
+                        Você precisa selecionar um cliente para ver as tarefas e acompanhamento do contrato.
+                    </p>
+                    {isMaster ? (
+                        <Link href="/app/central-conteudo" className="block w-full py-3 bg-rausch text-white font-medium rounded-lg hover:bg-rausch-active text-center transition-colors">
+                            Ir para Central de Conteúdos
+                        </Link>
+                    ) : (
+                        <Link href="/app" className="block w-full py-3 bg-rausch text-white font-medium rounded-lg hover:bg-rausch-active text-center transition-colors">
+                            Voltar ao Início
+                        </Link>
+                    )}
+                </div>
+            </div>
+        );
+    }
 
     if (loading) {
         return <div className="flex justify-center p-8"><div className="animate-spin h-8 w-8 border-b-2 border-rausch rounded-full"></div></div>;

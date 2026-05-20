@@ -40,7 +40,10 @@ function CalendarioContent() {
 
   async function fetchPosts() {
     const targetClientId = clientIdParam || client?.id;
-    if (!targetClientId) return;
+    if (!targetClientId) {
+      setLoading(false);
+      return;
+    }
     setLoading(true);
     const supabase = await createSPASassClient();
     const db = supabase.getSupabaseClient();
@@ -200,6 +203,27 @@ function CalendarioContent() {
   });
 
   const currentClientName = overrideClientName || client?.nome || "";
+
+  const targetClientId = clientIdParam || client?.id;
+
+  if (!loading && !targetClientId) {
+    return (
+      <div className="min-h-screen bg-surface-soft flex flex-col items-center justify-center p-6 text-center">
+        <div className="bg-canvas border p-8 rounded-xl shadow-xl max-w-md w-full">
+          <CalendarDays className="w-12 h-12 text-rausch mx-auto mb-4" />
+          <h2 className="text-xl font-bold text-ink mb-2">Nenhum Cliente Selecionado</h2>
+          <p className="text-muted text-sm mb-6">
+            Você precisa selecionar um cliente para ver o calendário de postagens.
+          </p>
+          {isMaster && (
+            <Link href="/app/central-conteudo" className="block w-full py-3 bg-rausch text-white font-medium rounded-lg hover:bg-rausch-active text-center transition-colors">
+              Ir para Central de Conteúdos
+            </Link>
+          )}
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-surface-soft pb-12">

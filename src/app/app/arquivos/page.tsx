@@ -1,5 +1,6 @@
 "use client";
 import React, { useCallback, useEffect, useState } from 'react';
+import Link from 'next/link';
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
 import { useGlobal } from '@/lib/context/GlobalContext';
 import { createSPASassClient } from '@/lib/supabase/client';
@@ -24,7 +25,7 @@ type Arquivo = {
 };
 
 export default function ArquivosPage() {
-  const { client } = useGlobal();
+  const { client, loading: globalLoading, user } = useGlobal();
   const { showSuccess, showError } = useToast();
   const [arquivos, setArquivos] = useState<Arquivo[]>([]);
   const [loading, setLoading] = useState(true);
@@ -35,8 +36,13 @@ export default function ArquivosPage() {
 
   const bucket = 'client_files';
 
+  const isMaster = user?.role === "master" || user?.role === "admin";
+
   async function fetchArquivos() {
-    if (!client) return;
+    if (!client) {
+      setLoading(false);
+      return;
+    }
     setLoading(true);
     setError('');
     try {
@@ -67,6 +73,37 @@ export default function ArquivosPage() {
   useEffect(() => {
     fetchArquivos();
   }, [client]);
+
+  if (globalLoading) {
+    return (
+      <div className="min-h-screen bg-surface-soft flex items-center justify-center">
+        <div className="w-8 h-8 border-4 border-rausch border-t-transparent rounded-full animate-spin" />
+      </div>
+    );
+  }
+
+  if (!client) {
+    return (
+      <div className="min-h-screen bg-surface-soft flex flex-col items-center justify-center p-6 text-center">
+        <div className="bg-canvas border p-8 rounded-xl shadow-xl max-w-md w-full">
+          <FileText className="w-12 h-12 text-rausch mx-auto mb-4" />
+          <h2 className="text-xl font-bold text-ink mb-2">Nenhum Cliente Selecionado</h2>
+          <p className="text-muted text-sm mb-6">
+            Você precisa selecionar um cliente para acessar a central de arquivos compartilhados.
+          </p>
+          {isMaster ? (
+            <Link href="/app/central-conteudo" className="block w-full py-3 bg-rausch text-white font-medium rounded-lg hover:bg-rausch-active text-center transition-colors">
+              Ir para Central de Conteúdos
+            </Link>
+          ) : (
+            <Link href="/app" className="block w-full py-3 bg-rausch text-white font-medium rounded-lg hover:bg-rausch-active text-center transition-colors">
+              Voltar ao Início
+            </Link>
+          )}
+        </div>
+      </div>
+    );
+  }
 
   const handleUpload = useCallback(async (e: React.ChangeEvent<HTMLInputElement>) => {
     if (!client || !e.target.files?.length) return;

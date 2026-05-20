@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useState, useEffect, useMemo } from "react";
+import Link from "next/link";
 import { useGlobal } from "@/lib/context/GlobalContext";
 import { createSPASassClient } from "@/lib/supabase/client";
 import {
@@ -414,7 +415,32 @@ export default function MeuCadastroPage() {
     }
   };
 
-  if (globalLoading || !clientData) {
+  if (globalLoading) {
+    return (
+      <div className="min-h-screen bg-surface-soft flex items-center justify-center">
+        <div className="w-8 h-8 border-4 border-rausch border-t-transparent rounded-full animate-spin" />
+      </div>
+    );
+  }
+
+  if (!client) {
+    return (
+      <div className="min-h-screen bg-surface-soft flex flex-col items-center justify-center p-6 text-center">
+        <div className="bg-canvas border p-8 rounded-xl shadow-xl max-w-md w-full">
+          <Building2 className="w-12 h-12 text-rausch mx-auto mb-4" />
+          <h2 className="text-xl font-bold text-ink mb-2">Nenhum Cliente Vinculado</h2>
+          <p className="text-muted text-sm mb-6">
+            Você precisa estar vinculado a um cliente para acessar esta página, ou selecionar um cliente na Central de Conteúdos.
+          </p>
+          <Link href="/app" className="block w-full py-3 bg-rausch text-white font-medium rounded-lg hover:bg-rausch-active text-center transition-colors">
+            Voltar ao Início
+          </Link>
+        </div>
+      </div>
+    );
+  }
+
+  if (!clientData) {
     return (
       <div className="min-h-screen bg-surface-soft flex items-center justify-center">
         <div className="w-8 h-8 border-4 border-rausch border-t-transparent rounded-full animate-spin" />

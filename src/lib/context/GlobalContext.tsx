@@ -81,31 +81,31 @@ export function GlobalProvider({ children }: { children: React.ReactNode }) {
                 setProfile((profileData as Profile) || null);
 
                 // Buscar cliente vinculado ao usuário
-                const { data: clientData } = await client
+                const { data: linkData } = await client
                     .from('portal_client_users')
-                    .select('client_id, portal_clients(id, nome, slug, email_responsavel, status, profile_data)')
+                    .select('client_id')
                     .eq('user_id', user.id)
                     .maybeSingle();
 
                 let clientId: string | null = null;
-                type PortalClientJoin = {
-                    portal_clients: {
-                        id: string; nome: string; slug: string;
-                        email_responsavel: string; status: string;
-                        profile_data?: Record<string, unknown>;
-                    } | null;
-                };
-                if (clientData && (clientData as PortalClientJoin).portal_clients) {
-                    const pc = (clientData as PortalClientJoin).portal_clients!;
-                    clientId = pc.id;
-                    setClient({
-                        id: pc.id,
-                        nome: pc.nome,
-                        slug: pc.slug,
-                        email_responsavel: pc.email_responsavel,
-                        status: pc.status,
-                        profile_data: pc.profile_data,
-                    });
+                if (linkData?.client_id) {
+                    const { data: pc } = await client
+                        .from('portal_clients')
+                        .select('id, nome, slug, email_responsavel, status, profile_data')
+                        .eq('id', linkData.client_id)
+                        .maybeSingle();
+
+                    if (pc) {
+                        clientId = pc.id;
+                        setClient({
+                            id: pc.id,
+                            nome: pc.nome,
+                            slug: pc.slug,
+                            email_responsavel: pc.email_responsavel || '',
+                            status: pc.status || '',
+                            profile_data: pc.profile_data as Record<string, unknown> | undefined,
+                        });
+                    }
                 }
 
                 // Buscar dados reais se tiver cliente vinculado
