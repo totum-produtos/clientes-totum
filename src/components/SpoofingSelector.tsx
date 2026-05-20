@@ -13,7 +13,7 @@ export default function SpoofingSelector() {
     const isMaster = user?.role === "master" || user?.role === "admin";
 
     useEffect(() => {
-        if (!isMaster) return;
+        if (!isMaster || !isOpen) return;
         async function fetchClientes() {
             const supabase = await createSPASassClient();
             const { data } = await supabase.getSupabaseClient()
@@ -26,7 +26,7 @@ export default function SpoofingSelector() {
             }
         }
         fetchClientes();
-    }, [isMaster]);
+    }, [isMaster, isOpen]);
 
     if (!isMaster) return null;
 
