@@ -29,7 +29,7 @@ export function withAuth(
                 .eq("user_id", user.id)
                 .single();
             
-            const role = roleData?.role || "cliente";
+            const role = (roleData as { role: string } | null)?.role || "cliente";
 
             // 3. Validar se master é exigido
             if (requireMaster && role !== "master") {
