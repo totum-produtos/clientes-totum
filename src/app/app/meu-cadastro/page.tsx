@@ -234,7 +234,11 @@ export default function MeuCadastroPage() {
       .select("*")
       .eq("id", client!.id)
       .single();
-    if (data) setClientData(data);
+    if (data) {
+      setClientData(data);
+    } else {
+      setClientData({ _error: true });
+    }
   }
 
   async function loadPendingCount() {
@@ -444,6 +448,23 @@ export default function MeuCadastroPage() {
     return (
       <div className="min-h-screen bg-surface-soft flex items-center justify-center">
         <div className="w-8 h-8 border-4 border-rausch border-t-transparent rounded-full animate-spin" />
+      </div>
+    );
+  }
+
+  if (clientData._error) {
+    return (
+      <div className="min-h-screen bg-surface-soft flex flex-col items-center justify-center p-6 text-center">
+        <div className="bg-canvas border p-8 rounded-xl shadow-xl max-w-md w-full">
+          <AlertCircle className="w-12 h-12 text-rausch mx-auto mb-4" />
+          <h2 className="text-xl font-bold text-ink mb-2">Erro ao carregar dados</h2>
+          <p className="text-muted text-sm mb-6">
+            Não foi possível carregar as informações deste cliente. Você pode não ter permissão de acesso.
+          </p>
+          <Link href="/app" className="block w-full py-3 bg-rausch text-white font-medium rounded-lg hover:bg-rausch-active text-center transition-colors">
+            Voltar ao Início
+          </Link>
+        </div>
       </div>
     );
   }

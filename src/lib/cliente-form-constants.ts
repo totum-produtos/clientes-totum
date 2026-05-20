@@ -79,8 +79,6 @@ export type FormState = {
   puv: string;
   
   // Novos campos do Briefing
-  como_chegou: string;
-  finalidade_briefing: string;
   modelo_negocio: string;
   diferencial_competitivo: string;
   produto_mais_forte: string;
@@ -96,7 +94,6 @@ export type FormState = {
   abrangencia_geografica: string;
   cliente_ideal: string;
   base_dados_clientes: string;
-  tamanho_base: string;
   meses_alta_faturamento: string[];
   meses_baixa_faturamento: string[];
   periodo_forte_mes: string;
@@ -145,12 +142,12 @@ export const DEFAULT_FORM_STATE: FormState = {
   puv: "",
   
   // Inicialização dos novos campos
-  como_chegou: "", finalidade_briefing: "", modelo_negocio: "",
+  modelo_negocio: "",
   diferencial_competitivo: "", produto_mais_forte: "", produto_desejado_forte: "",
   produto_mais_fraco: "", ticket_medio_atual: "", ticket_medio_ideal: "",
   maior_objetivo_mkt: "", principal_meta: "", meta_mensuravel: "",
   porcentagem_homens: "", porcentagem_mulheres: "", abrangencia_geografica: "",
-  cliente_ideal: "", base_dados_clientes: "", tamanho_base: "",
+  cliente_ideal: "", base_dados_clientes: "",
   meses_alta_faturamento: [], meses_baixa_faturamento: [],
   periodo_forte_mes: "", periodo_fraco_mes: "",
   dias_fortes_semana: [], dias_fracos_semana: [],

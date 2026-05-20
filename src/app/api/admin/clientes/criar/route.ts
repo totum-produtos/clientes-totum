@@ -119,39 +119,22 @@ export async function POST(request: Request) {
     }
     createdClientId = client.id;
 
-    // 3. Gera invite link (cria auth.user + retorna action_link)
-    const origin =
-      request.headers.get("origin") ||
-      process.env.NEXT_PUBLIC_SITE_URL ||
-      "https://cliente.grupototum.com";
-    // Vai direto para a tela de criar senha. O createBrowserClient do
-    // @supabase/ssr processa o fragment (#access_token=...) automaticamente
-    // via detectSessionInUrl, então não precisamos passar pelo callback
-    // server-side (que só lê query, não fragment).
-    const redirectTo = `${origin}/auth/reset-password?invite=true`;
-
-    const { data: linkData, error: linkErr } = await admin.auth.admin.generateLink({
-      type: "invite",
+    // 3. Cria usuário com senha padrão Mudar@123
+    const { data: authData, error: authErr } = await admin.auth.admin.createUser({
       email: body.email_responsavel,
-      options: {
-        redirectTo,
-        data: {
-          portal_client_id: createdClientId,
-          must_change_password: true,
-        },
-      },
+      password: "Mudar@123",
+      email_confirm: true,
+      user_metadata: {
+        portal_client_id: createdClientId,
+        must_change_password: true,
+      }
     });
 
-    if (linkErr || !linkData?.user) {
-      throw new Error(linkErr?.message || "Falha ao gerar link de convite");
+    if (authErr || !authData?.user) {
+      throw new Error(authErr?.message || "Falha ao criar usuário de acesso");
     }
 
-    const newUserId = linkData.user.id;
-    const actionLink = linkData.properties?.action_link;
-
-    if (!actionLink) {
-      throw new Error("Supabase não retornou action_link");
-    }
+    const newUserId = authData.user.id;
 
     // 4. Vincula em user_roles + portal_client_users
     const { error: roleErr } = await admin
@@ -172,11 +155,19 @@ export async function POST(request: Request) {
       throw new Error(`Falha ao vincular usuário ao cliente: ${linkUserErr.message}`);
     }
 
+    const welcomeMessage = `Olá, ${body.nome}! Seu acesso à nossa plataforma foi criado com sucesso.
+
+Acesse: https://cliente.grupototum.com
+Login: ${body.email_responsavel}
+Senha temporária: Mudar@123
+
+Ao acessar pela primeira vez, o sistema exigirá que você redefina esta senha para uma de sua preferência. Estamos ansiosos para começar!`;
+
     return NextResponse.json({
       success: true,
       clientId: createdClientId,
       userId: newUserId,
-      inviteLink: actionLink,
+      welcomeMessage: welcomeMessage,
     });
   } catch (err) {
     // Rollback: se o portal_client foi criado mas algo depois falhou, remove

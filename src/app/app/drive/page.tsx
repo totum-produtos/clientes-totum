@@ -104,23 +104,42 @@ export default function DrivePage() {
   }
 
   if (!client) {
+    if (isMaster) {
+      return (
+        <div className="space-y-6 p-2">
+          <div>
+            <h1 className="text-2xl font-bold text-ink">Google Drive (Matriz)</h1>
+            <p className="text-muted">Acesso global ao drive da agência</p>
+          </div>
+          <Card>
+            <CardHeader><CardTitle>Acesso Raiz</CardTitle></CardHeader>
+            <CardContent>
+              <a
+                href="https://drive.google.com/drive/u/0/my-drive"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-flex items-center gap-2 px-4 py-2 bg-rausch text-white rounded-md text-sm font-medium hover:bg-rausch-active transition-colors"
+              >
+                <ExternalLink className="h-4 w-4" />
+                Abrir Meu Drive (Totum)
+              </a>
+            </CardContent>
+          </Card>
+        </div>
+      );
+    }
+
     return (
       <div className="min-h-screen bg-surface-soft flex flex-col items-center justify-center p-6 text-center">
-        <div className="bg-canvas border p-8 rounded-xl shadow-xl max-w-md w-full">
+        <div className="bg-canvas border p-8 rounded-xl shadow-airbnb max-w-md w-full">
           <Cloud className="w-12 h-12 text-rausch mx-auto mb-4" />
           <h2 className="text-xl font-bold text-ink mb-2">Nenhum Cliente Selecionado</h2>
           <p className="text-muted text-sm mb-6">
             Você precisa selecionar um cliente para acessar a pasta do Google Drive.
           </p>
-          {isMaster ? (
-            <Link href="/app/central-conteudo" className="block w-full py-3 bg-rausch text-white font-medium rounded-lg hover:bg-rausch-active text-center transition-colors">
-              Ir para Central de Conteúdos
-            </Link>
-          ) : (
-            <Link href="/app" className="block w-full py-3 bg-rausch text-white font-medium rounded-lg hover:bg-rausch-active text-center transition-colors">
-              Voltar ao Início
-            </Link>
-          )}
+          <Link href="/app/central-conteudo" className="block w-full py-3 bg-rausch text-white font-medium rounded-md hover:bg-rausch-active text-center transition-colors">
+            Ir para Central de Conteúdos
+          </Link>
         </div>
       </div>
     );

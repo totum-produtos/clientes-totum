@@ -10,6 +10,7 @@ type Props = {
   step: number;
   form: FormState;
   editMode: boolean;
+  isMaster?: boolean;
   update: <K extends keyof FormState>(field: K, value: FormState[K]) => void;
   toggleArray: (field: "classe_social" | "canais_atendimento" | "dias_atendimento" | "meses_alta_faturamento" | "meses_baixa_faturamento" | "dias_fortes_semana" | "dias_fracos_semana" | "canais_comunicacao_possuidos" | "canais_vendas", value: string) => void;
   addPersona: () => void;
@@ -19,7 +20,7 @@ type Props = {
 };
 
 export function ClienteFormSteps({
-  step, form, editMode, update, toggleArray, addPersona, removePersona, updatePersona, setForm,
+  step, form, editMode, isMaster = false, update, toggleArray, addPersona, removePersona, updatePersona, setForm,
 }: Props) {
   const fileInputRef = useRef<HTMLInputElement>(null);
 
@@ -59,14 +60,6 @@ export function ClienteFormSteps({
         <Field label="Telefone" editMode={editMode} required><input value={form.telefone} onChange={e => update("telefone", e.target.value)} placeholder="(00) 00000-0000" className="input-field" readOnly={!editMode} required /></Field>
       </div>
       <Field label="Site" editMode={editMode}><input value={form.site} onChange={e => update("site", e.target.value)} placeholder="https://www.empresa.com" className="input-field" readOnly={!editMode} /></Field>
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-5 border-t pt-5">
-        <Field label="Como chegou até a gente" editMode={editMode}><input value={form.como_chegou} onChange={e => update("como_chegou", e.target.value)} placeholder="Ex: Indicação" className="input-field" readOnly={!editMode} /></Field>
-        <Field label="Finalidade do briefing" editMode={editMode} required>
-          <select value={form.finalidade_briefing} onChange={e => update("finalidade_briefing", e.target.value)} className="input-field" disabled={!editMode} required>
-            <option value="">Selecione</option>{FINALIDADES.map(r => <option key={r} value={r}>{r}</option>)}
-          </select>
-        </Field>
-      </div>
     </div>
   );
 
@@ -164,23 +157,29 @@ export function ClienteFormSteps({
   // STEP 4 - Público-Alvo
   if (step === 4) return (
     <div className="space-y-5">
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
-        <Field label="Homens (%)" editMode={editMode}><input value={form.porcentagem_homens} onChange={e => update("porcentagem_homens", e.target.value)} className="input-field" readOnly={!editMode} /></Field>
-        <Field label="Mulheres (%)" editMode={editMode}><input value={form.porcentagem_mulheres} onChange={e => update("porcentagem_mulheres", e.target.value)} className="input-field" readOnly={!editMode} /></Field>
-        <Field label="Abrangência geográfica" editMode={editMode}><input value={form.abrangencia_geografica} onChange={e => update("abrangencia_geografica", e.target.value)} className="input-field" readOnly={!editMode} /></Field>
+      <div className="grid grid-cols-5 gap-5">
+        <div className="col-span-1">
+          <Field label="Homens (%)" editMode={editMode}><input value={form.porcentagem_homens} onChange={e => update("porcentagem_homens", e.target.value)} placeholder="Ex: 40" className="input-field" readOnly={!editMode} /></Field>
+        </div>
+        <div className="col-span-1">
+          <Field label="Mulheres (%)" editMode={editMode}><input value={form.porcentagem_mulheres} onChange={e => update("porcentagem_mulheres", e.target.value)} placeholder="Ex: 60" className="input-field" readOnly={!editMode} /></Field>
+        </div>
+        <div className="col-span-3">
+          <Field label="Regiões de Atendimento" editMode={editMode}><input value={form.abrangencia_geografica} onChange={e => update("abrangencia_geografica", e.target.value)} placeholder="Ex: São Paulo Capital, ABC Paulista" className="input-field" readOnly={!editMode} /></Field>
+        </div>
       </div>
       <Field label="Cliente ideal na carteira (Como ele é?)" editMode={editMode}><textarea value={form.cliente_ideal} onChange={e => update("cliente_ideal", e.target.value)} rows={3} className="input-field resize-none" readOnly={!editMode} /></Field>
       <Field label="Principais dúvidas e dores ao contatar a empresa" editMode={editMode}><textarea value={form.dores_principais} onChange={e => update("dores_principais", e.target.value)} rows={3} className="input-field resize-none" readOnly={!editMode} /></Field>
       
       <div className="grid grid-cols-1 md:grid-cols-2 gap-5 border-t pt-5">
-        <Field label="Existe uma base de dados destes clientes?" editMode={editMode}>
+        <Field label="Vocês já têm uma lista com o contato desses clientes?" editMode={editMode}>
           <select value={form.base_dados_clientes} onChange={e => update("base_dados_clientes", e.target.value)} className="input-field" disabled={!editMode}>
             <option value="">Selecione</option>
             <option value="Sim">Sim</option>
             <option value="Não">Não</option>
+            <option value="Quero receber uma">Quero receber uma lista</option>
           </select>
         </Field>
-        <Field label="Tamanho da base" editMode={editMode}><input value={form.tamanho_base} onChange={e => update("tamanho_base", e.target.value)} className="input-field" readOnly={!editMode} /></Field>
       </div>
       <div className="pt-5 border-t">
         <Field label="Classe social (Renda média)" editMode={editMode}>
@@ -198,15 +197,19 @@ export function ClienteFormSteps({
   if (step === 5) return (
     <div className="space-y-5">
       <h3 className="font-medium text-ink">Concorrência</h3>
-      <Field label="Principais concorrentes" editMode={editMode}><textarea value={form.concorrentes_referencia} onChange={e => update("concorrentes_referencia", e.target.value)} rows={2} className="input-field resize-none" readOnly={!editMode} /></Field>
-      <Field label="Qual concorrente é o mais forte? Por quê?" editMode={editMode}><textarea value={form.concorrente_mais_forte} onChange={e => update("concorrente_mais_forte", e.target.value)} rows={2} className="input-field resize-none" readOnly={!editMode} /></Field>
-      <Field label="Referência de comunicação bacana" editMode={editMode}><textarea value={form.referencia_comunicacao} onChange={e => update("referencia_comunicacao", e.target.value)} rows={2} className="input-field resize-none" readOnly={!editMode} /></Field>
-      <Field label="Onde seus produtos/serviços perdem dos concorrentes?" editMode={editMode}><textarea value={form.pontos_fracos_concorrencia} onChange={e => update("pontos_fracos_concorrencia", e.target.value)} rows={2} className="input-field resize-none" readOnly={!editMode} /></Field>
-      <Field label="Como você enxerga o mercado" editMode={editMode}>
-        <select value={form.visao_mercado} onChange={e => update("visao_mercado", e.target.value)} className="input-field" disabled={!editMode}>
-          <option value="">Selecione</option>{VISIOES_MERCADO.map(s => <option key={s} value={s}>{s}</option>)}
-        </select>
-      </Field>
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
+        <Field label="Principais concorrentes" editMode={editMode}><textarea value={form.concorrentes_referencia} onChange={e => update("concorrentes_referencia", e.target.value)} placeholder="Quem são seus concorrentes diretos?" rows={3} className="input-field resize-none" readOnly={!editMode} /></Field>
+        <Field label="Qual o mais forte e por quê?" editMode={editMode}><textarea value={form.concorrente_mais_forte} onChange={e => update("concorrente_mais_forte", e.target.value)} placeholder="O que eles fazem bem?" rows={3} className="input-field resize-none" readOnly={!editMode} /></Field>
+        <Field label="Onde você perde para eles?" editMode={editMode}><textarea value={form.pontos_fracos_concorrencia} onChange={e => update("pontos_fracos_concorrencia", e.target.value)} placeholder="Quais são as fraquezas da sua oferta?" rows={3} className="input-field resize-none" readOnly={!editMode} /></Field>
+      </div>
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+        <Field label="Referência de comunicação" editMode={editMode}><input value={form.referencia_comunicacao} onChange={e => update("referencia_comunicacao", e.target.value)} placeholder="Ex: Marca X, porque são criativos..." className="input-field" readOnly={!editMode} /></Field>
+        <Field label="Como você enxerga o mercado" editMode={editMode}>
+          <select value={form.visao_mercado} onChange={e => update("visao_mercado", e.target.value)} className="input-field" disabled={!editMode}>
+            <option value="">Selecione</option>{VISIOES_MERCADO.map(s => <option key={s} value={s}>{s}</option>)}
+          </select>
+        </Field>
+      </div>
 
       <div className="border-t pt-5 mt-5 space-y-5">
         <h3 className="font-medium text-ink">Comunicação e Marketing</h3>
@@ -255,18 +258,21 @@ export function ClienteFormSteps({
 
   // STEP 7 - Identidade Visual
   if (step === 7) return (
-    <div className="space-y-5">
+    <div className={`space-y-5 ${(!editMode || !isMaster) ? 'opacity-80 pointer-events-none' : ''}`}>
+      <div className="bg-warning-bg p-3 rounded text-sm text-warning-text mb-4 border border-warning-bg">
+        {!isMaster ? "Aba exclusiva para edição do time Totum." : "Edição permitida. Apenas Master pode alterar."}
+      </div>
       <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
-        <Field label="Cor primária" editMode={editMode}>
+        <Field label="Cor primária" editMode={editMode && isMaster}>
           <div className="flex items-center gap-3">
-            <input type="color" value={form.cor_primaria} onChange={e => update("cor_primaria", e.target.value)} className="w-12 h-12 rounded-none border cursor-pointer" disabled={!editMode} />
-            <input value={form.cor_primaria} onChange={e => update("cor_primaria", e.target.value)} className="input-field font-mono uppercase" readOnly={!editMode} />
+            <input type="color" value={form.cor_primaria} onChange={e => update("cor_primaria", e.target.value)} className="w-12 h-12 rounded-none border cursor-pointer" disabled={!editMode || !isMaster} />
+            <input value={form.cor_primaria} onChange={e => update("cor_primaria", e.target.value)} className="input-field font-mono uppercase" readOnly={!editMode || !isMaster} />
           </div>
         </Field>
-        <Field label="Cor secundária" editMode={editMode}>
+        <Field label="Cor secundária" editMode={editMode && isMaster}>
           <div className="flex items-center gap-3">
-            <input type="color" value={form.cor_secundaria} onChange={e => update("cor_secundaria", e.target.value)} className="w-12 h-12 rounded-none border cursor-pointer" disabled={!editMode} />
-            <input value={form.cor_secundaria} onChange={e => update("cor_secundaria", e.target.value)} className="input-field font-mono uppercase" readOnly={!editMode} />
+            <input type="color" value={form.cor_secundaria} onChange={e => update("cor_secundaria", e.target.value)} className="w-12 h-12 rounded-none border cursor-pointer" disabled={!editMode || !isMaster} />
+            <input value={form.cor_secundaria} onChange={e => update("cor_secundaria", e.target.value)} className="input-field font-mono uppercase" readOnly={!editMode || !isMaster} />
           </div>
         </Field>
       </div>
@@ -341,7 +347,10 @@ export function ClienteFormSteps({
 
   // STEP 9 - Persona
   if (step === 9) return (
-    <div className="space-y-6">
+    <div className={`space-y-6 ${(!editMode || !isMaster) ? 'opacity-80 pointer-events-none' : ''}`}>
+      <div className="bg-warning-bg p-3 rounded text-sm text-warning-text mb-4 border border-warning-bg">
+        {!isMaster ? "Aba exclusiva para edição do time Totum." : "Edição permitida. Apenas Master pode alterar."}
+      </div>
       {form.personas.map((persona, idx) => (
         <div key={idx} className="border rounded-md p-5 space-y-4 relative">
           {form.personas.length > 1 && editMode && (
@@ -369,7 +378,10 @@ export function ClienteFormSteps({
 
   // STEP 10 - Círculo Dourado
   if (step === 10) return (
-    <div className="space-y-5">
+    <div className={`space-y-5 ${(!editMode || !isMaster) ? 'opacity-80 pointer-events-none' : ''}`}>
+      <div className="bg-warning-bg p-3 rounded text-sm text-warning-text mb-4 border border-warning-bg">
+        {!isMaster ? "Aba exclusiva para edição do time Totum." : "Edição permitida. Apenas Master pode alterar."}
+      </div>
       <div className="bg-danger-bg border border-danger-bg rounded-md p-5">
         <div className="flex items-center gap-2 mb-2">
           <div className="w-8 h-8 rounded-full bg-danger text-white flex items-center justify-center text-sm font-bold">P</div>
@@ -399,7 +411,10 @@ export function ClienteFormSteps({
 
   // STEP 11 - Características da Marca
   if (step === 11) return (
-    <div className="space-y-5">
+    <div className={`space-y-5 ${(!editMode || !isMaster) ? 'opacity-80 pointer-events-none' : ''}`}>
+      <div className="bg-warning-bg p-3 rounded text-sm text-warning-text mb-4 border border-warning-bg">
+        {!isMaster ? "Aba exclusiva para edição do time Totum." : "Edição permitida. Apenas Master pode alterar."}
+      </div>
       <Field label="Tom de voz da marca" editMode={editMode}>
         <select value={form.tom_voz} onChange={e => update("tom_voz", e.target.value)} className="input-field" disabled={!editMode}>
           <option value="">Selecione</option>{TONS_VOZ.map(t => <option key={t} value={t}>{t}</option>)}
@@ -414,7 +429,10 @@ export function ClienteFormSteps({
 
   // STEP 12 - PUV
   if (step === 12) return (
-    <div className="space-y-5">
+    <div className={`space-y-5 ${(!editMode || !isMaster) ? 'opacity-80 pointer-events-none' : ''}`}>
+      <div className="bg-warning-bg p-3 rounded text-sm text-warning-text mb-4 border border-warning-bg">
+        {!isMaster ? "Aba exclusiva para edição do time Totum." : "Edição permitida. Apenas Master pode alterar."}
+      </div>
       <div className="bg-gradient-to-br from-rausch/5 to-rausch/5 border border-hairline rounded-md p-6">
         <h4 className="font-semibold text-ink mb-2 flex items-center gap-2">
           <Check className="w-5 h-5 text-rausch" />

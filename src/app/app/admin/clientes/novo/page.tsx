@@ -12,7 +12,7 @@ export default function NovoClientePage() {
   const [step, setStep] = useState(1);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
-  const [inviteLink, setInviteLink] = useState<string | null>(null);
+  const [welcomeMessage, setWelcomeMessage] = useState<string | null>(null);
   const [copied, setCopied] = useState(false);
 
   const { form, setForm, update, toggleArray, addPersona, removePersona, updatePersona, resetForm } = useClienteForm();
@@ -70,7 +70,7 @@ export default function NovoClientePage() {
       });
       const data = await res.json();
       if (!res.ok || !data.success) throw new Error(data.error || "Erro ao criar cliente");
-      setInviteLink(data.inviteLink);
+      setWelcomeMessage(data.welcomeMessage);
     } catch (err: unknown) {
       setError(err instanceof Error ? err.message : "Erro ao criar cliente");
     } finally {
@@ -78,14 +78,14 @@ export default function NovoClientePage() {
     }
   };
 
-  const copiarLink = async () => {
-    if (!inviteLink) return;
-    await navigator.clipboard.writeText(inviteLink);
+  const copiarMensagem = async () => {
+    if (!welcomeMessage) return;
+    await navigator.clipboard.writeText(welcomeMessage);
     setCopied(true);
     setTimeout(() => setCopied(false), 2000);
   };
 
-  if (inviteLink) {
+  if (welcomeMessage) {
     return (
       <div className="min-h-screen bg-surface-soft pb-12 flex items-center justify-center px-4">
         <div className="max-w-2xl w-full bg-canvas rounded-lg border shadow-airbnb p-8">
@@ -94,45 +94,40 @@ export default function NovoClientePage() {
               <Check className="w-8 h-8 text-success-text" />
             </div>
           </div>
-          <h1 className="text-2xl font-bold text-ink text-center mb-2">Cliente criado!</h1>
+          <h1 className="text-2xl font-bold text-ink text-center mb-2">Cliente criado com sucesso!</h1>
           <p className="text-sm text-body text-center mb-6">
-            Copie o link abaixo e envie ao cliente (WhatsApp, email, etc).
-            Ele será direcionado para criar a senha e preencher os dados da empresa.
+            Copie a mensagem abaixo e envie ao cliente (WhatsApp, email, etc).
+            Ela contém o login e a senha padrão de acesso.
           </p>
-          <div className="bg-surface-soft border border-hairline rounded-md p-4 mb-4">
-            <div className="flex items-center gap-2 mb-2">
-              <Link2 className="w-4 h-4 text-rausch" />
-              <span className="text-xs font-semibold uppercase tracking-wide text-muted">Link de convite</span>
-            </div>
-            <div className="flex items-stretch gap-2">
-              <input
-                type="text"
-                value={inviteLink}
-                readOnly
-                onClick={(e) => (e.target as HTMLInputElement).select()}
-                className="flex-1 bg-canvas border border-hairline rounded-md px-3 py-2 text-xs font-mono text-ink select-all"
-              />
+          <div className="bg-surface-soft border border-hairline rounded-md p-4 mb-6">
+            <div className="flex items-center justify-between mb-3">
+              <div className="flex items-center gap-2">
+                <Copy className="w-4 h-4 text-rausch" />
+                <span className="text-xs font-semibold uppercase tracking-wide text-muted">Mensagem de Boas-vindas</span>
+              </div>
               <button
-                onClick={copiarLink}
-                className={`flex items-center gap-2 px-4 py-2 rounded-md text-sm font-medium transition-all ${copied ? "bg-success text-white" : "bg-rausch text-white hover:bg-rausch-active"}`}
+                onClick={copiarMensagem}
+                className={`flex items-center gap-1.5 px-3 py-1.5 rounded-md text-xs font-medium transition-all ${copied ? "bg-success text-white" : "bg-rausch text-white hover:bg-rausch-active"}`}
               >
-                {copied ? <><Check className="w-4 h-4" /> Copiado</> : <><Copy className="w-4 h-4" /> Copiar</>}
+                {copied ? <><Check className="w-3.5 h-3.5" /> Copiado</> : "Copiar Texto"}
               </button>
             </div>
-          </div>
-          <div className="bg-warning-bg border border-warning-bg rounded-md p-4 mb-6 text-sm text-warning-text">
-            <strong>Atenção:</strong> o link é de uso único. Após o cliente clicar e criar a senha, ele não funcionará mais.
+            <textarea
+              readOnly
+              value={welcomeMessage}
+              className="w-full bg-canvas border border-hairline rounded-md px-3 py-3 text-sm text-ink resize-none h-40 focus:outline-none"
+            />
           </div>
           <div className="flex gap-3">
             <button
               onClick={() => router.push("/app/admin")}
-              className="flex-1 px-6 py-3 bg-rausch text-white rounded-full text-sm font-medium hover:bg-rausch-active transition-all shadow-airbnb"
+              className="flex-1 px-6 py-3 bg-rausch text-white rounded-md text-sm font-medium hover:bg-rausch-active transition-all"
             >
-              Ir para Admin
+              Ir para Painel Admin
             </button>
             <button
-              onClick={() => { setInviteLink(null); setStep(1); resetForm(); }}
-              className="px-6 py-3 border border-hairline text-body rounded-full text-sm font-medium hover:bg-surface-soft transition-all"
+              onClick={() => { setWelcomeMessage(null); setStep(1); resetForm(); }}
+              className="px-6 py-3 border border-hairline text-body rounded-md text-sm font-medium hover:bg-surface-soft transition-all"
             >
               Criar outro cliente
             </button>

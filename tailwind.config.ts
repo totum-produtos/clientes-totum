@@ -129,11 +129,11 @@ const config: Config = {
       },
       borderRadius: {
         none: "0px",
-        xs: "4px",
-        sm: "8px",
-        md: "14px",
-        lg: "20px",
-        xl: "32px",
+        xs: "2px",
+        sm: "2px",
+        md: "4px",
+        lg: "6px",
+        xl: "8px",
         full: "9999px",
       },
       spacing: {

@@ -65,21 +65,21 @@
     @apply border-border;
   }
   body {
-    @apply bg-canvas text-ink font-cereal antialiased;
+    @apply bg-canvas text-ink font-cereal antialiased dark:bg-ink dark:text-white;
   }
   h1, h2, h3, h4, h5, h6 {
-    @apply text-ink font-cereal;
+    @apply text-ink font-cereal dark:text-white;
   }
 }
 
 @layer components {
   /* Airbnb Buttons */
   .btn-primary {
-    @apply bg-rausch text-on-primary font-cereal text-button-md rounded-sm px-6 py-3.5 h-12 font-medium transition-colors hover:bg-rausch-active disabled:bg-rausch-disabled disabled:cursor-not-allowed;
+    @apply bg-rausch text-on-primary font-cereal text-button-sm rounded-sm px-4 py-2 h-10 font-medium transition-colors hover:bg-rausch-active disabled:bg-rausch-disabled disabled:cursor-not-allowed;
   }
 
   .btn-secondary {
-    @apply bg-canvas text-ink font-cereal text-button-md rounded-sm px-6 py-3.5 h-12 font-medium border border-hairline transition-colors hover:bg-surface-soft;
+    @apply bg-canvas text-ink font-cereal text-button-sm rounded-sm px-4 py-2 h-10 font-medium border border-hairline transition-colors hover:bg-surface-soft dark:bg-surface-strong dark:text-white dark:border-border-strong dark:hover:bg-ink;
   }
 
   .btn-tertiary {
@@ -92,7 +92,7 @@
 
   /* Airbnb Inputs */
   .input-field {
-    @apply w-full bg-canvas text-ink font-cereal text-body-md rounded-sm px-3 py-3.5 h-14 border border-hairline placeholder:text-muted-soft focus:outline-none focus:border-ink focus:ring-0 transition-colors;
+    @apply w-full bg-canvas text-ink font-cereal text-body-sm rounded-sm px-3 py-2 h-10 border border-hairline placeholder:text-muted-soft focus:outline-none focus:border-ink focus:ring-0 transition-colors dark:bg-surface-strong dark:text-white dark:border-border-strong dark:focus:border-white;
   }
 
   .input-primary {

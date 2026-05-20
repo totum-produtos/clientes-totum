@@ -38,6 +38,7 @@ interface GlobalContextType {
     tarefas: Tarefa[];
     projetos: Projeto[];
     refreshData: () => Promise<void>;
+    setSpoofedClient: (id: string | null) => void;
 }
 
 const GlobalContext = createContext<GlobalContextType | undefined>(undefined);
@@ -80,23 +81,37 @@ export function GlobalProvider({ children }: { children: React.ReactNode }) {
                     .single();
                 setProfile((profileData as Profile) || null);
 
-                // Buscar cliente vinculado ao usuário
-                const { data: linkData } = await client
-                    .from('portal_client_users')
-                    .select('client_id')
-                    .eq('user_id', user.id)
-                    .maybeSingle();
-
                 let clientId: string | null = null;
-                if (linkData?.client_id) {
+                const role = roleData?.role || 'cliente';
+
+                // Lógica de Spoofing para Master/Admin
+                if (role === 'master' || role === 'admin') {
+                    const spoofedId = localStorage.getItem('totum_spoofed_client_id');
+                    if (spoofedId) {
+                        clientId = spoofedId;
+                    }
+                }
+
+                // Se não tiver spoofing, ou for cliente comum, busca o vínculo
+                if (!clientId && role === 'cliente') {
+                    const { data: linkData } = await client
+                        .from('portal_client_users')
+                        .select('client_id')
+                        .eq('user_id', user.id)
+                        .maybeSingle();
+                    if (linkData?.client_id) {
+                        clientId = linkData.client_id;
+                    }
+                }
+
+                if (clientId) {
                     const { data: pc } = await client
                         .from('portal_clients')
                         .select('id, nome, slug, email_responsavel, status, profile_data')
-                        .eq('id', linkData.client_id)
+                        .eq('id', clientId)
                         .maybeSingle();
 
                     if (pc) {
-                        clientId = pc.id;
                         setClient({
                             id: pc.id,
                             nome: pc.nome,
@@ -105,7 +120,14 @@ export function GlobalProvider({ children }: { children: React.ReactNode }) {
                             status: pc.status || '',
                             profile_data: pc.profile_data as Record<string, unknown> | undefined,
                         });
+                    } else {
+                        setClient(null);
                     }
+                } else {
+                    setClient(null);
+                    setPosts([]);
+                    setTarefas([]);
+                    setProjetos([]);
                 }
 
                 // Buscar dados reais se tiver cliente vinculado
@@ -146,8 +168,17 @@ export function GlobalProvider({ children }: { children: React.ReactNode }) {
         loadData();
     }, []);
 
+    const handleSetSpoofedClient = (id: string | null) => {
+        if (id) {
+            localStorage.setItem('totum_spoofed_client_id', id);
+        } else {
+            localStorage.removeItem('totum_spoofed_client_id');
+        }
+        loadData();
+    };
+
     return (
-        <GlobalContext.Provider value={{ loading, user, profile, client, posts, tarefas, projetos, refreshData: loadData }}>
+        <GlobalContext.Provider value={{ loading, user, profile, client, posts, tarefas, projetos, refreshData: loadData, setSpoofedClient: handleSetSpoofedClient }}>
             {children}
         </GlobalContext.Provider>
     );

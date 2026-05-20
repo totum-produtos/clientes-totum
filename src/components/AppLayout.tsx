@@ -27,6 +27,7 @@ import { createSPASassClient } from "@/lib/supabase/client";
 import { useDarkMode } from "@/lib/hooks/useDarkMode";
 import Image from "next/image";
 import NotificationBell from "./NotificationBell";
+import SpoofingSelector from "./SpoofingSelector";
 
 export default function AppLayout({ children }: { children: React.ReactNode }) {
     const [isSidebarOpen, setSidebarOpen] = useState(false);
@@ -74,6 +75,7 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
             items: [
                 { name: 'Central de Clientes', href: '/app/gestao-clientes', icon: Building2, clientOnly: false },
                 { name: 'Admin', href: '/app/admin', icon: User, clientOnly: false },
+                { name: 'Pendências', href: '/app/admin/pendencias', icon: List, clientOnly: false },
             ]
         }
     ];
@@ -153,6 +155,7 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
                     </button>
 
                     <div className="flex items-center gap-3 ml-auto">
+                        <SpoofingSelector />
                         <NotificationBell />
                         <div className="relative">
                         <button

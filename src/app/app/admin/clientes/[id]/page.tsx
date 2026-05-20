@@ -11,6 +11,7 @@ import {
 import { STEPS, FormState, DEFAULT_FORM_STATE } from "@/lib/cliente-form-constants";
 import { useClienteForm } from "@/hooks/useClienteForm";
 import { ClienteFormSteps } from "@/components/ClienteFormSteps";
+import { useGlobal } from "@/lib/context/GlobalContext";
 
 export default function EditarClientePage() {
   const router = useRouter();
@@ -40,6 +41,8 @@ export default function EditarClientePage() {
   const [driveSaved, setDriveSaved] = useState("");
   const [driveSaving, setDriveSaving] = useState(false);
 
+  const { user } = useGlobal();
+  const isMaster = user?.role === "master" || user?.role === "admin";
   const { form, setForm, update, toggleArray, addPersona, removePersona, updatePersona } = useClienteForm();
 
   useEffect(() => {
@@ -320,10 +323,7 @@ export default function EditarClientePage() {
             ) : (
               <div className="flex items-center gap-2">
                 <button onClick={() => { setEditMode(false); setMessage(""); setError(""); }} className="flex items-center gap-2 px-5 py-2.5 text-body hover:text-ink rounded-md text-sm font-medium transition-colors">
-                  <X className="w-4 h-4" /> Cancelar
-                </button>
-                <button onClick={handleSave} disabled={saving} className="flex items-center gap-2 px-5 py-2.5 bg-success text-white rounded-md text-sm font-medium hover:bg-success-text disabled:opacity-50 transition-all shadow-airbnb">
-                  {saving ? <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" /> : <><Save className="w-4 h-4" /> Salvar</>}
+                  <X className="w-4 h-4" /> Cancelar Edição
                 </button>
               </div>
             )}
@@ -457,16 +457,11 @@ export default function EditarClientePage() {
             <input
               value={driveUrl}
               onChange={e => setDriveUrl(e.target.value)}
+              onBlur={handleSaveDrive}
               placeholder="https://drive.google.com/drive/folders/..."
               className="flex-1 input-field"
             />
-            <button
-              onClick={handleSaveDrive}
-              disabled={driveSaving}
-              className="flex items-center justify-center gap-2 px-4 py-2 bg-rausch text-white rounded-md text-sm font-medium hover:bg-rausch-active disabled:opacity-50 transition-all"
-            >
-              {driveSaving ? <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" /> : <><Save className="w-4 h-4" /> Salvar pasta</>}
-            </button>
+            {driveSaving && <div className="px-4 py-2 flex items-center justify-center"><div className="w-4 h-4 border-2 border-rausch/30 border-t-rausch rounded-full animate-spin" /></div>}
             {driveUrl && (
               <a
                 href={driveUrl}
@@ -544,6 +539,7 @@ export default function EditarClientePage() {
                 step={step}
                 form={form}
                 editMode={editMode}
+                isMaster={isMaster}
                 update={update}
                 toggleArray={toggleArray}
                 addPersona={addPersona}
