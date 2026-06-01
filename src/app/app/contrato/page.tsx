@@ -29,15 +29,20 @@ export default function ContratoPage() {
             setLoading(false);
             return;
         }
-        setLoading(true);
-        const supabase = await createSPASassClient();
-        const { data } = await supabase.getSupabaseClient()
-            .from('tarefas')
-            .select('id, titulo, status, prioridade, data_limite, departamento, descricao')
-            .eq('portal_client_id', client.id)
-            .order('created_at', { ascending: false });
-        setTarefas(data || []);
-        setLoading(false);
+        try {
+            setLoading(true);
+            const supabase = await createSPASassClient();
+            const { data } = await supabase.getSupabaseClient()
+                .from('tarefas')
+                .select('id, titulo, status, prioridade, data_limite, departamento, descricao')
+                .eq('portal_client_id', client.id)
+                .order('created_at', { ascending: false });
+            setTarefas(data || []);
+        } catch (error) {
+            console.error("Critical error fetching tasks:", error);
+        } finally {
+            setLoading(false);
+        }
     }
 
     useEffect(() => {

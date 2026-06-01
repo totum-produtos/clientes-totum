@@ -97,25 +97,30 @@ export default function FeedPostagensPage() {
         setLoading(false);
         return;
       }
-      setLoading(true);
-      const supabase = await createSPASassClient();
-      const sb = supabase.getSupabaseClient();
+      try {
+        setLoading(true);
+        const supabase = await createSPASassClient();
+        const sb = supabase.getSupabaseClient();
 
-      const inicio = startOfMonth(mesAtual).toISOString();
-      const fim = endOfMonth(mesAtual).toISOString();
+        const inicio = startOfMonth(mesAtual).toISOString();
+        const fim = endOfMonth(mesAtual).toISOString();
 
-      const { data, error } = await sb
-        .from('wanda_posts')
-        .select('id, subject, tipo, published_at, views, likes, engagement_rate, conversion_rate, created_at')
-        .eq('portal_client_id', client.id)
-        .gte('published_at', inicio)
-        .lte('published_at', fim)
-        .order('published_at', { ascending: false });
+        const { data, error } = await sb
+          .from('wanda_posts')
+          .select('id, subject, tipo, published_at, views, likes, engagement_rate, conversion_rate, created_at')
+          .eq('portal_client_id', client.id)
+          .gte('published_at', inicio)
+          .lte('published_at', fim)
+          .order('published_at', { ascending: false });
 
-      if (!error && data) {
-        setPosts(data);
+        if (!error && data) {
+          setPosts(data);
+        }
+      } catch (error) {
+        console.error("Critical error fetching feed posts:", error);
+      } finally {
+        setLoading(false);
       }
-      setLoading(false);
     }
     fetchPosts();
   }, [client, mesAtual]);

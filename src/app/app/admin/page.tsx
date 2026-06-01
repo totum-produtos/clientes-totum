@@ -2,7 +2,7 @@
 import React, { useEffect, useState } from 'react';
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
 import { createSPASassClient } from '@/lib/supabase/client';
-import { Plus, Link2, Users, Building2, Clock, CheckCircle, XCircle, Mail, Loader2, Edit3 } from 'lucide-react';
+import { Plus, Link2, Users, Building2, Clock, CheckCircle, XCircle, Mail, Loader2, Edit3, Power, PowerOff } from 'lucide-react';
 import Link from 'next/link';
 import type { Json } from '@/lib/types';
 
@@ -69,6 +69,7 @@ export default function AdminPage() {
 
     const [newClient, setNewClient] = useState({ nome: '', slug: '', email_responsavel: '' });
     const [sendingInvite, setSendingInvite] = useState<string | null>(null);
+    const [togglingId, setTogglingId] = useState<string | null>(null);
 
     async function fetchData() {
         const supabase = await createSPASassClient();
@@ -134,6 +135,25 @@ export default function AdminPage() {
             setMessage('Usuário vinculado com sucesso!');
             setLinkOpen(false);
             fetchData();
+        }
+    }
+
+    async function handleToggleStatus(client: PortalClient) {
+        setTogglingId(client.id);
+        try {
+            const novoStatus = client.status === 'inactive' ? 'active' : 'inactive';
+            const supabase = await createSPASassClient();
+            const { error: toggleError } = await supabase.getSupabaseClient()
+                .from('portal_clients')
+                .update({ status: novoStatus })
+                .eq('id', client.id);
+            if (toggleError) throw toggleError;
+            setMessage(`Cliente ${novoStatus === 'active' ? 'ativado' : 'inativado'} com sucesso!`);
+            fetchData();
+        } catch (err: unknown) {
+            setMessage('Erro ao alterar status: ' + errorMessage(err));
+        } finally {
+            setTogglingId(null);
         }
     }
 
@@ -395,6 +415,21 @@ export default function AdminPage() {
                                             <Mail className="h-3 w-3" />
                                         )}
                                         Enviar convite
+                                    </button>
+                                    <button
+                                        onClick={() => handleToggleStatus(c)}
+                                        disabled={togglingId === c.id}
+                                        className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium border transition-colors disabled:opacity-50 ${c.status === 'active' ? 'text-danger-text hover:bg-danger-bg' : 'text-success-text hover:bg-success-bg'}`}
+                                        title={c.status === 'active' ? 'Inativar cliente' : 'Ativar cliente'}
+                                    >
+                                        {togglingId === c.id ? (
+                                            <Loader2 className="h-3 w-3 animate-spin" />
+                                        ) : c.status === 'active' ? (
+                                            <PowerOff className="h-3 w-3" />
+                                        ) : (
+                                            <Power className="h-3 w-3" />
+                                        )}
+                                        {c.status === 'active' ? 'Inativar' : 'Ativar'}
                                     </button>
                                     <span className={`text-xs px-2 py-1 rounded-full ${c.status === 'active' ? 'bg-success-bg text-success-text' : 'bg-surface-strong text-ink'}`}>
                                         {c.status}

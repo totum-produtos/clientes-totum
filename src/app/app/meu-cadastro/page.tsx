@@ -228,27 +228,42 @@ export default function MeuCadastroPage() {
   }, [client]);
 
   async function loadClientData() {
-    const supabase = await createSPASassClient();
-    const { data } = await supabase.getSupabaseClient()
-      .from("portal_clients")
-      .select("*")
-      .eq("id", client!.id)
-      .single();
-    if (data) {
-      setClientData(data);
-    } else {
+    try {
+      const supabase = await createSPASassClient();
+      const { data, error } = await supabase.getSupabaseClient()
+        .from("portal_clients")
+        .select("*")
+        .eq("id", client!.id)
+        .single();
+      
+      if (error) throw error;
+      
+      if (data) {
+        setClientData(data);
+      } else {
+        setClientData({ _error: true });
+      }
+    } catch (error) {
+      console.error("Critical error loading client data:", error);
       setClientData({ _error: true });
     }
   }
 
   async function loadPendingCount() {
-    const supabase = await createSPASassClient();
-    const { count } = await supabase.getSupabaseClient()
-      .from("client_profile_changes")
-      .select("*", { count: "exact", head: true })
-      .eq("portal_client_id", client!.id)
-      .eq("status", "pendente");
-    setPendingCount(count || 0);
+    try {
+      const supabase = await createSPASassClient();
+      const { count, error } = await supabase.getSupabaseClient()
+        .from("client_profile_changes")
+        .select("*", { count: "exact", head: true })
+        .eq("portal_client_id", client!.id)
+        .eq("status", "pendente");
+      
+      if (error) throw error;
+      setPendingCount(count || 0);
+    } catch (error) {
+      console.error("Critical error loading pending count:", error);
+      setPendingCount(0);
+    }
   }
 
   const toggleSection = (id: string) => {

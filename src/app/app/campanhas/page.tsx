@@ -55,27 +55,31 @@ export default function CampanhasPage() {
                 setLoading(false);
                 return;
             }
-            setLoading(true);
-            const supabase = await createSPASassClient();
-            const sb = supabase.getSupabaseClient();
+            try {
+                setLoading(true);
+                const supabase = await createSPASassClient();
+                const sb = supabase.getSupabaseClient();
 
-            // Posts orgânicos
-            const { data: postsData } = await sb
-                .from('wanda_posts')
-                .select('id, subject, tipo, views, likes, engagement_rate, conversion_rate, published_at')
-                .eq('portal_client_id', client.id)
-                .order('published_at', { ascending: false });
-            setPosts(postsData || []);
+                // Posts orgânicos
+                const { data: postsData } = await sb
+                    .from('wanda_posts')
+                    .select('id, subject, tipo, views, likes, engagement_rate, conversion_rate, published_at')
+                    .eq('portal_client_id', client.id)
+                    .order('published_at', { ascending: false });
+                setPosts(postsData || []);
 
-            // Campanhas pagas
-            const { data: campaignsData } = await sb
-                .from('ad_campaigns')
-                .select('*')
-                .eq('portal_client_id', client.id)
-                .order('spend', { ascending: false });
-            setCampaigns(campaignsData || []);
-
-            setLoading(false);
+                // Campanhas pagas
+                const { data: campaignsData } = await sb
+                    .from('ad_campaigns')
+                    .select('*')
+                    .eq('portal_client_id', client.id)
+                    .order('spend', { ascending: false });
+                setCampaigns(campaignsData || []);
+            } catch (error) {
+                console.error("Critical error fetching campaigns data:", error);
+            } finally {
+                setLoading(false);
+            }
         }
         fetchData();
     }, [client]);

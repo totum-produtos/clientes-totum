@@ -25,19 +25,27 @@ export default function DrivePage() {
         setLoading(false);
         return;
       }
-      setLoading(true);
-      const supabase = await createSPASassClient();
-      const { data } = await supabase.getSupabaseClient()
-        .from('portal_clients')
-        .select('drive_folder_id, drive_folder_cliente_id')
-        .eq('id', client.id)
-        .single();
+      try {
+        setLoading(true);
+        const supabase = await createSPASassClient();
+        const { data } = await supabase.getSupabaseClient()
+          .from('portal_clients')
+          .select('drive_folder_id, drive_folder_cliente_id')
+          .eq('id', client.id)
+          .single();
 
-      if (data?.drive_folder_id) {
-        setFolderId(data.drive_folder_id);
-        setDriveUrl(`https://drive.google.com/drive/folders/${data.drive_folder_id}`);
+        if (data?.drive_folder_cliente_id) {
+          setFolderId(data.drive_folder_cliente_id);
+          setDriveUrl(`https://drive.google.com/drive/folders/${data.drive_folder_cliente_id}`);
+        } else if (data?.drive_folder_id) {
+          setFolderId(data.drive_folder_id);
+          setDriveUrl(`https://drive.google.com/drive/folders/${data.drive_folder_id}`);
+        }
+      } catch (error) {
+        console.error("Critical error loading drive config:", error);
+      } finally {
+        setLoading(false);
       }
-      setLoading(false);
     }
     loadDriveConfig();
   }, [client]);

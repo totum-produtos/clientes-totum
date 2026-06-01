@@ -44,32 +44,39 @@ function CalendarioContent() {
       setLoading(false);
       return;
     }
-    setLoading(true);
-    const supabase = await createSPASassClient();
-    const db = supabase.getSupabaseClient();
+    
+    try {
+      setLoading(true);
+      const supabase = await createSPASassClient();
+      const db = supabase.getSupabaseClient();
 
-    // If browsing via Central de Conteúdos, also fetch client name
-    if (clientIdParam && clientIdParam !== client?.id) {
-      const { data: clientInfo } = await db
-        .from("portal_clients")
-        .select("nome")
-        .eq("id", clientIdParam)
-        .single();
-      if (clientInfo) setOverrideClientName(clientInfo.nome);
-    }
+      // If browsing via Central de Conteúdos, also fetch client name
+      if (clientIdParam && clientIdParam !== client?.id) {
+        const { data: clientInfo } = await db
+          .from("portal_clients")
+          .select("nome")
+          .eq("id", clientIdParam)
+          .single();
+        if (clientInfo) setOverrideClientName(clientInfo.nome);
+      }
 
-    const { data, error } = await db
-      .from("wanda_posts")
-      .select("id, subject, tipo, published_at, views, likes, engagement_rate")
-      .eq("portal_client_id", targetClientId)
-      .order("published_at", { ascending: false });
-    if (error) {
-      showError("Erro ao carregar posts");
-      console.error("Erro ao carregar posts:", error);
-    } else {
-      setPosts(data || []);
+      const { data, error } = await db
+        .from("wanda_posts")
+        .select("id, subject, tipo, published_at, views, likes, engagement_rate")
+        .eq("portal_client_id", targetClientId)
+        .order("published_at", { ascending: false });
+      if (error) {
+        showError("Erro ao carregar posts");
+        console.error("Erro ao carregar posts:", error);
+      } else {
+        setPosts(data || []);
+      }
+    } catch (error) {
+      console.error("Critical error fetching posts:", error);
+      showError("Erro inesperado ao carregar calendário.");
+    } finally {
+      setLoading(false);
     }
-    setLoading(false);
   }
 
   useEffect(() => {
