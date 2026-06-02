@@ -55,108 +55,81 @@ export function GlobalProvider({ children }: { children: React.ReactNode }) {
     async function loadData() {
         try {
             const supabase = await createSPASassClient();
-            const client = supabase.getSupabaseClient();
+            const sb = supabase.getSupabaseClient();
 
-            const { data: { user } } = await client.auth.getUser();
-            if (user) {
-                // Buscar role do usuário
-                const { data: roleData } = await client
-                    .from('user_roles')
-                    .select('role')
-                    .eq('user_id', user.id)
-                    .single();
+            // FASE A — auth (1 roundtrip)
+            const { data: { user } } = await sb.auth.getUser();
+            if (!user) throw new Error('User not found');
 
-                setUser({
-                    email: user.email!,
-                    id: user.id,
-                    registered_at: new Date(user.created_at),
-                    role: roleData?.role || 'cliente'
-                });
+            // FASE B — role + profile + vínculo de cliente em paralelo (1 roundtrip combinado)
+            const [roleRes, profileRes, linkRes] = await Promise.all([
+                sb.from('user_roles').select('role').eq('user_id', user.id).single(),
+                sb.from('profiles')
+                  .select('id, display_name, avatar_url, bio, telefone, cargo, timezone, idioma, updated_at')
+                  .eq('id', user.id).single(),
+                sb.from('portal_client_users').select('client_id').eq('user_id', user.id).maybeSingle(),
+            ]);
 
-                // Buscar perfil do usuário
-                const { data: profileData } = await client
-                    .from('profiles')
-                    .select('id, display_name, avatar_url, bio, telefone, cargo, timezone, idioma, updated_at')
-                    .eq('id', user.id)
-                    .single();
-                setProfile((profileData as Profile) || null);
+            const role = roleRes.data?.role || 'cliente';
+            setUser({
+                email: user.email!,
+                id: user.id,
+                registered_at: new Date(user.created_at),
+                role,
+            });
+            setProfile((profileRes.data as Profile) || null);
 
-                let clientId: string | null = null;
-                const role = roleData?.role || 'cliente';
-
-                // Lógica de Spoofing para Master/Admin
-                if (role === 'master' || role === 'admin') {
-                    const spoofedId = localStorage.getItem('totum_spoofed_client_id');
-                    if (spoofedId) {
-                        clientId = spoofedId;
-                    }
-                }
-
-                // Se não tiver spoofing, ou for cliente comum, busca o vínculo
-                if (!clientId && role === 'cliente') {
-                    const { data: linkData } = await client
-                        .from('portal_client_users')
-                        .select('client_id')
-                        .eq('user_id', user.id)
-                        .maybeSingle();
-                    if (linkData?.client_id) {
-                        clientId = linkData.client_id;
-                    }
-                }
-
-                if (clientId) {
-                    const { data: pc } = await client
-                        .from('portal_clients')
-                        .select('id, nome, slug, email_responsavel, status, profile_data')
-                        .eq('id', clientId)
-                        .maybeSingle();
-
-                    if (pc) {
-                        setClient({
-                            id: pc.id,
-                            nome: pc.nome,
-                            slug: pc.slug,
-                            email_responsavel: pc.email_responsavel || '',
-                            status: pc.status || '',
-                            profile_data: pc.profile_data as Record<string, unknown> | undefined,
-                        });
-                    } else {
-                        setClient(null);
-                    }
-                } else {
-                    setClient(null);
-                    setPosts([]);
-                    setTarefas([]);
-                    setProjetos([]);
-                }
-
-                // Buscar dados reais se tiver cliente vinculado
-                if (clientId) {
-                    const { data: postsData } = await client
-                        .from('wanda_posts')
-                        .select('id, subject, tipo, published_at, views, likes, engagement_rate')
-                        .eq('portal_client_id', clientId)
-                        .order('published_at', { ascending: false })
-                        .limit(10);
-                    setPosts((postsData || []) as WandaPost[]);
-
-                    const { data: tarefasData } = await client
-                        .from('tarefas')
-                        .select('id, titulo, status, prioridade, data_limite, departamento')
-                        .eq('portal_client_id', clientId)
-                        .order('created_at', { ascending: false })
-                        .limit(10);
-                    setTarefas((tarefasData || []) as Tarefa[]);
-
-                    const { data: projetosData } = await client
-                        .from('projetos')
-                        .select('id, nome, descricao, cor')
-                        .eq('portal_client_id', clientId);
-                    setProjetos((projetosData || []) as Projeto[]);
-                }
-            } else {
-                throw new Error('User not found');
+            // Spoofing master/admin tem precedência sobre vínculo real
+            let clientId: string | null = null;
+            if (role === 'master' || role === 'admin') {
+                clientId = localStorage.getItem('totum_spoofed_client_id');
             }
+            if (!clientId && role === 'cliente') {
+                clientId = linkRes.data?.client_id ?? null;
+            }
+
+            if (!clientId) {
+                setClient(null);
+                setPosts([]);
+                setTarefas([]);
+                setProjetos([]);
+                return;
+            }
+
+            // FASE C — portal_client + posts + tarefas + projetos em paralelo (1 roundtrip combinado)
+            const [pcRes, postsRes, tarefasRes, projetosRes] = await Promise.all([
+                sb.from('portal_clients')
+                  .select('id, nome, slug, email_responsavel, status, profile_data')
+                  .eq('id', clientId).maybeSingle(),
+                sb.from('wanda_posts')
+                  .select('id, subject, tipo, published_at, views, likes, engagement_rate')
+                  .eq('portal_client_id', clientId)
+                  .order('published_at', { ascending: false }).limit(10),
+                sb.from('tarefas')
+                  .select('id, titulo, status, prioridade, data_limite, departamento')
+                  .eq('portal_client_id', clientId)
+                  .order('created_at', { ascending: false }).limit(10),
+                sb.from('projetos')
+                  .select('id, nome, descricao, cor')
+                  .eq('portal_client_id', clientId),
+            ]);
+
+            const pc = pcRes.data;
+            if (pc) {
+                setClient({
+                    id: pc.id,
+                    nome: pc.nome,
+                    slug: pc.slug,
+                    email_responsavel: pc.email_responsavel || '',
+                    status: pc.status || '',
+                    profile_data: pc.profile_data as Record<string, unknown> | undefined,
+                });
+            } else {
+                setClient(null);
+            }
+            setPosts((postsRes.data || []) as WandaPost[]);
+            setTarefas((tarefasRes.data || []) as Tarefa[]);
+            setProjetos((projetosRes.data || []) as Projeto[]);
         } catch (error) {
             console.error('Error loading data:', error);
         } finally {
