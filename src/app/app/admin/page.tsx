@@ -2,7 +2,7 @@
 import React, { useEffect, useState } from 'react';
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
 import { createSPASassClient } from '@/lib/supabase/client';
-import { Plus, Link2, Users, Building2, Clock, CheckCircle, XCircle, Mail, Loader2, Edit3, Power, PowerOff } from 'lucide-react';
+import { Plus, Link2, Users, Building2, Clock, CheckCircle, XCircle, Mail, Loader2, Edit3, Power, PowerOff, Send, Copy, Check } from 'lucide-react';
 import Link from 'next/link';
 import type { Json } from '@/lib/types';
 
@@ -70,6 +70,54 @@ export default function AdminPage() {
     const [newClient, setNewClient] = useState({ nome: '', slug: '', email_responsavel: '' });
     const [sendingInvite, setSendingInvite] = useState<string | null>(null);
     const [togglingId, setTogglingId] = useState<string | null>(null);
+
+    // Geração de link de auto-onboarding
+    const [onboardingOpen, setOnboardingOpen] = useState(false);
+    const [onboardingEmail, setOnboardingEmail] = useState('');
+    const [onboardingNome, setOnboardingNome] = useState('');
+    const [onboardingLoading, setOnboardingLoading] = useState(false);
+    const [onboardingLink, setOnboardingLink] = useState<string | null>(null);
+    const [onboardingExpiresAt, setOnboardingExpiresAt] = useState<string | null>(null);
+    const [onboardingCopied, setOnboardingCopied] = useState(false);
+    const [onboardingError, setOnboardingError] = useState('');
+
+    async function gerarLinkOnboarding(e: React.FormEvent) {
+        e.preventDefault();
+        setOnboardingLoading(true);
+        setOnboardingError('');
+        setOnboardingLink(null);
+        try {
+            const res = await fetch('/api/admin/onboarding/criar-convite', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ email: onboardingEmail.trim(), nome_pre: onboardingNome.trim() }),
+            });
+            const data = await res.json();
+            if (!res.ok || !data.success) throw new Error(data.error || 'Falha ao gerar link');
+            setOnboardingLink(data.url);
+            setOnboardingExpiresAt(data.expires_at);
+        } catch (err) {
+            setOnboardingError(err instanceof Error ? err.message : 'Erro desconhecido');
+        } finally {
+            setOnboardingLoading(false);
+        }
+    }
+
+    async function copiarLinkOnboarding() {
+        if (!onboardingLink) return;
+        await navigator.clipboard.writeText(onboardingLink);
+        setOnboardingCopied(true);
+        setTimeout(() => setOnboardingCopied(false), 1500);
+    }
+
+    function resetOnboarding() {
+        setOnboardingOpen(false);
+        setOnboardingEmail('');
+        setOnboardingNome('');
+        setOnboardingLink(null);
+        setOnboardingExpiresAt(null);
+        setOnboardingError('');
+    }
 
     async function fetchData() {
         const supabase = await createSPASassClient();
@@ -370,11 +418,56 @@ export default function AdminPage() {
                         <Building2 className="h-5 w-5 text-rausch" />
                         Clientes do portal ({clients.length})
                     </CardTitle>
-                    <button onClick={() => setFormOpen(!formOpen)} className="btn-primary px-3 py-1.5 rounded-lg text-sm flex items-center gap-1">
-                        <Plus className="h-4 w-4" /> Novo cliente
-                    </button>
+                    <div className="flex items-center gap-2">
+                        <button onClick={() => setOnboardingOpen(true)} className="px-3 py-1.5 rounded-lg text-sm flex items-center gap-1 border border-rausch text-rausch hover:bg-rausch hover:text-white transition-colors">
+                            <Send className="h-4 w-4" /> Gerar link de convite
+                        </button>
+                        <button onClick={() => setFormOpen(!formOpen)} className="btn-primary px-3 py-1.5 rounded-lg text-sm flex items-center gap-1">
+                            <Plus className="h-4 w-4" /> Novo cliente
+                        </button>
+                    </div>
                 </CardHeader>
                 <CardContent>
+                    {onboardingOpen && (
+                        <div className="mb-4 p-4 bg-surface-soft border border-rausch/30 rounded-lg space-y-3">
+                            <div className="flex items-center justify-between">
+                                <h3 className="font-medium text-sm flex items-center gap-2"><Send className="h-4 w-4 text-rausch" /> Gerar link de auto-cadastro</h3>
+                                <button type="button" onClick={resetOnboarding} className="text-xs text-muted hover:text-ink">Fechar</button>
+                            </div>
+                            <p className="text-xs text-muted">O cliente recebe o link, preenche o briefing completo e ao finalizar é criado automaticamente no portal. Link único, expira em 7 dias.</p>
+                            {!onboardingLink ? (
+                                <form onSubmit={gerarLinkOnboarding} className="space-y-3">
+                                    <input required type="email" placeholder="Email do cliente" value={onboardingEmail} onChange={e => setOnboardingEmail(e.target.value)} className="w-full px-3 py-2 border rounded-none text-sm" />
+                                    <input placeholder="Nome do cliente (opcional, pré-preenche o formulário)" value={onboardingNome} onChange={e => setOnboardingNome(e.target.value)} className="w-full px-3 py-2 border rounded-none text-sm" />
+                                    {onboardingError && <p className="text-xs text-danger-text">{onboardingError}</p>}
+                                    <div className="flex gap-2">
+                                        <button type="submit" disabled={onboardingLoading} className="btn-primary px-4 py-2 rounded-lg text-sm flex items-center gap-1.5 disabled:opacity-50">
+                                            {onboardingLoading ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Send className="h-3.5 w-3.5" />}
+                                            Gerar link
+                                        </button>
+                                        <button type="button" onClick={resetOnboarding} className="px-4 py-2 rounded-lg text-sm border">Cancelar</button>
+                                    </div>
+                                </form>
+                            ) : (
+                                <div className="space-y-3">
+                                    <div className="bg-canvas border border-hairline rounded-md p-3">
+                                        <p className="text-xs text-muted mb-1">Envie este link ao cliente (WhatsApp / email):</p>
+                                        <div className="flex items-center gap-2">
+                                            <code className="flex-1 text-xs font-mono text-ink break-all px-2 py-1.5 bg-surface-soft rounded">{onboardingLink}</code>
+                                            <button onClick={copiarLinkOnboarding} className={`flex items-center gap-1 px-3 py-1.5 rounded-md text-xs font-medium ${onboardingCopied ? 'bg-success text-white' : 'bg-rausch text-white hover:bg-rausch-active'}`}>
+                                                {onboardingCopied ? <Check className="h-3 w-3" /> : <Copy className="h-3 w-3" />}
+                                                {onboardingCopied ? 'Copiado' : 'Copiar'}
+                                            </button>
+                                        </div>
+                                    </div>
+                                    {onboardingExpiresAt && (
+                                        <p className="text-xs text-muted">Expira em {new Date(onboardingExpiresAt).toLocaleString('pt-BR')}</p>
+                                    )}
+                                    <button onClick={resetOnboarding} className="text-xs text-rausch hover:underline">Gerar outro link</button>
+                                </div>
+                            )}
+                        </div>
+                    )}
                     {formOpen && (
                         <form onSubmit={handleCreateClient} className="mb-4 p-4 bg-surface-soft rounded-lg space-y-3">
                             <h3 className="font-medium text-sm">Novo cliente</h3>
