@@ -1,5 +1,5 @@
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.49.4'
-import { corsHeaders } from '../_shared/cors.ts'
+import { corsHeadersFor } from '../_shared/cors.ts'
 
 // Edge Function: send-invite
 // Envia um convite por email para um cliente criar conta no portal
@@ -328,6 +328,7 @@ const EMAIL_TEMPLATE = `<!DOCTYPE html>
 o docido`
 
 Deno.serve(async (req) => {
+  const corsHeaders = corsHeadersFor(req.headers.get('origin'))
   if (req.method === 'OPTIONS') {
     return new Response('ok', { headers: corsHeaders })
   }
