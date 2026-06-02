@@ -1,5 +1,5 @@
-import { AnimatedSignIn } from '@/components/ui/sign-in';
+import { redirect } from "next/navigation";
 
 export default function Home() {
-  return <AnimatedSignIn />;
+  redirect("/auth/login");
 }
