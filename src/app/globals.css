@@ -90,6 +90,28 @@
     @apply bg-rausch text-on-primary font-cereal text-button-sm rounded-full px-5 py-2.5 font-medium transition-colors hover:bg-rausch-active;
   }
 
+  /* Ghost: ação secundária sem fundo — Cancelar, Voltar, ícone-only */
+  .btn-ghost {
+    @apply inline-flex items-center gap-2 text-body hover:text-ink hover:bg-surface-soft rounded-md px-3 py-2 text-sm font-medium transition-colors disabled:opacity-50 disabled:pointer-events-none;
+  }
+
+  /* Danger: ação destrutiva. Vermelho preenchido. */
+  .btn-danger {
+    @apply inline-flex items-center justify-center gap-2 bg-danger text-white rounded-md px-4 py-2 text-sm font-medium transition-colors hover:bg-danger/90 disabled:opacity-50 disabled:cursor-not-allowed;
+  }
+
+  /* Chip: pequeno botão de ação dentro de listas/cards.
+     Usa cor neutra; combine com bg-* + text-* utilitários
+     pra variar (success, warning, danger). */
+  .btn-chip {
+    @apply inline-flex items-center gap-1.5 px-3 py-1.5 rounded-md text-xs font-medium border border-hairline bg-canvas text-body hover:bg-surface-soft transition-colors disabled:opacity-50;
+  }
+
+  /* Botão só com ícone (40x40). Para barras de ações. */
+  .btn-icon {
+    @apply inline-flex items-center justify-center w-10 h-10 rounded-md text-body hover:bg-surface-soft hover:text-ink transition-colors disabled:opacity-50;
+  }
+
   /* Airbnb Inputs */
   .input-field {
     @apply w-full bg-canvas text-ink font-cereal text-body-sm rounded-sm px-3 py-2 h-10 border border-hairline placeholder:text-muted-soft focus:outline-none focus:border-ink focus:ring-0 transition-colors dark:bg-surface-strong dark:text-white dark:border-border-strong dark:focus:border-white;

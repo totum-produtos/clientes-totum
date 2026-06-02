@@ -483,7 +483,7 @@ export default function MeuCadastroPage() {
                 </button>
               ) : (
                 <div className="flex items-center gap-2">
-                  <button onClick={() => { setEditMode(false); setMessage(""); }} className="flex items-center gap-2 px-4 py-2 text-body hover:text-ink rounded-md text-sm font-medium transition-colors">
+                  <button onClick={() => { setEditMode(false); setMessage(""); }} className="btn-ghost">
                     <X className="w-4 h-4" /> Cancelar
                   </button>
                   <button onClick={handleSubmitChanges} disabled={loading} className="flex items-center gap-2 px-4 py-2 bg-success text-white rounded-md text-sm font-medium hover:bg-success-text disabled:opacity-50 transition-colors">
@@ -556,7 +556,7 @@ export default function MeuCadastroPage() {
           <div className="w-full max-w-5xl flex items-center justify-between px-6">
             <span className="text-sm font-medium text-muted hidden md:block">Você possui alterações não salvas no briefing.</span>
             <div className="flex items-center gap-3 w-full md:w-auto justify-end">
-              <button onClick={() => { setEditMode(false); setMessage(""); }} className="flex items-center justify-center gap-2 px-4 py-2 text-body hover:text-ink rounded-md text-sm font-medium transition-colors">
+              <button onClick={() => { setEditMode(false); setMessage(""); }} className="btn-ghost justify-center">
                 <X className="w-4 h-4" /> Cancelar
               </button>
               <button onClick={handleSubmitChanges} disabled={loading} className="flex items-center justify-center gap-2 px-6 py-2.5 bg-success text-white rounded-md text-sm font-medium hover:bg-success-text shadow-sm disabled:opacity-50 transition-colors">
