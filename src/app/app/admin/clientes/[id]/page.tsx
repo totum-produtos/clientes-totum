@@ -10,7 +10,7 @@ import {
 } from "lucide-react";
 import { STEPS, FormState, DEFAULT_FORM_STATE } from "@/lib/cliente-form-constants";
 import { useClienteForm } from "@/hooks/useClienteForm";
-import { ClienteFormSteps } from "@/components/ClienteFormSteps";
+import { ClienteFormSteps, validateStep } from "@/components/ClienteFormSteps";
 import { useGlobal } from "@/lib/context/GlobalContext";
 
 export default function EditarClientePage() {
@@ -185,7 +185,25 @@ export default function EditarClientePage() {
     }
   };
 
+  const goNextStep = () => {
+    const { ok, missing } = validateStep(step, form);
+    if (!ok) {
+      setError(`Preencha os campos obrigatórios: ${missing.join(", ")}.`);
+      return;
+    }
+    setError("");
+    setStep(s => Math.min(STEPS.length, s + 1));
+  };
+
   const handleSave = async () => {
+    for (let s = 1; s <= STEPS.length; s++) {
+      const { ok, missing } = validateStep(s, form);
+      if (!ok) {
+        setStep(s);
+        setError(`Etapa ${s}: preencha os campos obrigatórios: ${missing.join(", ")}.`);
+        return;
+      }
+    }
     setSaving(true); setError(""); setMessage("");
     try {
       const supabase = await createSPASassClient();
@@ -510,7 +528,7 @@ export default function EditarClientePage() {
                   <ChevronRight className="w-4 h-4 rotate-180" /> Voltar
                 </button>
                 {step < STEPS.length ? (
-                  <button type="button" onClick={() => setStep(s => Math.min(STEPS.length, s + 1))} className="flex items-center gap-2 px-8 py-3 bg-rausch text-white rounded-full text-sm font-medium hover:bg-rausch-active transition-all shadow-airbnb">
+                  <button type="button" onClick={editMode ? goNextStep : () => setStep(s => Math.min(STEPS.length, s + 1))} className="flex items-center gap-2 px-8 py-3 bg-rausch text-white rounded-full text-sm font-medium hover:bg-rausch-active transition-all shadow-airbnb">
                     Próximo <ChevronRight className="w-4 h-4" />
                   </button>
                 ) : (

@@ -5,7 +5,7 @@ import { useRouter } from "next/navigation";
 import { Check, ChevronRight, Copy, Link2 } from "lucide-react";
 import { STEPS } from "@/lib/cliente-form-constants";
 import { useClienteForm } from "@/hooks/useClienteForm";
-import { ClienteFormSteps } from "@/components/ClienteFormSteps";
+import { ClienteFormSteps, validateStep } from "@/components/ClienteFormSteps";
 
 export default function NovoClientePage() {
   const router = useRouter();
@@ -19,7 +19,25 @@ export default function NovoClientePage() {
 
   const StepIcon = STEPS[step - 1].icon;
 
+  const goNext = () => {
+    const { ok, missing } = validateStep(step, form);
+    if (!ok) {
+      setError(`Preencha os campos obrigatórios: ${missing.join(", ")}.`);
+      return;
+    }
+    setError("");
+    setStep(s => Math.min(STEPS.length, s + 1));
+  };
+
   const handleSubmit = async () => {
+    for (let s = 1; s <= STEPS.length; s++) {
+      const { ok, missing } = validateStep(s, form);
+      if (!ok) {
+        setStep(s);
+        setError(`Etapa ${s}: preencha os campos obrigatórios: ${missing.join(", ")}.`);
+        return;
+      }
+    }
     setLoading(true);
     setError("");
     try {
@@ -224,7 +242,7 @@ export default function NovoClientePage() {
                   <ChevronRight className="w-4 h-4 rotate-180" /> Voltar
                 </button>
                 {step < STEPS.length ? (
-                  <button type="button" onClick={() => setStep(s => Math.min(STEPS.length, s + 1))} className="flex items-center gap-2 px-8 py-3 bg-rausch text-white rounded-full text-sm font-medium hover:bg-rausch-active transition-all shadow-airbnb">
+                  <button type="button" onClick={goNext} className="flex items-center gap-2 px-8 py-3 bg-rausch text-white rounded-full text-sm font-medium hover:bg-rausch-active transition-all shadow-airbnb">
                     Próximo <ChevronRight className="w-4 h-4" />
                   </button>
                 ) : (

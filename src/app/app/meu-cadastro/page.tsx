@@ -55,12 +55,12 @@ const SECTIONS: BriefingSection[] = [
     icon: Briefcase,
     fields: [
       { key: "descricao_negocio", label: "O que a empresa faz?", type: "textarea", source: "column" },
-      { key: "modelo_negocio", label: "Qual o modelo de negócio?", type: "textarea", source: "profile" },
-      { key: "diferencial_competitivo", label: "Diferencial frente aos concorrentes", type: "textarea", source: "profile" },
-      { key: "produto_mais_forte", label: "Produto ou serviço mais forte", type: "text", source: "profile" },
+      { key: "modelo_negocio", label: "Qual o modelo de negócio?", type: "textarea", source: "profile", required: true },
+      { key: "diferencial_competitivo", label: "Diferencial frente aos concorrentes", type: "textarea", source: "profile", required: true },
+      { key: "produto_mais_forte", label: "Produto ou serviço mais forte", type: "text", source: "profile", required: true },
       { key: "produto_desejado_forte", label: "Produto que gostaria que fosse o mais forte", type: "text", source: "profile" },
       { key: "produto_mais_fraco", label: "Produto ou serviço mais fraco", type: "text", source: "profile" },
-      { key: "ticket_medio_atual", label: "Ticket médio Atual", type: "text", source: "profile" },
+      { key: "ticket_medio_atual", label: "Ticket médio Atual", type: "text", source: "profile", required: true },
       { key: "ticket_medio_ideal", label: "Ticket médio Ideal", type: "text", source: "profile" },
     ],
   },
@@ -69,8 +69,8 @@ const SECTIONS: BriefingSection[] = [
     label: "Objetivos e Metas",
     icon: TrendingUp,
     fields: [
-      { key: "maior_objetivo_mkt", label: "Maior objetivo com o marketing digital hoje", type: "textarea", source: "profile" },
-      { key: "principal_meta", label: "Principal meta", type: "textarea", source: "profile" },
+      { key: "maior_objetivo_mkt", label: "Maior objetivo com o marketing digital hoje", type: "textarea", source: "profile", required: true },
+      { key: "principal_meta", label: "Principal meta", type: "textarea", source: "profile", required: true },
       { key: "meta_mensuravel", label: "É possível mensurar a meta? Como?", type: "textarea", source: "profile" },
     ],
   },
@@ -79,12 +79,12 @@ const SECTIONS: BriefingSection[] = [
     label: "Público-Alvo",
     icon: Target,
     fields: [
-      { key: "porcentagem_homens", label: "Porcentagem de Homens", type: "text", source: "profile" },
-      { key: "porcentagem_mulheres", label: "Porcentagem de Mulheres", type: "text", source: "profile" },
-      { key: "abrangencia_geografica", label: "Abrangência (Regional, nacional, internacional...)", type: "text", source: "profile" },
+      { key: "porcentagem_homens", label: "Porcentagem de Homens", type: "text", source: "profile", required: true },
+      { key: "porcentagem_mulheres", label: "Porcentagem de Mulheres", type: "text", source: "profile", required: true },
+      { key: "abrangencia_geografica", label: "Abrangência (Regional, nacional, internacional...)", type: "text", source: "profile", required: true },
       { key: "cliente_ideal", label: "Cliente ideal na carteira (Como ele é?)", type: "textarea", source: "profile" },
-      { key: "dores_principais", label: "Principais dúvidas e dores ao contatar a empresa", type: "textarea", source: "profile" },
-      { key: "base_dados_clientes", label: "Existe uma base com dados destes clientes?", type: "select", source: "profile", options: ["Sim", "Não"] },
+      { key: "dores_principais", label: "Principais dúvidas e dores ao contatar a empresa", type: "textarea", source: "profile", required: true },
+      { key: "base_dados_clientes", label: "Existe uma base com dados destes clientes?", type: "select", source: "profile", options: ["Sim", "Não"], required: true },
       { key: "tamanho_base", label: "Tamanho da base (se existir)", type: "text", source: "profile" },
       { key: "classe_social", label: "Renda média do cliente", type: "text", source: "profile", hint: "Ex: A+, B, C, D" },
     ],
@@ -94,7 +94,7 @@ const SECTIONS: BriefingSection[] = [
     label: "Sazonalidade",
     icon: Clock,
     fields: [
-      { key: "meses_alta_faturamento", label: "Meses de aumento de faturamento", type: "text", source: "profile", hint: "Ex: JAN, DEZ" },
+      { key: "meses_alta_faturamento", label: "Meses de aumento de faturamento", type: "text", source: "profile", hint: "Ex: JAN, DEZ", required: true },
       { key: "meses_baixa_faturamento", label: "Meses de baixa de faturamento", type: "text", source: "profile", hint: "Ex: FEV, MAR" },
       { key: "periodo_forte_mes", label: "Período mais forte do mês", type: "select", source: "profile", options: ["Primeira semana", "Segunda semana", "Terceira semana", "Última semana"] },
       { key: "periodo_fraco_mes", label: "Período mais fraco do mês", type: "select", source: "profile", options: ["Primeira semana", "Segunda semana", "Terceira semana", "Última semana"] },
@@ -107,9 +107,9 @@ const SECTIONS: BriefingSection[] = [
     label: "Concorrência / Referência",
     icon: Sparkles,
     fields: [
-      { key: "concorrentes_referencia", label: "Principais concorrentes", type: "textarea", source: "profile" },
+      { key: "concorrentes_referencia", label: "Principais concorrentes", type: "textarea", source: "profile", required: true },
       { key: "concorrente_mais_forte", label: "Qual concorrente é o mais forte? Por quê?", type: "textarea", source: "profile" },
-      { key: "referencia_comunicacao", label: "Referência de comunicação bacana", type: "textarea", source: "profile" },
+      { key: "referencia_comunicacao", label: "Referência de comunicação bacana", type: "textarea", source: "profile", required: true },
       { key: "pontos_fracos_concorrencia", label: "Onde seus produtos/serviços perdem dos concorrentes?", type: "textarea", source: "profile" },
       { key: "visao_mercado", label: "Como você enxerga o mercado", type: "select", source: "profile", options: ["Saturado", "Tranquilo/tem espaço", "Promissor"] },
     ],
@@ -119,8 +119,8 @@ const SECTIONS: BriefingSection[] = [
     label: "Comunicação",
     icon: Megaphone,
     fields: [
-      { key: "canais_comunicacao_possuidos", label: "Canais de comunicação que já possui", type: "textarea", source: "profile", hint: "E-mail, Site, Instagram, Telefone, etc." },
-      { key: "canal_maior_retorno", label: "Qual canal dá mais retorno?", type: "text", source: "profile" },
+      { key: "canais_comunicacao_possuidos", label: "Canais de comunicação que já possui", type: "textarea", source: "profile", hint: "E-mail, Site, Instagram, Telefone, etc.", required: true },
+      { key: "canal_maior_retorno", label: "Qual canal dá mais retorno?", type: "text", source: "profile", required: true },
       { key: "monitoramento_canais", label: "Estes canais são monitorados e atualizados?", type: "textarea", source: "profile" },
       { key: "canais_preferencia_contato", label: "Através de quais canais preferiria ser contatado?", type: "text", source: "profile" },
       { key: "acoes_passadas", label: "Ações de marketing efetivas no passado", type: "textarea", source: "profile" },
@@ -304,29 +304,23 @@ export default function MeuCadastroPage() {
     if (!clientData || !user) return;
     setLoading(true); setMessage("");
 
-    // Validação de campos obrigatórios
-    const requiredFields = [
-      { key: "nome", label: "Nome da empresa" },
-      { key: "cnpj", label: "CNPJ" },
-      { key: "email_responsavel", label: "E-mail corporativo" },
-      { key: "telefone", label: "Telefone" },
-      { key: "ramo_atuacao", label: "Setor" },
-      { key: "finalidade_briefing", label: "Finalidade do briefing" }
-    ];
+    // Validação dinâmica: todos os campos marcados como required: true
+    // são obrigatórios. Para campos lockedForClient (somente Totum), só
+    // exigimos quando o usuário é admin/master.
+    const requiredFields = SECTIONS.flatMap(s =>
+      (s.lockedForClient && !isAdmin) ? [] : s.fields.filter(f => f.required)
+    );
 
-    for (const req of requiredFields) {
-      const fieldConfig = SECTIONS.flatMap(s => s.fields).find(f => f.key === req.key);
-      if (fieldConfig) {
-        const val = getValue(fieldConfig);
-        if (!val || String(val).trim() === "") {
-          const section = SECTIONS.find(s => s.fields.some(f => f.key === req.key));
-          if (section) {
-            setExpanded(prev => prev.includes(section.id) ? prev : [...prev, section.id]);
-          }
-          setMessage(`❌ O campo obrigatório "${req.label}" precisa ser preenchido.`);
-          setLoading(false);
-          return;
+    for (const fieldConfig of requiredFields) {
+      const val = getValue(fieldConfig);
+      if (!val || String(val).trim() === "") {
+        const section = SECTIONS.find(s => s.fields.some(f => f.key === fieldConfig.key));
+        if (section) {
+          setExpanded(prev => prev.includes(section.id) ? prev : [...prev, section.id]);
         }
+        setMessage(`❌ O campo obrigatório "${fieldConfig.label}" precisa ser preenchido.`);
+        setLoading(false);
+        return;
       }
     }
 
