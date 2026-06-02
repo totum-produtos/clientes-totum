@@ -48,7 +48,7 @@ function ResetPasswordPageInner() {
                     });
                     if (!mounted) return;
                     if (setErr) {
-                        setError('Invalid or expired reset link. Please request a new password reset.');
+                        setError('Link de recuperação inválido ou expirado. Solicite um novo.');
                         return;
                     }
                     // Clear sensitive fragment from URL
@@ -61,7 +61,7 @@ function ResetPasswordPageInner() {
             const { data: { session } } = await client.auth.getSession();
             if (!mounted) return;
             if (!session) {
-                setError('Invalid or expired reset link. Please request a new password reset.');
+                setError('Link de recuperação inválido ou expirado. Solicite um novo.');
             }
         };
 
@@ -74,12 +74,12 @@ function ResetPasswordPageInner() {
         setError('');
 
         if (newPassword !== confirmPassword) {
-            setError("Passwords don't match");
+            setError('As senhas não coincidem');
             return;
         }
 
         if (newPassword.length < 6) {
-            setError('Password must be at least 6 characters long');
+            setError('A senha precisa ter no mínimo 6 caracteres');
             return;
         }
 
@@ -101,7 +101,7 @@ function ResetPasswordPageInner() {
             if (err instanceof Error) {
                 setError(err.message);
             } else {
-                setError('Failed to reset password');
+                setError('Falha ao redefinir a senha');
             }
         } finally {
             setLoading(false);
@@ -117,13 +117,13 @@ function ResetPasswordPageInner() {
                     </div>
 
                     <h2 className="text-2xl font-bold text-ink mb-2">
-                        {isInvite ? 'Senha criada com sucesso' : 'Password reset successful'}
+                        {isInvite ? 'Senha criada com sucesso' : 'Senha redefinida com sucesso'}
                     </h2>
 
                     <p className="text-body mb-8">
                         {isInvite
                             ? 'Estamos te direcionando para preencher os dados da sua empresa…'
-                            : 'Your password has been successfully reset. You will be redirected to the app in a moment.'}
+                            : 'Sua senha foi redefinida. Você será redirecionado para o portal em instantes.'}
                     </p>
                 </div>
             </div>
@@ -137,7 +137,7 @@ function ResetPasswordPageInner() {
                     <Key className="h-12 w-12 text-rausch" />
                 </div>
                 <h2 className="text-2xl font-bold text-center text-ink mb-2">
-                    {isInvite ? 'Bem-vindo! Crie sua senha' : 'Create new password'}
+                    {isInvite ? 'Bem-vindo! Crie sua senha' : 'Criar nova senha'}
                 </h2>
                 {isInvite && (
                     <p className="text-sm text-center text-body mb-6">
@@ -155,7 +155,7 @@ function ResetPasswordPageInner() {
             <form onSubmit={handleSubmit} className="space-y-6">
                 <div>
                     <label htmlFor="new-password" className="block text-sm font-medium text-ink">
-                        New Password
+                        Nova senha
                     </label>
                     <div className="mt-1">
                         <input
@@ -173,7 +173,7 @@ function ResetPasswordPageInner() {
 
                 <div>
                     <label htmlFor="confirm-password" className="block text-sm font-medium text-ink">
-                        Confirm New Password
+                        Confirme a nova senha
                     </label>
                     <div className="mt-1">
                         <input
@@ -188,7 +188,7 @@ function ResetPasswordPageInner() {
                         />
                     </div>
                     <p className="mt-2 text-sm text-muted">
-                        Password must be at least 6 characters long
+                        A senha precisa ter no mínimo 6 caracteres
                     </p>
                 </div>
 
@@ -198,7 +198,7 @@ function ResetPasswordPageInner() {
                         disabled={loading}
                         className="flex w-full justify-center rounded-md border border-transparent bg-rausch py-2 px-4 text-sm font-medium text-white shadow-airbnb hover:bg-rausch-active focus:outline-none focus:ring-2 focus:ring-rausch focus:ring-offset-2 disabled:opacity-50"
                     >
-                        {loading ? 'Resetting password...' : 'Reset password'}
+                        {loading ? 'Redefinindo…' : 'Redefinir senha'}
                     </button>
                 </div>
             </form>

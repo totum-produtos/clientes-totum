@@ -29,7 +29,7 @@ export default function ForgotPasswordPage() {
             if (err instanceof Error) {
                 setError(err.message);
             } else {
-                setError('An unknown error occurred');
+                setError('Ocorreu um erro desconhecido');
             }
         } finally {
             setLoading(false);
@@ -45,17 +45,17 @@ export default function ForgotPasswordPage() {
                     </div>
 
                     <h2 className="text-2xl font-bold text-ink mb-2">
-                        Check your email
+                        Verifique seu email
                     </h2>
 
                     <p className="text-body mb-8">
-                        We have sent a password reset link to your email address.
-                        Please check your inbox and follow the instructions to reset your password.
+                        Enviamos um link de recuperação para seu email.
+                        Verifique sua caixa de entrada e siga as instruções para redefinir sua senha.
                     </p>
 
                     <div className="mt-6 text-center text-sm">
                         <Link href="/auth/login" className="font-medium text-rausch hover:text-rausch">
-                            Return to login
+                            Voltar para o login
                         </Link>
                     </div>
                 </div>
@@ -67,7 +67,7 @@ export default function ForgotPasswordPage() {
         <div className="bg-canvas py-8 px-4 shadow sm:rounded-lg sm:px-10">
             <div className="sm:mx-auto sm:w-full sm:max-w-md">
                 <h2 className="text-2xl font-bold text-center text-ink mb-8">
-                    Reset your password
+                    Recuperar senha
                 </h2>
             </div>
 
@@ -80,7 +80,7 @@ export default function ForgotPasswordPage() {
             <form onSubmit={handleSubmit} className="space-y-6">
                 <div>
                     <label htmlFor="email" className="block text-sm font-medium text-ink">
-                        Email address
+                        Email
                     </label>
                     <div className="mt-1">
                         <input
@@ -95,7 +95,7 @@ export default function ForgotPasswordPage() {
                         />
                     </div>
                     <p className="mt-2 text-sm text-muted">
-                        Enter your email address and we will send you a link to reset your password.
+                        Informe seu email e enviaremos um link para redefinir sua senha.
                     </p>
                 </div>
 
@@ -105,16 +105,16 @@ export default function ForgotPasswordPage() {
                         disabled={loading}
                         className="flex w-full justify-center rounded-md border border-transparent bg-rausch py-2 px-4 text-sm font-medium text-white shadow-airbnb hover:bg-rausch-active focus:outline-none focus:ring-2 focus:ring-rausch focus:ring-offset-2 disabled:opacity-50"
                     >
-                        {loading ? 'Sending reset link...' : 'Send reset link'}
+                        {loading ? 'Enviando link…' : 'Enviar link de recuperação'}
                     </button>
                 </div>
             </form>
 
             <div className="mt-6 text-center text-sm">
-                <span className="text-body">Remember your password?</span>
+                <span className="text-body">Lembrou da senha?</span>
                 {' '}
                 <Link href="/auth/login" className="font-medium text-rausch hover:text-rausch">
-                    Sign in
+                    Entrar
                 </Link>
             </div>
         </div>

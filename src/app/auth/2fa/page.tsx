@@ -37,7 +37,7 @@ export default function TwoFactorAuthPage() {
 
             setLoading(false);
         } catch (err) {
-            setError(err instanceof Error ? err.message : 'An error occurred');
+            setError(err instanceof Error ? err.message : 'Ocorreu um erro');
             setLoading(false);
         }
     };

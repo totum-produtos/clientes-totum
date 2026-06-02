@@ -83,7 +83,7 @@ export default function SSOButtons({ onError, compact }: SSOButtonsProps) {
             if (err instanceof Error) {
                 onError?.(err.message);
             } else {
-                onError?.('An unknown error occurred');
+                onError?.('Ocorreu um erro desconhecido');
             }
         }
     };
@@ -102,7 +102,7 @@ export default function SSOButtons({ onError, compact }: SSOButtonsProps) {
                         <div className="w-full border-t border-hairline"/>
                     </div>
                     <div className="relative flex justify-center text-sm">
-                        <span className="bg-canvas px-2 text-muted">Or continue with</span>
+                        <span className="bg-canvas px-2 text-muted">Ou continue com</span>
                     </div>
                 </div>
             )}
@@ -122,20 +122,20 @@ export default function SSOButtons({ onError, compact }: SSOButtonsProps) {
                                 </div>
                             </div>
                             <span className="mx-auto text-sm font-semibold">
-                Continue with {config.name}
+                Continuar com {config.name}
               </span>
                         </button>
                     );
                 })}
             </div>
             <div className="mt-4 text-center text-xs text-muted">
-                By creating an account via selected provider, you agree to our{' '}
+                Ao criar uma conta pelo provedor selecionado, você concorda com os nossos{' '}
                 <Link href="/legal/terms" className="text-rausch hover:text-rausch underline">
-                    Terms and Conditions
+                    Termos de Uso
                 </Link>
-                {' '}and{' '}
+                {' '}e a{' '}
                 <Link href="/legal/privacy" className="text-rausch hover:text-rausch underline">
-                    Privacy Policy
+                    Política de Privacidade
                 </Link>
             </div>
         </div>

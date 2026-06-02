@@ -13,7 +13,7 @@ export default function VerifyEmailPage() {
 
     const resendVerificationEmail = async () => {
         if (!email) {
-            setError('Please enter your email address');
+            setError('Por favor, informe seu email');
             return;
         }
 
@@ -31,7 +31,7 @@ export default function VerifyEmailPage() {
             if (err instanceof Error) {
                 setError(err.message);
             } else {
-                setError('An unknown error occurred');
+                setError('Ocorreu um erro desconhecido');
             }
         } finally {
             setLoading(false);
@@ -46,17 +46,17 @@ export default function VerifyEmailPage() {
                 </div>
 
                 <h2 className="text-2xl font-bold text-ink mb-2">
-                    Check your email
+                    Verifique seu email
                 </h2>
 
                 <p className="text-body mb-8">
-                    We&#39;ve sent you an email with a verification link.
-                    Please check your inbox and click the link to verify your account.
+                    Enviamos um email com um link de verificação.
+                    Acesse sua caixa de entrada e clique no link para confirmar sua conta.
                 </p>
 
                 <div className="space-y-4">
                     <p className="text-sm text-muted">
-                        Didn&#39;t receive the email? Check your spam folder or enter your email to resend:
+                        Não recebeu o email? Verifique a pasta de spam ou informe seu email para reenviar:
                     </p>
 
                     {error && (
@@ -67,7 +67,7 @@ export default function VerifyEmailPage() {
 
                     {success && (
                         <div className="text-sm text-success-text bg-success-bg rounded-md p-3">
-                            Verification email has been resent successfully.
+                            Email de verificação reenviado com sucesso.
                         </div>
                     )}
 
@@ -76,7 +76,7 @@ export default function VerifyEmailPage() {
                             type="email"
                             value={email}
                             onChange={(e) => setEmail(e.target.value)}
-                            placeholder="Enter your email address"
+                            placeholder="Digite seu email"
                             className="block w-full appearance-none rounded-md border border-hairline px-3 py-2 shadow-airbnb focus:border-rausch focus:outline-none focus:ring-rausch text-sm"
                         />
                     </div>
@@ -86,7 +86,7 @@ export default function VerifyEmailPage() {
                         onClick={resendVerificationEmail}
                         disabled={loading}
                     >
-                        {loading ? 'Sending...' : 'Click here to resend'}
+                        {loading ? 'Enviando…' : 'Clique aqui para reenviar'}
                     </button>
                 </div>
 
@@ -95,7 +95,7 @@ export default function VerifyEmailPage() {
                         href="/auth/login"
                         className="text-sm font-medium text-rausch hover:text-rausch"
                     >
-                        Return to login
+                        Voltar para o login
                     </Link>
                 </div>
             </div>

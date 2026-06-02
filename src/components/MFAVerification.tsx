@@ -38,7 +38,7 @@ export function MFAVerification({ onVerified }: MFAVerificationProps) {
             }
         } catch (err) {
             console.error('Error loading MFA factors:', err);
-            setError('Failed to load authentication devices');
+            setError('Falha ao carregar dispositivos de autenticação');
         } finally {
             setLoadingFactors(false);
         }
@@ -46,7 +46,7 @@ export function MFAVerification({ onVerified }: MFAVerificationProps) {
 
     const handleVerification = async () => {
         if (!selectedFactorId) {
-            setError('Please select an authentication device');
+            setError('Selecione um dispositivo de autenticação');
             return;
         }
 
@@ -76,7 +76,7 @@ export function MFAVerification({ onVerified }: MFAVerificationProps) {
             onVerified();
         } catch (err) {
             console.error('MFA verification error:', err);
-            setError(err instanceof Error ? err.message : 'Failed to verify MFA code');
+            setError(err instanceof Error ? err.message : 'Falha ao verificar o código MFA');
         } finally {
             setLoading(false);
         }
@@ -98,7 +98,7 @@ export function MFAVerification({ onVerified }: MFAVerificationProps) {
                 <CardContent className="py-8">
                     <Alert variant="destructive">
                         <AlertDescription>
-                            No authentication devices found. Please contact support.
+                            Nenhum dispositivo de autenticação encontrado. Entre em contato com o suporte.
                         </AlertDescription>
                     </Alert>
                 </CardContent>
@@ -109,9 +109,9 @@ export function MFAVerification({ onVerified }: MFAVerificationProps) {
     return (
         <Card className="w-full">
             <CardHeader>
-                <CardTitle>Two-Factor Authentication Required</CardTitle>
+                <CardTitle>Autenticação em duas etapas</CardTitle>
                 <CardDescription>
-                    Please enter the verification code from your authenticator app
+                    Digite o código de verificação do seu aplicativo autenticador
                 </CardDescription>
             </CardHeader>
             <CardContent>
@@ -125,7 +125,7 @@ export function MFAVerification({ onVerified }: MFAVerificationProps) {
                     {factors.length > 1 && (
                         <div className="space-y-2">
                             <label className="block text-sm font-medium text-ink">
-                                Select Authentication Device
+                                Selecione o dispositivo de autenticação
                             </label>
                             <div className="grid gap-3">
                                 {factors.map((factor) => (
@@ -141,10 +141,10 @@ export function MFAVerification({ onVerified }: MFAVerificationProps) {
                                         <Smartphone className="h-5 w-5" />
                                         <div className="flex-1 text-left">
                                             <p className="font-medium">
-                                                {factor.friendly_name || 'Authenticator Device'}
+                                                {factor.friendly_name || 'Dispositivo autenticador'}
                                             </p>
                                             <p className="text-sm text-muted">
-                                                Added on {new Date(factor.created_at).toLocaleDateString()}
+                                                Adicionado em {new Date(factor.created_at).toLocaleDateString('pt-BR')}
                                             </p>
                                         </div>
                                         {selectedFactorId === factor.id && (
@@ -158,18 +158,18 @@ export function MFAVerification({ onVerified }: MFAVerificationProps) {
 
                     <div className="space-y-2">
                         <label className="block text-sm font-medium text-ink">
-                            Verification Code
+                            Código de verificação
                         </label>
                         <input
                             type="text"
                             value={verifyCode}
                             onChange={(e) => setVerifyCode(e.target.value.trim())}
                             className="block w-full rounded-md border border-hairline px-3 py-2 shadow-airbnb focus:border-rausch focus:outline-none focus:ring-rausch sm:text-sm"
-                            placeholder="Enter 6-digit code"
+                            placeholder="Digite o código de 6 dígitos"
                             maxLength={6}
                         />
                         <p className="text-sm text-muted">
-                            Enter the 6-digit code from your authenticator app
+                            Digite o código de 6 dígitos do seu aplicativo autenticador
                         </p>
                     </div>
 
@@ -178,7 +178,7 @@ export function MFAVerification({ onVerified }: MFAVerificationProps) {
                         disabled={loading || verifyCode.length !== 6 || !selectedFactorId}
                         className="w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-airbnb text-sm font-medium text-white bg-rausch hover:bg-rausch-active focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-rausch disabled:opacity-50"
                     >
-                        {loading ? 'Verifying...' : 'Verify'}
+                        {loading ? 'Verificando…' : 'Verificar'}
                     </button>
                 </div>
             </CardContent>

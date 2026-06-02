@@ -20,12 +20,12 @@ export default function RegisterPage() {
         setError('');
 
         if (!acceptedTerms) {
-            setError('You must accept the Terms of Service and Privacy Policy');
+            setError('Você precisa aceitar os Termos de Uso e a Política de Privacidade');
             return;
         }
 
         if (password !== confirmPassword) {
-            setError("Passwords don't match");
+            setError('As senhas não coincidem');
             return;
         }
 
@@ -42,7 +42,7 @@ export default function RegisterPage() {
             if(err instanceof Error) {
                 setError(err.message);
             } else {
-                setError('An unknown error occurred');
+                setError('Ocorreu um erro desconhecido');
             }
         } finally {
             setLoading(false);
@@ -60,7 +60,7 @@ export default function RegisterPage() {
             <form onSubmit={handleSubmit} className="space-y-6">
                 <div>
                     <label htmlFor="email" className="block text-sm font-medium text-ink">
-                        Email address
+                        Email
                     </label>
                     <div className="mt-1">
                         <input
@@ -78,7 +78,7 @@ export default function RegisterPage() {
 
                 <div>
                     <label htmlFor="password" className="block text-sm font-medium text-ink">
-                        Password
+                        Senha
                     </label>
                     <div className="mt-1">
                         <input
@@ -96,7 +96,7 @@ export default function RegisterPage() {
 
                 <div>
                     <label htmlFor="confirmPassword" className="block text-sm font-medium text-ink">
-                        Confirm Password
+                        Confirme a senha
                     </label>
                     <div className="mt-1">
                         <input
@@ -126,21 +126,21 @@ export default function RegisterPage() {
                         </div>
                         <div className="ml-3 text-sm">
                             <label htmlFor="terms" className="text-body">
-                                I agree to the{' '}
+                                Concordo com os{' '}
                                 <Link
                                     href="/legal/terms"
                                     className="font-medium text-rausch hover:text-rausch"
                                     target="_blank"
                                 >
-                                    Terms of Service
+                                    Termos de Uso
                                 </Link>{' '}
-                                and{' '}
+                                e a{' '}
                                 <Link
                                     href="/legal/privacy"
                                     className="font-medium text-rausch hover:text-rausch"
                                     target="_blank"
                                 >
-                                    Privacy Policy
+                                    Política de Privacidade
                                 </Link>
                             </label>
                         </div>
@@ -152,7 +152,7 @@ export default function RegisterPage() {
                         disabled={loading}
                         className="flex w-full justify-center rounded-md border border-transparent bg-rausch py-2 px-4 text-sm font-medium text-white shadow-airbnb hover:bg-rausch-active focus:outline-none focus:ring-2 focus:ring-rausch focus:ring-offset-2 disabled:opacity-50"
                     >
-                        {loading ? 'Creating account...' : 'Create account'}
+                        {loading ? 'Criando conta…' : 'Criar conta'}
                     </button>
                 </div>
             </form>
@@ -160,10 +160,10 @@ export default function RegisterPage() {
             <SSOButtons onError={setError}/>
 
             <div className="mt-6 text-center text-sm">
-                <span className="text-body">Already have an account?</span>
+                <span className="text-body">Já tem uma conta?</span>
                 {' '}
                 <Link href="/auth/login" className="font-medium text-rausch hover:text-rausch">
-                    Sign in
+                    Entrar
                 </Link>
             </div>
         </div>
