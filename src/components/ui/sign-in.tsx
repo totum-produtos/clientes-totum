@@ -171,21 +171,26 @@ export const SignInPage: React.FC<SignInPageProps> = ({
 
       {/* Coluna direita — hero da marca */}
       <section className="hidden md:flex flex-1 relative p-4">
-        <div
-          className="animate-slide-right animate-delay-300 absolute inset-4 rounded-3xl overflow-hidden bg-rausch"
-          style={
-            heroImageSrc
-              ? {
-                  backgroundImage: `url(${heroImageSrc})`,
-                  backgroundSize: "cover",
-                  backgroundPosition: "center",
-                }
-              : {
-                  backgroundImage:
-                    "radial-gradient(circle at 50% 60%, hsl(349 100% 55%) 0%, hsl(349 80% 32%) 55%, hsl(0 0% 8%) 100%)",
-                }
-          }
-        >
+        <div className="animate-slide-right animate-delay-300 absolute inset-4 rounded-3xl overflow-hidden bg-rausch">
+          {/* imagem de fundo @ 40% opacidade sobre o vermelho da marca */}
+          {heroImageSrc ? (
+            <div
+              className="absolute inset-0 opacity-40"
+              style={{
+                backgroundImage: `url(${heroImageSrc})`,
+                backgroundSize: "cover",
+                backgroundPosition: "center",
+              }}
+            />
+          ) : (
+            <div
+              className="absolute inset-0"
+              style={{
+                backgroundImage:
+                  "radial-gradient(circle at 50% 60%, hsl(349 100% 55%) 0%, hsl(349 80% 32%) 55%, hsl(0 0% 8%) 100%)",
+              }}
+            />
+          )}
           {/* gradiente para legibilidade da tagline */}
           <div className="absolute inset-x-0 bottom-0 h-1/2 bg-gradient-to-t from-black/70 via-black/20 to-transparent" />
           {/* tagline */}
