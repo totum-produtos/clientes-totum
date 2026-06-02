@@ -4,6 +4,7 @@ import React, { useEffect, useState } from "react";
 import { createSPASassClient } from "@/lib/supabase/client";
 import { AlertCircle, CloudOff, FileWarning, Search } from "lucide-react";
 import Link from "next/link";
+import { LoadingSpinner } from "@/components/ui/LoadingSpinner";
 
 type ClientePendencia = {
     id: string;
@@ -79,7 +80,7 @@ export default function PendenciasPage() {
 
             {loading ? (
                 <div className="flex justify-center p-8">
-                    <div className="animate-spin h-8 w-8 border-b-2 border-rausch rounded-full"></div>
+                    <LoadingSpinner />
                 </div>
             ) : filtered.length === 0 ? (
                 <div className="text-center py-12 bg-canvas rounded-md border border-hairline shadow-airbnb">

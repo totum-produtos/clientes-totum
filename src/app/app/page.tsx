@@ -4,16 +4,14 @@ import { useGlobal } from '@/lib/context/GlobalContext';
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
 import { CalendarDays, FolderOpen, BarChart3, TrendingUp, Users, CheckCircle2, Clock } from 'lucide-react';
 import Link from 'next/link';
+import { PageLoader } from '@/components/ui/LoadingSpinner';
+import { EmptyState } from '@/components/ui/EmptyState';
 
 export default function DashboardPage() {
     const { loading, client, posts, tarefas, projetos } = useGlobal();
 
     if (loading) {
-        return (
-            <div className="flex items-center justify-center min-h-screen">
-                <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-rausch"></div>
-            </div>
-        );
+        return <PageLoader />;
     }
 
     const totalViews = posts.reduce((sum, p) => sum + (p.views || 0), 0);

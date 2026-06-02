@@ -20,6 +20,7 @@ import {
   PowerOff,
   AlertTriangle,
 } from 'lucide-react';
+import { LoadingSpinner } from '@/components/ui/LoadingSpinner';
 
 type Cliente = {
   id: string;
@@ -167,7 +168,7 @@ export default function GestaoClientesPage() {
   if (loading) {
     return (
       <div className="flex justify-center items-center h-96">
-        <div className="animate-spin h-10 w-10 border-b-2 border-rausch rounded-full" />
+        <LoadingSpinner size="lg" />
       </div>
     );
   }

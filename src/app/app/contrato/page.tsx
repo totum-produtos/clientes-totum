@@ -6,6 +6,7 @@ import { useGlobal } from '@/lib/context/GlobalContext';
 import { createSPASassClient } from '@/lib/supabase/client';
 import { FileText, CheckCircle2, Clock } from 'lucide-react';
 import type { RealtimeChannel } from '@supabase/supabase-js';
+import { LoadingSpinner, PageLoader } from '@/components/ui/LoadingSpinner';
 
 type Tarefa = {
     id: string;
@@ -79,11 +80,7 @@ export default function ContratoPage() {
     }, [client]);
 
     if (globalLoading) {
-        return (
-            <div className="min-h-screen bg-surface-soft flex items-center justify-center">
-                <div className="w-8 h-8 border-4 border-rausch border-t-transparent rounded-full animate-spin" />
-            </div>
-        );
+        return <PageLoader />;
     }
 
     if (!client) {
@@ -110,7 +107,7 @@ export default function ContratoPage() {
     }
 
     if (loading) {
-        return <div className="flex justify-center p-8"><div className="animate-spin h-8 w-8 border-b-2 border-rausch rounded-full"></div></div>;
+        return <div className="flex justify-center p-8"><LoadingSpinner /></div>;
     }
 
     const concluidas = tarefas.filter(t => t.status === 'concluido').length;

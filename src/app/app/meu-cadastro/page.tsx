@@ -9,6 +9,8 @@ import {
   Edit3, Save, X, Clock, CheckCircle, AlertCircle, ChevronDown, ChevronUp,
   ShoppingCart, Megaphone, Globe, TrendingUp, Sparkles, Flag, Link2, FolderUp, Lock
 } from "lucide-react";
+import { LoadingSpinner, PageLoader } from "@/components/ui/LoadingSpinner";
+import { PageError } from "@/components/ui/PageError";
 
 // Tipo de campo do briefing
 type FieldType = "text" | "textarea" | "select" | "file-link";
@@ -429,52 +431,28 @@ export default function MeuCadastroPage() {
   };
 
   if (globalLoading) {
-    return (
-      <div className="min-h-screen bg-surface-soft flex items-center justify-center">
-        <div className="w-8 h-8 border-4 border-rausch border-t-transparent rounded-full animate-spin" />
-      </div>
-    );
+    return <PageLoader />;
   }
 
   if (!client) {
     return (
-      <div className="min-h-screen bg-surface-soft flex flex-col items-center justify-center p-6 text-center">
-        <div className="bg-canvas border p-8 rounded-xl shadow-xl max-w-md w-full">
-          <Building2 className="w-12 h-12 text-rausch mx-auto mb-4" />
-          <h2 className="text-xl font-bold text-ink mb-2">Nenhum Cliente Vinculado</h2>
-          <p className="text-muted text-sm mb-6">
-            Você precisa estar vinculado a um cliente para acessar esta página, ou selecionar um cliente na Central de Conteúdos.
-          </p>
-          <Link href="/app" className="block w-full py-3 bg-rausch text-white font-medium rounded-lg hover:bg-rausch-active text-center transition-colors">
-            Voltar ao Início
-          </Link>
-        </div>
-      </div>
+      <PageError
+        title="Nenhum cliente vinculado"
+        description="Você precisa estar vinculado a um cliente para acessar esta página, ou selecionar um cliente na Central de Conteúdos."
+      />
     );
   }
 
   if (!clientData) {
-    return (
-      <div className="min-h-screen bg-surface-soft flex items-center justify-center">
-        <div className="w-8 h-8 border-4 border-rausch border-t-transparent rounded-full animate-spin" />
-      </div>
-    );
+    return <PageLoader />;
   }
 
   if (clientData._error) {
     return (
-      <div className="min-h-screen bg-surface-soft flex flex-col items-center justify-center p-6 text-center">
-        <div className="bg-canvas border p-8 rounded-xl shadow-xl max-w-md w-full">
-          <AlertCircle className="w-12 h-12 text-rausch mx-auto mb-4" />
-          <h2 className="text-xl font-bold text-ink mb-2">Erro ao carregar dados</h2>
-          <p className="text-muted text-sm mb-6">
-            Não foi possível carregar as informações deste cliente. Você pode não ter permissão de acesso.
-          </p>
-          <Link href="/app" className="block w-full py-3 bg-rausch text-white font-medium rounded-lg hover:bg-rausch-active text-center transition-colors">
-            Voltar ao Início
-          </Link>
-        </div>
-      </div>
+      <PageError
+        title="Erro ao carregar dados"
+        description="Não foi possível carregar as informações deste cliente. Você pode não ter permissão de acesso."
+      />
     );
   }
 
@@ -509,7 +487,7 @@ export default function MeuCadastroPage() {
                     <X className="w-4 h-4" /> Cancelar
                   </button>
                   <button onClick={handleSubmitChanges} disabled={loading} className="flex items-center gap-2 px-4 py-2 bg-success text-white rounded-md text-sm font-medium hover:bg-success-text disabled:opacity-50 transition-colors">
-                    {loading ? <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" /> : <><Save className="w-4 h-4" /> {isAdmin ? "Salvar" : "Salvar alterações"}</>}
+                    {loading ? <LoadingSpinner size="sm" inverted /> : <><Save className="w-4 h-4" /> {isAdmin ? "Salvar" : "Salvar alterações"}</>}
                   </button>
                 </div>
               )}
@@ -582,7 +560,7 @@ export default function MeuCadastroPage() {
                 <X className="w-4 h-4" /> Cancelar
               </button>
               <button onClick={handleSubmitChanges} disabled={loading} className="flex items-center justify-center gap-2 px-6 py-2.5 bg-success text-white rounded-md text-sm font-medium hover:bg-success-text shadow-sm disabled:opacity-50 transition-colors">
-                {loading ? <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" /> : <><Save className="w-4 h-4" /> {isAdmin ? "Salvar" : "Salvar alterações"}</>}
+                {loading ? <LoadingSpinner size="sm" inverted /> : <><Save className="w-4 h-4" /> {isAdmin ? "Salvar" : "Salvar alterações"}</>}
               </button>
             </div>
           </div>

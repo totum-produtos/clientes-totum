@@ -7,6 +7,7 @@ import { createSPASassClient } from '@/lib/supabase/client';
 import { TrendingUp, Eye, Heart, BarChart3, Megaphone, DollarSign, Target, MousePointerClick } from 'lucide-react';
 import { useToast } from "@/components/ui/ToastProvider";
 import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianGrid } from 'recharts';
+import { LoadingSpinner, PageLoader } from '@/components/ui/LoadingSpinner';
 
 type Post = {
     id: number;
@@ -127,11 +128,7 @@ export default function CampanhasPage() {
     }
 
     if (globalLoading) {
-        return (
-            <div className="min-h-screen bg-surface-soft flex items-center justify-center">
-                <div className="w-8 h-8 border-4 border-rausch border-t-transparent rounded-full animate-spin" />
-            </div>
-        );
+        return <PageLoader />;
     }
 
     if (!client) {
@@ -139,16 +136,16 @@ export default function CampanhasPage() {
             <div className="min-h-screen bg-surface-soft flex flex-col items-center justify-center p-6 text-center">
                 <div className="bg-canvas border p-8 rounded-xl shadow-xl max-w-md w-full">
                     <BarChart3 className="w-12 h-12 text-rausch mx-auto mb-4" />
-                    <h2 className="text-xl font-bold text-ink mb-2">Nenhum Cliente Selecionado</h2>
+                    <h2 className="text-xl font-bold text-ink mb-2">Nenhum cliente selecionado</h2>
                     <p className="text-muted text-sm mb-6">
                         Você precisa selecionar um cliente para ver o dashboard de campanhas.
                     </p>
                     {isMaster ? (
-                        <Link href="/app/central-conteudo" className="block w-full py-3 bg-rausch text-white font-medium rounded-lg hover:bg-rausch-active text-center transition-colors">
+                        <Link href="/app/central-conteudo" className="block w-full py-3 bg-rausch text-white font-medium rounded-md hover:bg-rausch-active text-center transition-colors">
                             Ir para Central de Conteúdos
                         </Link>
                     ) : (
-                        <Link href="/app" className="block w-full py-3 bg-rausch text-white font-medium rounded-lg hover:bg-rausch-active text-center transition-colors">
+                        <Link href="/app" className="block w-full py-3 bg-rausch text-white font-medium rounded-md hover:bg-rausch-active text-center transition-colors">
                             Voltar ao Início
                         </Link>
                     )}
@@ -158,7 +155,7 @@ export default function CampanhasPage() {
     }
 
     if (loading) {
-        return <div className="flex justify-center p-8"><div className="animate-spin h-8 w-8 border-b-2 border-rausch rounded-full"></div></div>;
+        return <div className="flex justify-center p-8"><LoadingSpinner /></div>;
     }
 
     const totalViews = posts.reduce((sum, p) => sum + (p.views || 0), 0);

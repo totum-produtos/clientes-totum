@@ -5,6 +5,9 @@ import { createSPASassClient } from "@/lib/supabase/client";
 import {
   Bell, Clock, CheckCircle, XCircle, FileText, Check, Trash2, Filter
 } from "lucide-react";
+import { LoadingSpinner } from "@/components/ui/LoadingSpinner";
+import { EmptyState } from "@/components/ui/EmptyState";
+import { PageHeader } from "@/components/ui/PageHeader";
 
 interface Notification {
   id: string;
@@ -81,21 +84,16 @@ export default function NotificacoesPage() {
 
   return (
     <div className="min-h-screen bg-surface-soft pb-12">
-      <div className="bg-canvas border-b">
-        <div className="max-w-4xl mx-auto px-6 py-6">
-          <div className="flex items-center justify-between">
-            <div>
-              <h1 className="text-xl font-bold text-ink">NOTIFICAÇÕES</h1>
-              <p className="text-sm text-muted mt-1">Acompanhe todas as suas notificações</p>
-            </div>
-            {unreadCount > 0 && (
-              <button onClick={markAllAsRead} className="flex items-center gap-2 px-4 py-2 bg-rausch text-white rounded-md text-sm font-medium hover:bg-rausch-active transition-colors">
-                <Check className="w-4 h-4" /> Marcar todas como lidas
-              </button>
-            )}
-          </div>
-        </div>
-      </div>
+      <PageHeader
+        title="Notificações"
+        description="Acompanhe todas as suas notificações"
+        maxWidth="max-w-4xl"
+        actions={unreadCount > 0 ? (
+          <button onClick={markAllAsRead} className="flex items-center gap-2 px-4 py-2 bg-rausch text-white rounded-md text-sm font-medium hover:bg-rausch-active transition-colors">
+            <Check className="w-4 h-4" /> Marcar todas como lidas
+          </button>
+        ) : null}
+      />
 
       <div className="max-w-4xl mx-auto px-6 py-6">
         {/* Filtros */}
@@ -119,14 +117,15 @@ export default function NotificacoesPage() {
         {/* Lista */}
         {loading ? (
           <div className="flex items-center justify-center py-20">
-            <div className="w-8 h-8 border-4 border-rausch border-t-transparent rounded-full animate-spin" />
+            <LoadingSpinner />
           </div>
         ) : filtered.length === 0 ? (
-          <div className="bg-canvas rounded-lg border shadow-airbnb p-12 text-center">
-            <Bell className="w-12 h-12 mx-auto text-muted-soft mb-4" />
-            <h3 className="text-lg font-medium text-ink mb-1">Nenhuma notificação</h3>
-            <p className="text-sm text-muted">Você não tem notificações {filter === "nao_lidas" ? "não lidas" : filter === "lidas" ? "lidas" : ""} no momento.</p>
-          </div>
+          <EmptyState
+            icon={Bell}
+            title="Nenhuma notificação"
+            description={`Você não tem notificações ${filter === "nao_lidas" ? "não lidas " : filter === "lidas" ? "lidas " : ""}no momento.`}
+            variant="card"
+          />
         ) : (
           <div className="space-y-3">
             {filtered.map(n => (

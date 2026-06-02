@@ -7,6 +7,8 @@ import { createSPASassClient } from '@/lib/supabase/client';
 import { FileText, Download, Upload, Trash2, FileArchive, FileSpreadsheet, Image, File } from 'lucide-react';
 import { useToast } from "@/components/ui/ToastProvider";
 import ConfirmDialog from "@/components/ConfirmDialog";
+import { LoadingSpinner, PageLoader } from "@/components/ui/LoadingSpinner";
+import { EmptyState } from "@/components/ui/EmptyState";
 
 const typeIcons: Record<string, React.ReactNode> = {
   PDF: <FileText className="h-5 w-5 text-danger-text" />,
@@ -75,11 +77,7 @@ export default function ArquivosPage() {
   }, [client]);
 
   if (globalLoading) {
-    return (
-      <div className="min-h-screen bg-surface-soft flex items-center justify-center">
-        <div className="w-8 h-8 border-4 border-rausch border-t-transparent rounded-full animate-spin" />
-      </div>
-    );
+    return <PageLoader />;
   }
 
   if (!client) {
@@ -208,14 +206,14 @@ export default function ArquivosPage() {
         <CardContent className="space-y-2">
           {loading ? (
             <div className="flex justify-center py-8">
-              <div className="animate-spin h-6 w-6 border-b-2 border-rausch rounded-full"></div>
+              <LoadingSpinner />
             </div>
           ) : arquivos.length === 0 ? (
-            <div className="text-center py-8">
-              <FileText className="h-10 w-10 text-muted-soft mx-auto mb-2" />
-              <p className="text-sm text-muted-soft">Nenhum arquivo enviado ainda.</p>
-              <p className="text-xs text-muted-soft mt-1">Clique em &quot;Enviar arquivo&quot; para começar.</p>
-            </div>
+            <EmptyState
+              icon={FileText}
+              title="Nenhum arquivo enviado ainda"
+              description='Clique em "Enviar arquivo" para começar.'
+            />
           ) : (
             arquivos.map((arquivo) => (
               <div key={arquivo.id || arquivo.name} className="flex items-center gap-4 p-4 border rounded-lg hover:bg-surface-soft transition-colors">

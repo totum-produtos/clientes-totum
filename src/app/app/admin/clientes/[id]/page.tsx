@@ -11,6 +11,7 @@ import {
 import { STEPS, FormState, DEFAULT_FORM_STATE } from "@/lib/cliente-form-constants";
 import { useClienteForm } from "@/hooks/useClienteForm";
 import { ClienteFormSteps, validateStep } from "@/components/ClienteFormSteps";
+import { LoadingSpinner, PageLoader } from "@/components/ui/LoadingSpinner";
 import { useGlobal } from "@/lib/context/GlobalContext";
 
 export default function EditarClientePage() {
@@ -262,11 +263,7 @@ export default function EditarClientePage() {
   const StepIcon = STEPS[step - 1].icon;
 
   if (loading) {
-    return (
-      <div className="min-h-screen bg-surface-soft flex items-center justify-center">
-        <div className="w-8 h-8 border-4 border-rausch border-t-transparent rounded-full animate-spin" />
-      </div>
-    );
+    return <PageLoader />;
   }
 
   return (
@@ -384,7 +381,7 @@ export default function EditarClientePage() {
                     disabled={accessLoading}
                     className="flex items-center gap-1.5 px-4 py-2 bg-rausch text-white rounded-md text-sm font-medium hover:bg-rausch-active disabled:opacity-50 transition-all"
                   >
-                    {accessLoading ? <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" /> : <><Check className="w-3.5 h-3.5" /> Definir</>}
+                    {accessLoading ? <LoadingSpinner size="sm" inverted /> : <><Check className="w-3.5 h-3.5" /> Definir</>}
                   </button>
                   <button onClick={() => { setShowPasswordForm(false); setNewPassword(""); setAccessError(""); }} className="px-3 py-2 text-body hover:text-ink text-sm rounded-md transition-colors">
                     <X className="w-4 h-4" />
@@ -400,7 +397,7 @@ export default function EditarClientePage() {
                 disabled={accessLoading}
                 className="flex items-center gap-2 px-4 py-2.5 border border-hairline rounded-md text-sm font-medium text-body hover:bg-surface-soft hover:text-ink disabled:opacity-50 transition-all"
               >
-                {accessLoading && !showPasswordForm ? <div className="w-4 h-4 border-2 border-body/30 border-t-body rounded-full animate-spin" /> : <RefreshCw className="w-4 h-4" />}
+                {accessLoading && !showPasswordForm ? <LoadingSpinner size="sm" /> : <RefreshCw className="w-4 h-4" />}
                 Reenviar link de convite
               </button>
               <button
@@ -435,7 +432,7 @@ export default function EditarClientePage() {
               placeholder="https://drive.google.com/drive/folders/..."
               className="flex-1 input-field"
             />
-            {driveSaving && <div className="px-4 py-2 flex items-center justify-center"><div className="w-4 h-4 border-2 border-rausch/30 border-t-rausch rounded-full animate-spin" /></div>}
+            {driveSaving && <div className="px-4 py-2 flex items-center justify-center"><LoadingSpinner size="sm" /></div>}
             {driveUrl && (
               <a
                 href={driveUrl}
@@ -550,7 +547,7 @@ export default function EditarClientePage() {
                 <X className="w-4 h-4" /> Cancelar
               </button>
               <button onClick={handleSave} disabled={saving} className="flex items-center justify-center gap-2 px-6 py-2.5 bg-success text-white rounded-md text-sm font-medium hover:bg-success-text shadow-sm disabled:opacity-50 transition-colors">
-                {saving ? <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" /> : <><Save className="w-4 h-4" /> Salvar Alterações</>}
+                {saving ? <LoadingSpinner size="sm" inverted /> : <><Save className="w-4 h-4" /> Salvar Alterações</>}
               </button>
             </div>
           </div>

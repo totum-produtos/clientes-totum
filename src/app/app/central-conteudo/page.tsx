@@ -5,6 +5,8 @@ import { createSPASassClient } from "@/lib/supabase/client";
 import { LayoutGrid, ArrowRight, Building2 } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
+import { LoadingSpinner } from "@/components/ui/LoadingSpinner";
+import { EmptyState } from "@/components/ui/EmptyState";
 
 type PortalClient = {
     id: string;
@@ -46,7 +48,7 @@ export default function CentralConteudoPage() {
     if (loading) {
         return (
             <div className="flex items-center justify-center min-h-[50vh]">
-                <div className="w-8 h-8 border-4 border-rausch border-t-transparent rounded-full animate-spin" />
+                <LoadingSpinner />
             </div>
         );
     }
@@ -94,8 +96,13 @@ export default function CentralConteudoPage() {
                 ))}
                 
                 {clients.length === 0 && (
-                    <div className="col-span-full p-8 text-center bg-surface-soft rounded-lg border border-hairline border-dashed">
-                        <p className="text-muted">Nenhum cliente ativo encontrado.</p>
+                    <div className="col-span-full">
+                        <EmptyState
+                            icon={Building2}
+                            title="Nenhum cliente ativo encontrado"
+                            description="Quando houver clientes ativos no portal, eles aparecerão aqui."
+                            variant="card"
+                        />
                     </div>
                 )}
             </div>

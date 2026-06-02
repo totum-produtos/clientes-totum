@@ -7,6 +7,7 @@ import {
   User, Camera, Check, Lock, Globe, Clock, Phone, Briefcase,
   FileText, ChevronDown, ChevronUp, Eye, EyeOff, AlertCircle
 } from "lucide-react";
+import { LoadingSpinner } from "@/components/ui/LoadingSpinner";
 
 const IDIOMAS = [
   { value: "pt-BR", label: "Português (Brasil)" },
@@ -194,7 +195,7 @@ export default function PerfilPage() {
                     className="absolute bottom-0 right-0 w-9 h-9 bg-rausch text-on-primary rounded-full flex items-center justify-center shadow-airbnb hover:bg-rausch-active transition-colors"
                   >
                     {uploading ? (
-                      <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                      <LoadingSpinner size="sm" inverted />
                     ) : (
                       <Camera className="w-4 h-4" />
                     )}

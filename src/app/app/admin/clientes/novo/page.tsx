@@ -6,6 +6,7 @@ import { Check, ChevronRight, Copy, Link2 } from "lucide-react";
 import { STEPS } from "@/lib/cliente-form-constants";
 import { useClienteForm } from "@/hooks/useClienteForm";
 import { ClienteFormSteps, validateStep } from "@/components/ClienteFormSteps";
+import { LoadingSpinner } from "@/components/ui/LoadingSpinner";
 
 export default function NovoClientePage() {
   const router = useRouter();
@@ -247,7 +248,7 @@ export default function NovoClientePage() {
                   </button>
                 ) : (
                   <button type="button" onClick={handleSubmit} disabled={loading} className="flex items-center gap-2 px-8 py-3 bg-rausch text-white rounded-full text-sm font-medium hover:bg-rausch-active disabled:opacity-50 transition-all shadow-airbnb">
-                    {loading ? <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" /> : <><Check className="w-4 h-4" /> Finalizar cadastro</>}
+                    {loading ? <LoadingSpinner size="sm" inverted /> : <><Check className="w-4 h-4" /> Finalizar cadastro</>}
                   </button>
                 )}
               </div>

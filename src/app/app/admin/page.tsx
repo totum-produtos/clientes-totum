@@ -3,6 +3,7 @@ import React, { useEffect, useState } from 'react';
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
 import { createSPASassClient } from '@/lib/supabase/client';
 import { Plus, Link2, Users, Building2, Clock, CheckCircle, XCircle, Mail, Loader2, Edit3, Power, PowerOff, Send, Copy, Check } from 'lucide-react';
+import { LoadingSpinner } from '@/components/ui/LoadingSpinner';
 import Link from 'next/link';
 import type { Json } from '@/lib/types';
 
@@ -341,7 +342,7 @@ export default function AdminPage() {
     }
 
     if (loading) {
-        return <div className="flex justify-center p-8"><div className="animate-spin h-8 w-8 border-b-2 border-rausch rounded-full"></div></div>;
+        return <div className="flex justify-center p-8"><LoadingSpinner /></div>;
     }
 
     return (

@@ -7,6 +7,7 @@ import { createSPASassClient } from '@/lib/supabase/client';
 import { Folder, ExternalLink, Unlink, Cloud } from 'lucide-react';
 import { useToast } from "@/components/ui/ToastProvider";
 import ConfirmDialog from "@/components/ConfirmDialog";
+import { LoadingSpinner, PageLoader } from "@/components/ui/LoadingSpinner";
 
 export default function DrivePage() {
   const { client, loading: globalLoading, user } = useGlobal();
@@ -104,11 +105,7 @@ export default function DrivePage() {
   };
 
   if (globalLoading) {
-    return (
-      <div className="min-h-screen bg-surface-soft flex items-center justify-center">
-        <div className="w-8 h-8 border-4 border-rausch border-t-transparent rounded-full animate-spin" />
-      </div>
-    );
+    return <PageLoader />;
   }
 
   if (!client) {
@@ -154,7 +151,7 @@ export default function DrivePage() {
   }
 
   if (loading) {
-    return <div className="flex justify-center p-8"><div className="animate-spin h-8 w-8 border-b-2 border-rausch rounded-full"></div></div>;
+    return <div className="flex justify-center p-8"><LoadingSpinner /></div>;
   }
 
   return (

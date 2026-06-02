@@ -31,6 +31,7 @@ import {
   CheckCircle2,
   Sparkles,
 } from 'lucide-react';
+import { LoadingSpinner, PageLoader } from '@/components/ui/LoadingSpinner';
 
 type Post = {
   id: number;
@@ -126,11 +127,7 @@ export default function FeedPostagensPage() {
   }, [client, mesAtual]);
 
   if (globalLoading) {
-    return (
-      <div className="min-h-screen bg-surface-soft flex items-center justify-center">
-        <div className="w-8 h-8 border-4 border-rausch border-t-transparent rounded-full animate-spin" />
-      </div>
-    );
+    return <PageLoader />;
   }
 
   if (!client) {
@@ -312,7 +309,7 @@ export default function FeedPostagensPage() {
       {/* Feed */}
       {loading ? (
         <div className="flex justify-center py-16">
-          <div className="animate-spin h-8 w-8 border-b-2 border-rausch rounded-full" />
+          <LoadingSpinner />
         </div>
       ) : postsPorDia.length === 0 ? (
         <div className="text-center py-16 bg-canvas border rounded-md">

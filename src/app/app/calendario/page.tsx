@@ -10,6 +10,8 @@ import { useToast } from "@/components/ui/ToastProvider";
 import ConfirmDialog from "@/components/ConfirmDialog";
 import { useSearchParams } from "next/navigation";
 import Link from "next/link";
+import { LoadingSpinner } from "@/components/ui/LoadingSpinner";
+import { PageError } from "@/components/ui/PageError";
 
 type Post = {
   id: number;
@@ -215,20 +217,16 @@ function CalendarioContent() {
 
   if (!loading && !targetClientId) {
     return (
-      <div className="min-h-screen bg-surface-soft flex flex-col items-center justify-center p-6 text-center">
-        <div className="bg-canvas border p-8 rounded-xl shadow-xl max-w-md w-full">
-          <CalendarDays className="w-12 h-12 text-rausch mx-auto mb-4" />
-          <h2 className="text-xl font-bold text-ink mb-2">Nenhum Cliente Selecionado</h2>
-          <p className="text-muted text-sm mb-6">
-            Você precisa selecionar um cliente para ver o calendário de postagens.
-          </p>
-          {isMaster && (
-            <Link href="/app/central-conteudo" className="block w-full py-3 bg-rausch text-white font-medium rounded-lg hover:bg-rausch-active text-center transition-colors">
-              Ir para Central de Conteúdos
-            </Link>
-          )}
-        </div>
-      </div>
+      <PageError
+        title="Nenhum cliente selecionado"
+        description="Você precisa selecionar um cliente para ver o calendário de postagens."
+        action={isMaster ? (
+          <Link href="/app/central-conteudo" className="block w-full py-3 bg-rausch text-white font-medium rounded-md hover:bg-rausch-active text-center transition-colors">
+            Ir para Central de Conteúdos
+          </Link>
+        ) : null}
+        defaultBack={null}
+      />
     );
   }
 
@@ -309,7 +307,7 @@ function CalendarioContent() {
 
         {loading ? (
           <div className="flex justify-center p-12">
-            <div className="w-8 h-8 border-2 border-rausch/30 border-t-rausch rounded-full animate-spin" />
+            <LoadingSpinner />
           </div>
         ) : (
           <CalendarGrid
@@ -400,7 +398,7 @@ export default function CalendarioPage() {
   return (
     <Suspense fallback={
       <div className="flex items-center justify-center min-h-[50vh]">
-        <div className="w-8 h-8 border-4 border-rausch border-t-transparent rounded-full animate-spin" />
+        <LoadingSpinner />
       </div>
     }>
       <CalendarioContent />
