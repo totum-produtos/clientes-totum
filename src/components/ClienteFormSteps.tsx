@@ -137,10 +137,7 @@ export function ClienteFormSteps({
         <Field label="CNPJ" required help="Pedimos o CNPJ para contratos, notas fiscais e identificação correta da empresa." complete={isFilled(form.cnpj)}><input value={form.cnpj} onChange={(e) => update("cnpj", e.target.value)} placeholder="Ex.: 12.345.678/0001-99" readOnly={!editMode} required /></Field>
       </div>
       <Field label="Ramo de atuação" required help="Selecione a categoria que mais se aproxima do seu negócio." complete={isFilled(form.ramo_atuacao)}>
-        <select value={form.ramo_atuacao} onChange={(e) => update("ramo_atuacao", e.target.value)} disabled={!editMode} required>
-          <option value="">Ex.: Marketing Digital, Clínica Odontológica</option>
-          {RAMOS.map((r) => <option key={r} value={r}>{r}</option>)}
-        </select>
+        <OptionGrid values={RAMOS} selected={form.ramo_atuacao} disabled={!editMode} onSelect={(value) => update("ramo_atuacao", value)} />
       </Field>
       <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
         <Field label="Nome do responsável" complete={isFilled(form.nome_responsavel)}><input value={form.nome_responsavel} onChange={(e) => update("nome_responsavel", e.target.value)} placeholder="Ex.: João Silva" readOnly={!editMode} /></Field>
@@ -157,10 +154,7 @@ export function ClienteFormSteps({
     <StepShell>
       <Field label="O que sua empresa faz?" complete={isFilled(form.descricao_negocio)}><textarea value={form.descricao_negocio} onChange={(e) => update("descricao_negocio", e.target.value)} placeholder="Explique de forma simples quais produtos ou serviços você oferece." rows={3} readOnly={!editMode} /></Field>
       <Field label="Qual o modelo de negócio?" required help="Como sua empresa gera receita?" complete={isFilled(form.modelo_negocio)}>
-        <select value={form.modelo_negocio} onChange={(e) => update("modelo_negocio", e.target.value)} disabled={!editMode} required>
-          <option value="">Ex.: Prestação de serviços, E-commerce, Loja Física</option>
-          {MODELOS_NEGOCIO.map((m) => <option key={m} value={m}>{m}</option>)}
-        </select>
+        <OptionGrid values={MODELOS_NEGOCIO} selected={form.modelo_negocio} disabled={!editMode} onSelect={(value) => update("modelo_negocio", value)} />
       </Field>
       <Field label="Diferencial frente aos concorrentes" required complete={isFilled(form.diferencial_competitivo)}><textarea value={form.diferencial_competitivo} onChange={(e) => update("diferencial_competitivo", e.target.value)} placeholder="O que faz um cliente escolher sua empresa em vez da concorrência?" rows={3} readOnly={!editMode} required /></Field>
       <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
@@ -174,16 +168,10 @@ export function ClienteFormSteps({
       </div>
       <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
         <Field label="Tamanho da empresa" complete={isFilled(form.tamanho_empresa)}>
-          <select value={form.tamanho_empresa} onChange={(e) => update("tamanho_empresa", e.target.value)} disabled={!editMode}>
-            <option value="">Ex.: 2 funcionários, 10 funcionários</option>
-            {TAMANHOS.map((t) => <option key={t} value={t}>{t}</option>)}
-          </select>
+          <OptionGrid values={TAMANHOS} selected={form.tamanho_empresa} disabled={!editMode} onSelect={(value) => update("tamanho_empresa", value)} />
         </Field>
         <Field label="Faturamento mensal" complete={isFilled(form.faturamento_mensal)}>
-          <select value={form.faturamento_mensal} onChange={(e) => update("faturamento_mensal", e.target.value)} disabled={!editMode}>
-            <option value="">Ex.: Entre R$ 20 mil e R$ 50 mil</option>
-            {FATURAMENTOS.map((f) => <option key={f} value={f}>{f}</option>)}
-          </select>
+          <OptionGrid values={FATURAMENTOS} selected={form.faturamento_mensal} disabled={!editMode} onSelect={(value) => update("faturamento_mensal", value)} />
         </Field>
       </div>
     </StepShell>
@@ -192,10 +180,7 @@ export function ClienteFormSteps({
   if (step === 3) return (
     <StepShell>
       <Field label="Maior objetivo com o marketing digital hoje" required help="Escolha o resultado que mais deseja alcançar." complete={isFilled(form.maior_objetivo_mkt)}>
-        <select value={form.maior_objetivo_mkt} onChange={(e) => update("maior_objetivo_mkt", e.target.value)} disabled={!editMode} required>
-          <option value="">Ex.: Gerar mais leads, aumentar vendas</option>
-          {OBJETIVOS_MARKETING.map((o) => <option key={o} value={o}>{o}</option>)}
-        </select>
+        <OptionGrid values={OBJETIVOS_MARKETING} selected={form.maior_objetivo_mkt} disabled={!editMode} onSelect={(value) => update("maior_objetivo_mkt", value)} />
       </Field>
       <Field label="Principal meta" required complete={isFilled(form.principal_meta)}><textarea value={form.principal_meta} onChange={(e) => update("principal_meta", e.target.value)} placeholder="Ex.: Dobrar o número de clientes em 12 meses" rows={2} readOnly={!editMode} required /></Field>
       <Field label="Como você mede essa meta?" complete={isFilled(form.meta_mensuravel)}><textarea value={form.meta_mensuravel} onChange={(e) => update("meta_mensuravel", e.target.value)} placeholder="Ex.: Número de vendas, faturamento, agendamentos" rows={2} readOnly={!editMode} /></Field>
@@ -216,11 +201,7 @@ export function ClienteFormSteps({
       <Field label="Cliente ideal" complete={isFilled(form.cliente_ideal)}><textarea value={form.cliente_ideal} onChange={(e) => update("cliente_ideal", e.target.value)} placeholder="Descreva o tipo de cliente que você mais gosta de atender." rows={3} readOnly={!editMode} /></Field>
       <Field label="Principais dúvidas e objeções" required complete={isFilled(form.dores_principais)}><textarea value={form.dores_principais} onChange={(e) => update("dores_principais", e.target.value)} placeholder="Ex.: Preço, prazo, confiança, garantia" rows={3} readOnly={!editMode} required /></Field>
       <Field label="Possui base de clientes ou leads?" required complete={isFilled(form.base_dados_clientes)}>
-        <select value={form.base_dados_clientes} onChange={(e) => update("base_dados_clientes", e.target.value)} disabled={!editMode} required>
-          <option value="">Selecione</option>
-          <option value="Sim">Sim</option>
-          <option value="Não">Não</option>
-        </select>
+        <OptionGrid values={["Sim", "Não"]} selected={form.base_dados_clientes} disabled={!editMode} onSelect={(value) => update("base_dados_clientes", value)} />
       </Field>
       <Checklist label="Classe social predominante" values={CLASSES_SOCIAIS} selected={form.classe_social} disabled={!editMode} onToggle={(v) => toggleArray("classe_social", v)} />
     </StepShell>
@@ -240,11 +221,7 @@ export function ClienteFormSteps({
       <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
         <Field label="Ações de marketing que deram certo" complete={isFilled(form.acoes_passadas)}><textarea value={form.acoes_passadas} onChange={(e) => update("acoes_passadas", e.target.value)} placeholder="Ex.: Campanha de indicação, tráfego pago" rows={2} readOnly={!editMode} /></Field>
         <Field label="Já trabalhou com agência?" complete={isFilled(form.trabalhou_agencia)}>
-          <select value={form.trabalhou_agencia} onChange={(e) => update("trabalhou_agencia", e.target.value)} disabled={!editMode}>
-            <option value="">Como foi a experiência?</option>
-            <option value="Sim">Sim</option>
-            <option value="Não">Não</option>
-          </select>
+          <OptionGrid values={["Sim", "Não"]} selected={form.trabalhou_agencia} disabled={!editMode} onSelect={(value) => update("trabalhou_agencia", value)} />
         </Field>
       </div>
     </StepShell>
@@ -255,12 +232,7 @@ export function ClienteFormSteps({
       <Field label="Como funciona o processo de vendas?" required complete={isFilled(form.processo_vendas_estruturado)}><textarea value={form.processo_vendas_estruturado} onChange={(e) => update("processo_vendas_estruturado", e.target.value)} placeholder="Explique o caminho desde o primeiro contato até o fechamento." rows={3} readOnly={!editMode} required /></Field>
       <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
         <Field label="Utiliza CRM?" required complete={isFilled(form.crm_utilizado)}>
-          <select value={form.crm_utilizado} onChange={(e) => update("crm_utilizado", e.target.value)} disabled={!editMode} required>
-            <option value="">Ex.: Kommo, RD Station, Hubspot ou não utiliza.</option>
-            <option value="Sim">Sim</option>
-            <option value="Não">Não</option>
-            <option value="Não sei">Não sei</option>
-          </select>
+          <OptionGrid values={["Sim", "Não", "Não sei"]} selected={form.crm_utilizado} disabled={!editMode} onSelect={(value) => update("crm_utilizado", value)} />
         </Field>
         <Field label="Quantas pessoas vendem?" required complete={isFilled(form.equipe_vendas)}><input value={form.equipe_vendas} onChange={(e) => update("equipe_vendas", e.target.value)} placeholder="Ex.: 1 vendedor, 3 consultores" readOnly={!editMode} required /></Field>
       </div>
@@ -274,10 +246,7 @@ export function ClienteFormSteps({
     <StepShell>
       <Checklist label="Canais de atendimento" required values={CANAIS_ATENDIMENTO} selected={form.canais_atendimento} disabled={!editMode} onToggle={(v) => toggleArray("canais_atendimento", v)} />
       <Field label="SLA de resposta" complete={isFilled(form.sla_resposta)}>
-        <select value={form.sla_resposta} onChange={(e) => update("sla_resposta", e.target.value)} disabled={!editMode}>
-          <option value="">Ex.: Respondemos em até 15 minutos</option>
-          {SLAS.map((s) => <option key={s} value={s}>{s}</option>)}
-        </select>
+        <OptionGrid values={SLAS} selected={form.sla_resposta} disabled={!editMode} onSelect={(value) => update("sla_resposta", value)} />
       </Field>
       <Field label="Observações adicionais" complete={isFilled(form.informacoes_adicionais)}><textarea value={form.informacoes_adicionais} onChange={(e) => update("informacoes_adicionais", e.target.value)} placeholder="Informações que considera importantes para a equipe Totum." rows={3} readOnly={!editMode} /></Field>
 
@@ -324,7 +293,7 @@ export function ClienteFormSteps({
 }
 
 function StepShell({ children }: { children: React.ReactNode }) {
-  return <div className="space-y-5">{children}</div>;
+  return <div className="typeform-question-stack">{children}</div>;
 }
 
 function Field({
@@ -341,7 +310,7 @@ function Field({
   children: React.ReactNode;
 }) {
   return (
-    <div className="space-y-2">
+    <section className="typeform-question">
       <label className="totum-label">
         <span>{label} {required && <b>*</b>}</span>
         <span className="flex items-center gap-2">
@@ -357,6 +326,39 @@ function Field({
         </span>
       </label>
       {children}
+    </section>
+  );
+}
+
+function OptionGrid({
+  values,
+  selected,
+  disabled,
+  onSelect,
+}: {
+  values: string[];
+  selected: string;
+  disabled?: boolean;
+  onSelect: (value: string) => void;
+}) {
+  return (
+    <div className="typeform-option-grid">
+      {values.map((value, idx) => {
+        const active = selected === value;
+        return (
+          <button
+            key={value}
+            type="button"
+            disabled={disabled}
+            onClick={() => onSelect(value)}
+            className={`typeform-option ${active ? "is-active" : ""}`}
+          >
+            <span className="typeform-option-key">{String.fromCharCode(65 + (idx % 26))}</span>
+            <span>{value}</span>
+            {active && <Check className="ml-auto h-4 w-4 text-success" />}
+          </button>
+        );
+      })}
     </div>
   );
 }
@@ -377,12 +379,12 @@ function Checklist({
   onToggle: (value: string) => void;
 }) {
   return (
-    <div className="space-y-3">
+    <section className="typeform-question">
       <label className="totum-label">
         <span>{label} {required && <b>*</b>}</span>
         {selected.length > 0 && <Check className="h-4 w-4 text-success" />}
       </label>
-      <div className="flex flex-wrap gap-2">
+      <div className="typeform-option-grid">
         {values.map((value) => {
           const active = selected.includes(value);
           return (
@@ -391,13 +393,14 @@ function Checklist({
               type="button"
               disabled={disabled}
               onClick={() => onToggle(value)}
-              className={`totum-chip ${active ? "is-active" : ""}`}
+              className={`typeform-option ${active ? "is-active" : ""}`}
             >
+              <span className="typeform-option-key">{active ? "✓" : "+"}</span>
               {value}
             </button>
           );
         })}
       </div>
-    </div>
+    </section>
   );
 }

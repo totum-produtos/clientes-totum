@@ -332,14 +332,13 @@ export default function OnboardingPage() {
     );
   }
 
-  /* ---------- FORM (wizard editorial) ---------- */
+  /* ---------- FORM (typeform-inspired quiz) ---------- */
   const currentStepIntro = STEP_INTROS[step] || "Preencha o que souber. Você pode revisar depois.";
 
   return (
-    <div className="totum-red-canvas min-h-screen flex flex-col">
-      {/* TOP RAIL */}
-      <header className="sticky top-0 z-40 bg-navy-deep/95 backdrop-blur-md text-white border-b border-border-strong">
-        <div className="max-w-screen-2xl mx-auto px-6 md:px-10 h-16 flex items-center justify-between">
+    <div className="totum-red-canvas min-h-screen flex flex-col typeform-canvas">
+      <header className="sticky top-0 z-40 bg-navy-deep/88 backdrop-blur-md text-white">
+        <div className="mx-auto flex h-16 max-w-6xl items-center justify-between px-5 md:px-8">
           <div className="flex items-center gap-5">
             <Image
               src="/logo.png"
@@ -349,15 +348,13 @@ export default function OnboardingPage() {
               priority
               className="h-7 w-auto brightness-0 invert"
             />
-            <span className="hidden md:block font-mono text-[10px] tracking-[0.32em] uppercase text-white/45">
-              Onboarding inicial
-            </span>
+            <span className="hidden md:block font-mono text-[10px] tracking-[0.32em] uppercase text-white/45">Briefing interativo</span>
           </div>
 
-          <div className="flex items-center gap-6">
+          <div className="flex items-center gap-4">
             {savedLabel && (
               <span
-                className={`hidden sm:flex items-center gap-2 font-mono text-[11px] tracking-[0.18em] uppercase ${
+                className={`hidden sm:flex items-center gap-2 font-mono text-[10px] tracking-[0.18em] uppercase ${
                   saving ? "text-white/55" : "text-white/75"
                 }`}
               >
@@ -369,8 +366,7 @@ export default function OnboardingPage() {
                 {savedLabel}
               </span>
             )}
-            <span className="font-mono text-[11px] tracking-[0.22em] uppercase text-white/75">
-              <span className="text-white/45">Etapa</span>{" "}
+            <span className="font-mono text-[10px] tracking-[0.22em] uppercase text-white/75">
               {String(step).padStart(2, "0")}
               <span className="text-white/45">{" / "}{String(STEPS.length).padStart(2, "0")}</span>
             </span>
@@ -382,184 +378,90 @@ export default function OnboardingPage() {
         </div>
       </header>
 
-      {/* MAIN */}
       <main className="relative z-10 flex-1">
-        <div className="max-w-screen-2xl mx-auto px-6 md:px-10 py-16 md:py-24">
-          <div className="grid grid-cols-12 gap-8 md:gap-12">
-
-            {/* LEFT RAIL — índice editorial */}
-            <aside className="hidden lg:block col-span-3 sticky top-32 self-start">
-              <span className="editorial-eyebrow text-rausch block mb-6">
-                Onboarding — 7 blocos
-              </span>
-              <ol className="space-y-0.5">
-                {STEPS.map((s) => {
-                  const active = s.id === step;
-                  const done = s.id < step;
-                  return (
-                    <li key={s.id}>
-                      <button
-                        type="button"
-                        onClick={() => goToStep(s.id)}
-                        className={`group w-full flex items-baseline gap-4 py-2.5 pl-4 -ml-px border-l text-left transition-all ${
-                          active
-                            ? "border-rausch"
-                            : done
-                            ? "border-white/20 hover:border-white/40"
-                            : "border-white/10 hover:border-white/30"
-                        }`}
-                      >
-                        <span
-                          className={`font-mono text-[10px] tracking-[0.1em] shrink-0 w-5 ${
-                            active ? "text-rausch font-semibold" : done ? "text-white/55" : "text-white/35"
-                          }`}
-                        >
-                          {String(s.id).padStart(2, "0")}
-                        </span>
-                        <span
-                          className={`font-display text-[15px] leading-snug transition-colors ${
-                            active
-                              ? "text-white font-medium"
-                              : done
-                              ? "text-white/65 group-hover:text-white"
-                              : "text-white/40 group-hover:text-white/80"
-                          }`}
-                        >
-                          {s.label}
-                        </span>
-                      </button>
-                    </li>
-                  );
-                })}
-              </ol>
-
-              <div className="mt-10 pt-6 border-t border-white/10">
-                <p className="text-[11px] font-mono uppercase tracking-[0.22em] text-muted-soft leading-relaxed">
-                  Auto-save ativo
-                  <br />
-                  Suas respostas ficam neste link por 7 dias
-                </p>
-              </div>
-            </aside>
-
-            {/* CONTENT */}
-            <section className="col-span-12 lg:col-span-9">
-              <div className="max-w-2xl">
-                {/* HERO da etapa */}
-                <div className="mb-12 md:mb-16">
-                  <span className="totum-kicker">
-                    Bloco {String(step).padStart(2, "0")} de{" "}
-                    {String(STEPS.length).padStart(2, "0")}
-                  </span>
-                  <h1 className="totum-heading mt-5">
-                    {STEPS[step - 1].label}
-                    <span className="text-rausch">.</span>
-                  </h1>
-                  <p className="mt-7 text-lg text-white-soft leading-relaxed max-w-lg">
-                    {currentStepIntro}
-                  </p>
-                </div>
-
-                {/* ERROR */}
-                {stepError && (
-                  <div className="mb-10 flex items-start gap-3 p-5 rounded-md border border-danger/30 bg-danger/10">
-                    <AlertCircle className="w-4 h-4 text-rausch mt-0.5 shrink-0" />
-                    <p className="text-sm text-red-light leading-relaxed">{stepError}</p>
-                  </div>
-                )}
-
-                {/* FORM (reaproveita ClienteFormSteps com tema editorial) */}
-                <div className="editorial-form">
-                  <ClienteFormSteps
-                    step={step}
-                    form={form}
-                    editMode={true}
-                    isMaster={false}
-                    update={update}
-                    toggleArray={toggleArray}
-                    addPersona={addPersona}
-                    removePersona={removePersona}
-                    updatePersona={updatePersona}
-                    setForm={setForm}
-                  />
-                </div>
-
-                {/* NAV */}
-                <div className="mt-16 pt-8 border-t border-white/10 flex items-center justify-between gap-4">
-                  <button
-                    type="button"
-                    onClick={goBack}
-                    disabled={step === 1}
-                    className="totum-button-ghost"
-                  >
-                    <ArrowLeft className="w-3.5 h-3.5" /> Voltar
-                  </button>
-
-                  {step < STEPS.length ? (
-                    <button type="button" onClick={goNext} className="totum-button-primary">
-                      Próximo
-                      <ArrowRight className="w-4 h-4" />
-                    </button>
-                  ) : (
-                    <button
-                      type="button"
-                      onClick={handleSubmit}
-                      disabled={submitting}
-                      className="totum-button-primary"
-                    >
-                      {submitting ? (
-                        <>
-                          <span className="w-3.5 h-3.5 border-2 border-white/40 border-t-white rounded-full animate-spin" />
-                          Finalizando
-                        </>
-                      ) : (
-                        <>
-                          Finalizar onboarding
-                          <ArrowRight className="w-4 h-4" />
-                        </>
-                      )}
-                    </button>
-                  )}
-                </div>
-
-                {/* Footer mobile */}
-                <p className="lg:hidden mt-12 text-[11px] font-mono uppercase tracking-[0.22em] text-muted-soft leading-relaxed">
-                  Auto-save ativo
-                  <br />
-                  Suas respostas ficam neste link por 7 dias
-                </p>
-              </div>
-            </section>
+        <section className="mx-auto flex min-h-[calc(100vh-8.25rem)] max-w-4xl flex-col px-5 py-10 md:px-8 md:py-14">
+          <div className="mb-8 flex flex-wrap items-center justify-between gap-3">
+            <div>
+              <span className="totum-kicker">Bloco {String(step).padStart(2, "0")}</span>
+              <h1 className="mt-3 text-3xl font-light leading-tight text-white md:text-5xl">
+                {STEPS[step - 1].label}
+              </h1>
+            </div>
+            <span className="hidden text-xs font-medium uppercase tracking-[0.18em] text-white/45 md:block">
+              Responda no seu ritmo
+            </span>
           </div>
-        </div>
+
+          <p className="mb-10 max-w-2xl text-lg leading-relaxed text-white-soft">{currentStepIntro}</p>
+
+          {stepError && (
+            <div className="mb-8 flex items-start gap-3 rounded-md border border-danger/30 bg-danger/10 p-4">
+              <AlertCircle className="mt-0.5 h-4 w-4 shrink-0 text-rausch" />
+              <p className="text-sm leading-relaxed text-red-light">{stepError}</p>
+            </div>
+          )}
+
+          <div className="editorial-form typeform-form">
+            <ClienteFormSteps
+              step={step}
+              form={form}
+              editMode={true}
+              isMaster={false}
+              update={update}
+              toggleArray={toggleArray}
+              addPersona={addPersona}
+              removePersona={removePersona}
+              updatePersona={updatePersona}
+              setForm={setForm}
+            />
+          </div>
+
+          <p className="mt-10 text-[11px] font-mono uppercase leading-relaxed tracking-[0.22em] text-muted-soft">
+            Auto-save ativo. Suas respostas ficam neste link por 7 dias.
+          </p>
+        </section>
       </main>
 
-      {/* Mobile step selector flutuante */}
-      <div className="lg:hidden sticky bottom-0 z-30 bg-navy-deep/95 backdrop-blur border-t border-white/10">
-        <div className="px-4 py-3 flex items-center gap-2 overflow-x-auto">
-          {STEPS.map((s) => {
-            const active = s.id === step;
-            const done = s.id < step;
-            return (
+      <footer className="sticky bottom-0 z-40 border-t border-white/10 bg-navy-deep/92 backdrop-blur-md">
+        <div className="mx-auto flex max-w-4xl items-center justify-between gap-4 px-5 py-4 md:px-8">
+          <button type="button" onClick={goBack} disabled={step === 1} className="totum-button-ghost">
+            <ArrowLeft className="h-3.5 w-3.5" /> Voltar
+          </button>
+
+          <div className="hidden flex-1 items-center justify-center gap-2 md:flex">
+            {STEPS.map((s) => (
               <button
                 key={s.id}
                 type="button"
                 onClick={() => goToStep(s.id)}
-                className={`shrink-0 px-3 py-1.5 rounded-full font-mono text-[10px] tracking-[0.15em] uppercase transition-all ${
-                  active
-                    ? "bg-rausch text-white"
-                    : done
-                    ? "bg-navy-card/10 text-white/80"
-                    : "bg-navy-card/5 text-white/40"
-                }`}
-              >
-                {String(s.id).padStart(2, "0")}
-                {active ? " · " + s.label.split(" ")[0] : ""}
-              </button>
-            );
-          })}
+                aria-label={`Ir para ${s.label}`}
+                className={`h-2 rounded-full transition-all ${s.id === step ? "w-10 bg-rausch" : s.id < step ? "w-4 bg-white/45" : "w-4 bg-white/15"}`}
+              />
+            ))}
+          </div>
+
+          {step < STEPS.length ? (
+            <button type="button" onClick={goNext} className="totum-button-primary">
+              OK <span className="hidden sm:inline">continuar</span>
+              <ArrowRight className="h-4 w-4" />
+            </button>
+          ) : (
+            <button type="button" onClick={handleSubmit} disabled={submitting} className="totum-button-primary">
+              {submitting ? (
+                <>
+                  <span className="h-3.5 w-3.5 animate-spin rounded-full border-2 border-white/40 border-t-white" />
+                  Finalizando
+                </>
+              ) : (
+                <>
+                  Finalizar
+                  <ArrowRight className="h-4 w-4" />
+                </>
+              )}
+            </button>
+          )}
         </div>
-      </div>
+      </footer>
     </div>
   );
 }

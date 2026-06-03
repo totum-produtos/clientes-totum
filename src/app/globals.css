@@ -156,17 +156,46 @@
   .editorial-form input[type="password"],
   .editorial-form textarea,
   .editorial-form select {
-    @apply w-full rounded-md border border-border-strong bg-navy-elevated px-4 py-4 text-base text-white-soft placeholder:text-muted-soft transition-colors focus:border-rausch focus:outline-none focus:ring-0 disabled:opacity-60;
+    @apply w-full rounded-md border border-border-strong bg-navy-elevated px-5 py-5 text-lg text-white placeholder:text-muted-soft transition-colors focus:border-rausch focus:outline-none focus:ring-0 disabled:opacity-60;
   }
 
   .editorial-form textarea {
-    min-height: 104px;
+    min-height: 132px;
     resize: vertical;
+  }
+
+  .typeform-canvas {
+    background:
+      radial-gradient(circle at 15% 10%, rgba(218, 33, 40, 0.12), transparent 28rem),
+      radial-gradient(circle at 85% 18%, rgba(255, 255, 255, 0.05), transparent 24rem),
+      #080710;
+  }
+
+  .typeform-form {
+    counter-reset: question;
+  }
+
+  .typeform-question-stack {
+    @apply space-y-8 md:space-y-10;
+  }
+
+  .typeform-question {
+    counter-increment: question;
+    @apply relative rounded-md border border-white/10 bg-navy-card/55 p-5 shadow-brand transition-colors md:p-7;
+  }
+
+  .typeform-question:focus-within {
+    @apply border-rausch/70;
+  }
+
+  .typeform-question::before {
+    content: counter(question, decimal-leading-zero);
+    @apply mb-4 block font-mono text-[11px] font-semibold uppercase tracking-[0.22em] text-rausch;
   }
 
   .totum-label,
   .editorial-form label {
-    @apply flex items-center justify-between gap-3 text-sm font-medium text-white;
+    @apply mb-4 flex items-start justify-between gap-3 text-xl font-light leading-snug text-white md:text-2xl;
     letter-spacing: 0;
     text-transform: none;
   }
@@ -183,12 +212,32 @@
     @apply border-rausch bg-rausch text-white shadow-red;
   }
 
+  .typeform-option-grid {
+    @apply grid grid-cols-1 gap-3 sm:grid-cols-2;
+  }
+
+  .typeform-option {
+    @apply flex min-h-14 items-center gap-3 rounded-md border border-border-strong bg-navy-elevated px-4 py-3 text-left text-base font-medium text-white-soft transition-all hover:border-rausch hover:bg-navy-card hover:text-white disabled:cursor-not-allowed disabled:opacity-60;
+  }
+
+  .typeform-option.is-active {
+    @apply border-rausch bg-rausch/15 text-white shadow-red;
+  }
+
+  .typeform-option-key {
+    @apply grid h-7 w-7 shrink-0 place-items-center rounded border border-white/20 bg-white/5 font-mono text-[11px] font-semibold text-white/70;
+  }
+
+  .typeform-option.is-active .typeform-option-key {
+    @apply border-rausch bg-rausch text-white;
+  }
+
   .totum-upload {
-    @apply space-y-5 rounded-lg border border-border-strong bg-navy-card p-5 shadow-brand;
+    @apply space-y-5 rounded-md border border-white/10 bg-navy-card/55 p-5 shadow-brand md:p-7;
   }
 
   .totum-dropzone {
-    @apply flex w-full flex-col items-center justify-center gap-2 rounded-md border-2 border-dashed border-border-strong bg-navy-elevated px-5 py-8 text-center text-sm text-white-soft transition-colors hover:border-rausch hover:text-white;
+    @apply flex w-full flex-col items-center justify-center gap-2 rounded-md border-2 border-dashed border-border-strong bg-navy-elevated px-5 py-10 text-center text-base text-white-soft transition-colors hover:border-rausch hover:text-white;
   }
 
   .totum-dropzone small {
