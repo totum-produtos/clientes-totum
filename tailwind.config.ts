@@ -106,6 +106,22 @@ const config: Config = {
           "Helvetica Neue",
           "sans-serif",
         ],
+        // Editorial: serif display para títulos/etiquetas de prestígio.
+        // Carregado via next/font (ver app/layout.tsx).
+        display: [
+          "var(--font-display)",
+          "Fraunces",
+          "Georgia",
+          "serif",
+        ],
+        // Mono refinada — números, etapas, metadados.
+        mono: [
+          "var(--font-mono)",
+          "JetBrains Mono",
+          "SFMono-Regular",
+          "Menlo",
+          "monospace",
+        ],
       },
       fontSize: {
         "display-xl": ["28px", { lineHeight: "1.43", fontWeight: "700", letterSpacing: "0" }],
