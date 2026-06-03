@@ -1,10 +1,33 @@
 "use client";
+
 import React, { useRef } from "react";
-import { AlertCircle, Check, Plus, Trash2, Upload, X } from "lucide-react";
+import { Check, HelpCircle, Upload, X } from "lucide-react";
 import {
-  CANAIS, CLASSES_SOCIAIS, DIAS, FATURAMENTOS, FormState,
-  Persona, RAMOS, SLAS, TAMANHOS, TONS_VOZ, FINALIDADES, MESES, SEMANAS, VISIOES_MERCADO
+  CANAIS_ATENDIMENTO,
+  CANAIS_COMUNICACAO,
+  CANAIS_VENDA,
+  CLASSES_SOCIAIS,
+  FATURAMENTOS,
+  FormState,
+  MESES,
+  MODELOS_NEGOCIO,
+  OBJETIVOS_MARKETING,
+  Persona,
+  RAMOS,
+  SLAS,
+  TAMANHOS,
 } from "@/lib/cliente-form-constants";
+
+type ToggleField =
+  | "classe_social"
+  | "canais_atendimento"
+  | "dias_atendimento"
+  | "meses_alta_faturamento"
+  | "meses_baixa_faturamento"
+  | "dias_fortes_semana"
+  | "dias_fracos_semana"
+  | "canais_comunicacao_possuidos"
+  | "canais_vendas";
 
 type Props = {
   step: number;
@@ -12,492 +35,369 @@ type Props = {
   editMode: boolean;
   isMaster?: boolean;
   update: <K extends keyof FormState>(field: K, value: FormState[K]) => void;
-  toggleArray: (field: "classe_social" | "canais_atendimento" | "dias_atendimento" | "meses_alta_faturamento" | "meses_baixa_faturamento" | "dias_fortes_semana" | "dias_fracos_semana" | "canais_comunicacao_possuidos" | "canais_vendas", value: string) => void;
+  toggleArray: (field: ToggleField, value: string) => void;
   addPersona: () => void;
   removePersona: (idx: number) => void;
   updatePersona: (idx: number, field: keyof Persona, value: string) => void;
   setForm: React.Dispatch<React.SetStateAction<FormState>>;
 };
 
+const isFilled = (value: unknown) => {
+  if (Array.isArray(value)) return value.length > 0;
+  return !(value === undefined || value === null || String(value).trim() === "");
+};
+
+const requiredByStep: Record<number, Array<[keyof FormState, string]>> = {
+  1: [
+    ["nome", "Nome da empresa"],
+    ["cnpj", "CNPJ"],
+    ["ramo_atuacao", "Ramo de atuação"],
+    ["email_responsavel", "Email corporativo"],
+    ["telefone", "Telefone"],
+  ],
+  2: [
+    ["modelo_negocio", "Modelo de negócio"],
+    ["diferencial_competitivo", "Diferencial frente aos concorrentes"],
+    ["produto_mais_forte", "Produto ou serviço mais vendido"],
+    ["ticket_medio_atual", "Ticket médio atual"],
+  ],
+  3: [
+    ["maior_objetivo_mkt", "Maior objetivo com o marketing digital hoje"],
+    ["principal_meta", "Principal meta"],
+    ["meses_alta_faturamento", "Meses mais fortes do ano"],
+  ],
+  4: [
+    ["abrangencia_geografica", "Regiões atendidas"],
+    ["dores_principais", "Principais dúvidas e objeções"],
+    ["base_dados_clientes", "Possui base de clientes ou leads?"],
+  ],
+  5: [
+    ["concorrentes_referencia", "Principais concorrentes"],
+    ["referencia_comunicacao", "Referência de comunicação"],
+    ["canais_comunicacao_possuidos", "Canais atuais"],
+    ["canal_maior_retorno", "Canal que gera mais resultado"],
+  ],
+  6: [
+    ["processo_vendas_estruturado", "Como funciona o processo de vendas?"],
+    ["crm_utilizado", "Utiliza CRM?"],
+    ["equipe_vendas", "Quantas pessoas vendem?"],
+    ["canais_vendas", "Canais utilizados para vender"],
+  ],
+  7: [["canais_atendimento", "Canais de atendimento"]],
+};
+
+export function validateStep(step: number, form: FormState): { ok: boolean; missing: string[] } {
+  const missing = (requiredByStep[step] || [])
+    .filter(([key]) => !isFilled(form[key]))
+    .map(([, label]) => label);
+  return { ok: missing.length === 0, missing };
+}
+
 export function ClienteFormSteps({
-  step, form, editMode, isMaster = false, update, toggleArray, addPersona, removePersona, updatePersona, setForm,
+  step,
+  form,
+  editMode,
+  update,
+  toggleArray,
+  setForm,
 }: Props) {
   const fileInputRef = useRef<HTMLInputElement>(null);
 
-  const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const files = e.target.files;
-    if (!files) return;
-    Array.from(files).forEach(file => {
+  const handleMaterialUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const files = Array.from(e.target.files || []).slice(0, 5);
+    if (!files.length) return;
+
+    files.forEach((file) => {
+      if (file.size > 10 * 1024 * 1024) return;
       const reader = new FileReader();
       reader.onloadend = () => {
-        setForm(f => ({ ...f, key_visual_images: [...f.key_visual_images, reader.result as string] }));
+        setForm((current) => ({
+          ...current,
+          material_files: [...current.material_files, reader.result as string].slice(0, 5),
+          material_file_names: [...current.material_file_names, file.name].slice(0, 5),
+          enviar_materiais_depois: false,
+        }));
       };
       reader.readAsDataURL(file);
     });
   };
 
-  const removeImage = (idx: number) => {
-    setForm(f => ({ ...f, key_visual_images: f.key_visual_images.filter((_, i) => i !== idx) }));
+  const removeMaterial = (idx: number) => {
+    setForm((current) => ({
+      ...current,
+      material_files: current.material_files.filter((_, i) => i !== idx),
+      material_file_names: current.material_file_names.filter((_, i) => i !== idx),
+    }));
   };
 
-  // STEP 1 - Informações da Empresa
   if (step === 1) return (
-    <div className="space-y-5">
+    <StepShell>
       <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
-        <Field label="Nome da empresa" editMode={editMode} required><input value={form.nome} onChange={e => update("nome", e.target.value)} placeholder="Ex: Totum Digital" className="input-field" readOnly={!editMode} required /></Field>
-        <Field label="CNPJ" editMode={editMode} required><input value={form.cnpj} onChange={e => update("cnpj", e.target.value)} placeholder="00.000.000/0000-00" className="input-field" readOnly={!editMode} required /></Field>
+        <Field label="Nome da empresa" required complete={isFilled(form.nome)}><input value={form.nome} onChange={(e) => update("nome", e.target.value)} placeholder="Ex.: Grupo Totum" readOnly={!editMode} required /></Field>
+        <Field label="CNPJ" required help="Pedimos o CNPJ para contratos, notas fiscais e identificação correta da empresa." complete={isFilled(form.cnpj)}><input value={form.cnpj} onChange={(e) => update("cnpj", e.target.value)} placeholder="Ex.: 12.345.678/0001-99" readOnly={!editMode} required /></Field>
+      </div>
+      <Field label="Ramo de atuação" required help="Selecione a categoria que mais se aproxima do seu negócio." complete={isFilled(form.ramo_atuacao)}>
+        <select value={form.ramo_atuacao} onChange={(e) => update("ramo_atuacao", e.target.value)} disabled={!editMode} required>
+          <option value="">Ex.: Marketing Digital, Clínica Odontológica</option>
+          {RAMOS.map((r) => <option key={r} value={r}>{r}</option>)}
+        </select>
+      </Field>
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+        <Field label="Nome do responsável" complete={isFilled(form.nome_responsavel)}><input value={form.nome_responsavel} onChange={(e) => update("nome_responsavel", e.target.value)} placeholder="Ex.: João Silva" readOnly={!editMode} /></Field>
+        <Field label="Email corporativo" required complete={isFilled(form.email_responsavel)}><input type="email" value={form.email_responsavel} onChange={(e) => update("email_responsavel", e.target.value)} placeholder="Ex.: contato@empresa.com.br" readOnly={!editMode} required /></Field>
       </div>
       <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
-        <Field label="Ramo de atuação" editMode={editMode} required>
-          <select value={form.ramo_atuacao} onChange={e => update("ramo_atuacao", e.target.value)} className="input-field" disabled={!editMode} required>
-            <option value="">Selecione</option>{RAMOS.map(r => <option key={r} value={r}>{r}</option>)}
-          </select>
-        </Field>
-        <Field label="Nome do responsável" editMode={editMode}><input value={form.nome_responsavel} onChange={e => update("nome_responsavel", e.target.value)} placeholder="Nome completo" className="input-field" readOnly={!editMode} /></Field>
+        <Field label="Telefone" required complete={isFilled(form.telefone)}><input value={form.telefone} onChange={(e) => update("telefone", e.target.value)} placeholder="Ex.: (33) 99999-9999" readOnly={!editMode} required /></Field>
+        <Field label="Site" complete={isFilled(form.site)}><input value={form.site} onChange={(e) => update("site", e.target.value)} placeholder="Ex.: www.empresa.com.br" readOnly={!editMode} /></Field>
       </div>
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
-        <Field label="Email corporativo" editMode={editMode} required><input type="email" value={form.email_responsavel} onChange={e => update("email_responsavel", e.target.value)} placeholder="email@empresa.com" className="input-field" readOnly={!editMode} required /></Field>
-        <Field label="Telefone" editMode={editMode} required><input value={form.telefone} onChange={e => update("telefone", e.target.value)} placeholder="(00) 00000-0000" className="input-field" readOnly={!editMode} required /></Field>
-      </div>
-      <Field label="Site" editMode={editMode}><input value={form.site} onChange={e => update("site", e.target.value)} placeholder="https://www.empresa.com" className="input-field" readOnly={!editMode} /></Field>
-    </div>
+    </StepShell>
   );
 
-  // STEP 2 - Sobre o Negócio
   if (step === 2) return (
-    <div className="space-y-5">
-      <Field label="O que a empresa faz? (Descrição)" editMode={editMode}><textarea value={form.descricao_negocio} onChange={e => update("descricao_negocio", e.target.value)} placeholder="Descreva o negócio" rows={3} className="input-field resize-none" readOnly={!editMode} /></Field>
-      <Field label="Qual o modelo de negócio?" editMode={editMode} required><textarea value={form.modelo_negocio} onChange={e => update("modelo_negocio", e.target.value)} placeholder="B2B, B2C, Franquia..." rows={2} className="input-field resize-none" readOnly={!editMode} required /></Field>
-      <Field label="Diferencial frente aos concorrentes" editMode={editMode} required><textarea value={form.diferencial_competitivo} onChange={e => update("diferencial_competitivo", e.target.value)} rows={2} className="input-field resize-none" readOnly={!editMode} required /></Field>
-
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-5 border-t pt-5">
-        <Field label="Produto mais forte" editMode={editMode} required><input value={form.produto_mais_forte} onChange={e => update("produto_mais_forte", e.target.value)} className="input-field" readOnly={!editMode} required /></Field>
-        <Field label="Produto desejado forte" editMode={editMode}><input value={form.produto_desejado_forte} onChange={e => update("produto_desejado_forte", e.target.value)} className="input-field" readOnly={!editMode} /></Field>
-        <Field label="Produto mais fraco" editMode={editMode}><input value={form.produto_mais_fraco} onChange={e => update("produto_mais_fraco", e.target.value)} className="input-field" readOnly={!editMode} /></Field>
+    <StepShell>
+      <Field label="O que sua empresa faz?" complete={isFilled(form.descricao_negocio)}><textarea value={form.descricao_negocio} onChange={(e) => update("descricao_negocio", e.target.value)} placeholder="Explique de forma simples quais produtos ou serviços você oferece." rows={3} readOnly={!editMode} /></Field>
+      <Field label="Qual o modelo de negócio?" required help="Como sua empresa gera receita?" complete={isFilled(form.modelo_negocio)}>
+        <select value={form.modelo_negocio} onChange={(e) => update("modelo_negocio", e.target.value)} disabled={!editMode} required>
+          <option value="">Ex.: Prestação de serviços, E-commerce, Loja Física</option>
+          {MODELOS_NEGOCIO.map((m) => <option key={m} value={m}>{m}</option>)}
+        </select>
+      </Field>
+      <Field label="Diferencial frente aos concorrentes" required complete={isFilled(form.diferencial_competitivo)}><textarea value={form.diferencial_competitivo} onChange={(e) => update("diferencial_competitivo", e.target.value)} placeholder="O que faz um cliente escolher sua empresa em vez da concorrência?" rows={3} readOnly={!editMode} required /></Field>
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
+        <Field label="Produto ou serviço mais vendido" required complete={isFilled(form.produto_mais_forte)}><input value={form.produto_mais_forte} onChange={(e) => update("produto_mais_forte", e.target.value)} placeholder="Ex.: Clareamento dental" readOnly={!editMode} required /></Field>
+        <Field label="Produto ou serviço que deseja vender mais" complete={isFilled(form.produto_desejado_forte)}><input value={form.produto_desejado_forte} onChange={(e) => update("produto_desejado_forte", e.target.value)} placeholder="Ex.: Consultoria Premium" readOnly={!editMode} /></Field>
+        <Field label="Produto ou serviço com menor desempenho" complete={isFilled(form.produto_mais_fraco)}><input value={form.produto_mais_fraco} onChange={(e) => update("produto_mais_fraco", e.target.value)} placeholder="Ex.: Produto que vende pouco" readOnly={!editMode} /></Field>
       </div>
-
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-5 border-t pt-5">
-        <Field label="Ticket médio Atual" editMode={editMode} required><input value={form.ticket_medio_atual} onChange={e => update("ticket_medio_atual", e.target.value)} placeholder="Ex: R$ 5.000" className="input-field" readOnly={!editMode} required /></Field>
-        <Field label="Ticket médio Ideal" editMode={editMode}><input value={form.ticket_medio_ideal} onChange={e => update("ticket_medio_ideal", e.target.value)} placeholder="Ex: R$ 8.000" className="input-field" readOnly={!editMode} /></Field>
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+        <Field label="Ticket médio atual" required complete={isFilled(form.ticket_medio_atual)}><input value={form.ticket_medio_atual} onChange={(e) => update("ticket_medio_atual", e.target.value)} placeholder="Ex.: R$ 350,00" readOnly={!editMode} required /></Field>
+        <Field label="Ticket médio desejado" complete={isFilled(form.ticket_medio_ideal)}><input value={form.ticket_medio_ideal} onChange={(e) => update("ticket_medio_ideal", e.target.value)} placeholder="Ex.: R$ 700,00" readOnly={!editMode} /></Field>
       </div>
-
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-5 border-t pt-5">
-        <Field label="Tamanho da empresa" editMode={editMode}>
-          <select value={form.tamanho_empresa} onChange={e => update("tamanho_empresa", e.target.value)} className="input-field" disabled={!editMode}>
-            <option value="">Selecione</option>{TAMANHOS.map(t => <option key={t} value={t}>{t}</option>)}
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+        <Field label="Tamanho da empresa" complete={isFilled(form.tamanho_empresa)}>
+          <select value={form.tamanho_empresa} onChange={(e) => update("tamanho_empresa", e.target.value)} disabled={!editMode}>
+            <option value="">Ex.: 2 funcionários, 10 funcionários</option>
+            {TAMANHOS.map((t) => <option key={t} value={t}>{t}</option>)}
           </select>
         </Field>
-        <Field label="Faturamento mensal" editMode={editMode}>
-          <select value={form.faturamento_mensal} onChange={e => update("faturamento_mensal", e.target.value)} className="input-field" disabled={!editMode}>
-            <option value="">Selecione</option>{FATURAMENTOS.map(f => <option key={f} value={f}>{f}</option>)}
+        <Field label="Faturamento mensal" complete={isFilled(form.faturamento_mensal)}>
+          <select value={form.faturamento_mensal} onChange={(e) => update("faturamento_mensal", e.target.value)} disabled={!editMode}>
+            <option value="">Ex.: Entre R$ 20 mil e R$ 50 mil</option>
+            {FATURAMENTOS.map((f) => <option key={f} value={f}>{f}</option>)}
           </select>
         </Field>
       </div>
-    </div>
+    </StepShell>
   );
 
-  // STEP 3 - Objetivos e Sazonalidade
   if (step === 3) return (
-    <div className="space-y-5">
-      <h3 className="font-medium text-ink">Objetivos e Metas</h3>
-      <Field label="Maior objetivo com o marketing digital hoje" editMode={editMode} required><textarea value={form.maior_objetivo_mkt} onChange={e => update("maior_objetivo_mkt", e.target.value)} rows={2} className="input-field resize-none" readOnly={!editMode} required /></Field>
-      <Field label="Principal meta" editMode={editMode} required><textarea value={form.principal_meta} onChange={e => update("principal_meta", e.target.value)} rows={2} className="input-field resize-none" readOnly={!editMode} required /></Field>
-      <Field label="É possível mensurar a meta? Como?" editMode={editMode}><textarea value={form.meta_mensuravel} onChange={e => update("meta_mensuravel", e.target.value)} rows={2} className="input-field resize-none" readOnly={!editMode} /></Field>
-
-      <div className="border-t pt-5 mt-5">
-        <h3 className="font-medium text-ink mb-4">Sazonalidade</h3>
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
-          <Field label="Meses de aumento de faturamento" editMode={editMode} required>
-            <div className="flex flex-wrap gap-2">
-              {MESES.map(c => (
-                <button key={c} type="button" onClick={() => editMode && toggleArray("meses_alta_faturamento", c)} className={`px-2 py-1 rounded text-xs font-medium transition-all ${form.meses_alta_faturamento?.includes(c) ? "bg-rausch text-white shadow" : "bg-surface-strong text-body"}`}>{c}</button>
-              ))}
-            </div>
-          </Field>
-          <Field label="Meses de baixa de faturamento" editMode={editMode}>
-            <div className="flex flex-wrap gap-2">
-              {MESES.map(c => (
-                <button key={c} type="button" onClick={() => editMode && toggleArray("meses_baixa_faturamento", c)} className={`px-2 py-1 rounded text-xs font-medium transition-all ${form.meses_baixa_faturamento?.includes(c) ? "bg-rausch text-white shadow" : "bg-surface-strong text-body"}`}>{c}</button>
-              ))}
-            </div>
-          </Field>
-        </div>
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-5 mt-5">
-          <Field label="Período mais forte do mês" editMode={editMode}>
-            <select value={form.periodo_forte_mes} onChange={e => update("periodo_forte_mes", e.target.value)} className="input-field" disabled={!editMode}>
-              <option value="">Selecione</option>{SEMANAS.map(s => <option key={s} value={s}>{s}</option>)}
-            </select>
-          </Field>
-          <Field label="Período mais fraco do mês" editMode={editMode}>
-            <select value={form.periodo_fraco_mes} onChange={e => update("periodo_fraco_mes", e.target.value)} className="input-field" disabled={!editMode}>
-              <option value="">Selecione</option>{SEMANAS.map(s => <option key={s} value={s}>{s}</option>)}
-            </select>
-          </Field>
-        </div>
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-5 mt-5">
-          <Field label="Dias mais fortes da semana" editMode={editMode}>
-            <div className="flex flex-wrap gap-2">
-              {DIAS.map(c => (
-                <button key={c} type="button" onClick={() => editMode && toggleArray("dias_fortes_semana", c)} className={`px-2 py-1 rounded text-xs font-medium transition-all ${form.dias_fortes_semana?.includes(c) ? "bg-rausch text-white shadow" : "bg-surface-strong text-body"}`}>{c}</button>
-              ))}
-            </div>
-          </Field>
-          <Field label="Dias mais fracos da semana" editMode={editMode}>
-            <div className="flex flex-wrap gap-2">
-              {DIAS.map(c => (
-                <button key={c} type="button" onClick={() => editMode && toggleArray("dias_fracos_semana", c)} className={`px-2 py-1 rounded text-xs font-medium transition-all ${form.dias_fracos_semana?.includes(c) ? "bg-rausch text-white shadow" : "bg-surface-strong text-body"}`}>{c}</button>
-              ))}
-            </div>
-          </Field>
-        </div>
+    <StepShell>
+      <Field label="Maior objetivo com o marketing digital hoje" required help="Escolha o resultado que mais deseja alcançar." complete={isFilled(form.maior_objetivo_mkt)}>
+        <select value={form.maior_objetivo_mkt} onChange={(e) => update("maior_objetivo_mkt", e.target.value)} disabled={!editMode} required>
+          <option value="">Ex.: Gerar mais leads, aumentar vendas</option>
+          {OBJETIVOS_MARKETING.map((o) => <option key={o} value={o}>{o}</option>)}
+        </select>
+      </Field>
+      <Field label="Principal meta" required complete={isFilled(form.principal_meta)}><textarea value={form.principal_meta} onChange={(e) => update("principal_meta", e.target.value)} placeholder="Ex.: Dobrar o número de clientes em 12 meses" rows={2} readOnly={!editMode} required /></Field>
+      <Field label="Como você mede essa meta?" complete={isFilled(form.meta_mensuravel)}><textarea value={form.meta_mensuravel} onChange={(e) => update("meta_mensuravel", e.target.value)} placeholder="Ex.: Número de vendas, faturamento, agendamentos" rows={2} readOnly={!editMode} /></Field>
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+        <Checklist label="Meses mais fortes do ano" required values={MESES} selected={form.meses_alta_faturamento} disabled={!editMode} onToggle={(v) => toggleArray("meses_alta_faturamento", v)} />
+        <Checklist label="Meses mais fracos do ano" values={MESES} selected={form.meses_baixa_faturamento} disabled={!editMode} onToggle={(v) => toggleArray("meses_baixa_faturamento", v)} />
       </div>
-    </div>
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+        <Field label="Melhor período do mês" complete={isFilled(form.periodo_forte_mes)}><input value={form.periodo_forte_mes} onChange={(e) => update("periodo_forte_mes", e.target.value)} placeholder="Ex.: Dias próximos ao pagamento" readOnly={!editMode} /></Field>
+        <Field label="Pior período do mês" complete={isFilled(form.periodo_fraco_mes)}><input value={form.periodo_fraco_mes} onChange={(e) => update("periodo_fraco_mes", e.target.value)} placeholder="Ex.: Última semana do mês" readOnly={!editMode} /></Field>
+      </div>
+    </StepShell>
   );
 
-  // STEP 4 - Público-Alvo
   if (step === 4) return (
-    <div className="space-y-5">
-      <div className="grid grid-cols-5 gap-5">
-        <div className="col-span-1">
-          <Field label="Homens (%)" editMode={editMode} required><input value={form.porcentagem_homens} onChange={e => update("porcentagem_homens", e.target.value)} placeholder="Ex: 40" className="input-field" readOnly={!editMode} required /></Field>
-        </div>
-        <div className="col-span-1">
-          <Field label="Mulheres (%)" editMode={editMode} required><input value={form.porcentagem_mulheres} onChange={e => update("porcentagem_mulheres", e.target.value)} placeholder="Ex: 60" className="input-field" readOnly={!editMode} required /></Field>
-        </div>
-        <div className="col-span-3">
-          <Field label="Regiões de Atendimento" editMode={editMode} required><input value={form.abrangencia_geografica} onChange={e => update("abrangencia_geografica", e.target.value)} placeholder="Ex: São Paulo Capital, ABC Paulista" className="input-field" readOnly={!editMode} required /></Field>
-        </div>
-      </div>
-      <Field label="Cliente ideal na carteira (Como ele é?)" editMode={editMode}><textarea value={form.cliente_ideal} onChange={e => update("cliente_ideal", e.target.value)} rows={3} className="input-field resize-none" readOnly={!editMode} /></Field>
-      <Field label="Principais dúvidas e dores ao contatar a empresa" editMode={editMode} required><textarea value={form.dores_principais} onChange={e => update("dores_principais", e.target.value)} rows={3} className="input-field resize-none" readOnly={!editMode} required /></Field>
+    <StepShell>
+      <Field label="Regiões atendidas" required complete={isFilled(form.abrangencia_geografica)}><input value={form.abrangencia_geografica} onChange={(e) => update("abrangencia_geografica", e.target.value)} placeholder="Ex.: Governador Valadares, Ipatinga e região" readOnly={!editMode} required /></Field>
+      <Field label="Cliente ideal" complete={isFilled(form.cliente_ideal)}><textarea value={form.cliente_ideal} onChange={(e) => update("cliente_ideal", e.target.value)} placeholder="Descreva o tipo de cliente que você mais gosta de atender." rows={3} readOnly={!editMode} /></Field>
+      <Field label="Principais dúvidas e objeções" required complete={isFilled(form.dores_principais)}><textarea value={form.dores_principais} onChange={(e) => update("dores_principais", e.target.value)} placeholder="Ex.: Preço, prazo, confiança, garantia" rows={3} readOnly={!editMode} required /></Field>
+      <Field label="Possui base de clientes ou leads?" required complete={isFilled(form.base_dados_clientes)}>
+        <select value={form.base_dados_clientes} onChange={(e) => update("base_dados_clientes", e.target.value)} disabled={!editMode} required>
+          <option value="">Selecione</option>
+          <option value="Sim">Sim</option>
+          <option value="Não">Não</option>
+        </select>
+      </Field>
+      <Checklist label="Classe social predominante" values={CLASSES_SOCIAIS} selected={form.classe_social} disabled={!editMode} onToggle={(v) => toggleArray("classe_social", v)} />
+    </StepShell>
+  );
 
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-5 border-t pt-5">
-        <Field label="Vocês já têm uma lista com o contato desses clientes?" editMode={editMode} required>
-          <select value={form.base_dados_clientes} onChange={e => update("base_dados_clientes", e.target.value)} className="input-field" disabled={!editMode} required>
-            <option value="">Selecione</option>
+  if (step === 5) return (
+    <StepShell>
+      <Field label="Principais concorrentes" required complete={isFilled(form.concorrentes_referencia)}><textarea value={form.concorrentes_referencia} onChange={(e) => update("concorrentes_referencia", e.target.value)} placeholder="Informe empresas que disputam clientes com você." rows={3} readOnly={!editMode} required /></Field>
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+        <Field label="Concorrente mais forte" complete={isFilled(form.concorrente_mais_forte)}><textarea value={form.concorrente_mais_forte} onChange={(e) => update("concorrente_mais_forte", e.target.value)} placeholder="Qual concorrente você considera mais difícil de enfrentar?" rows={3} readOnly={!editMode} /></Field>
+        <Field label="Onde você perde para os concorrentes?" complete={isFilled(form.pontos_fracos_concorrencia)}><textarea value={form.pontos_fracos_concorrencia} onChange={(e) => update("pontos_fracos_concorrencia", e.target.value)} placeholder="Ex.: Preço, estrutura, marca, localização" rows={3} readOnly={!editMode} /></Field>
+      </div>
+      <Field label="Referência de comunicação" required complete={isFilled(form.referencia_comunicacao)}><input value={form.referencia_comunicacao} onChange={(e) => update("referencia_comunicacao", e.target.value)} placeholder="Empresas que você admira pela comunicação." readOnly={!editMode} required /></Field>
+      <Field label="Como você enxerga seu mercado?" complete={isFilled(form.visao_mercado)}><input value={form.visao_mercado} onChange={(e) => update("visao_mercado", e.target.value)} placeholder="Ex.: Muito competitivo, em crescimento, pouco explorado" readOnly={!editMode} /></Field>
+      <Checklist label="Canais atuais" required values={CANAIS_COMUNICACAO} selected={form.canais_comunicacao_possuidos} disabled={!editMode} onToggle={(v) => toggleArray("canais_comunicacao_possuidos", v)} />
+      <Field label="Canal que gera mais resultado" required complete={isFilled(form.canal_maior_retorno)}><input value={form.canal_maior_retorno} onChange={(e) => update("canal_maior_retorno", e.target.value)} placeholder="Ex.: Instagram" readOnly={!editMode} required /></Field>
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+        <Field label="Ações de marketing que deram certo" complete={isFilled(form.acoes_passadas)}><textarea value={form.acoes_passadas} onChange={(e) => update("acoes_passadas", e.target.value)} placeholder="Ex.: Campanha de indicação, tráfego pago" rows={2} readOnly={!editMode} /></Field>
+        <Field label="Já trabalhou com agência?" complete={isFilled(form.trabalhou_agencia)}>
+          <select value={form.trabalhou_agencia} onChange={(e) => update("trabalhou_agencia", e.target.value)} disabled={!editMode}>
+            <option value="">Como foi a experiência?</option>
             <option value="Sim">Sim</option>
             <option value="Não">Não</option>
-            <option value="Quero receber uma">Quero receber uma lista</option>
           </select>
         </Field>
       </div>
-      <div className="pt-5 border-t">
-        <Field label="Classe social (Renda média)" editMode={editMode}>
-          <div className="flex flex-wrap gap-2">
-            {CLASSES_SOCIAIS.map(c => (
-              <button key={c} type="button" onClick={() => editMode && toggleArray("classe_social", c)} className={`px-3 py-2 rounded-lg text-sm font-medium transition-all ${form.classe_social.includes(c) ? "bg-rausch text-white shadow" : "bg-surface-strong text-body"}`}>{c}</button>
-            ))}
-          </div>
-        </Field>
-      </div>
-    </div>
+    </StepShell>
   );
 
-  // STEP 5 - Concorrência e Comunicação
-  if (step === 5) return (
-    <div className="space-y-5">
-      <h3 className="font-medium text-ink">Concorrência</h3>
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
-        <Field label="Principais concorrentes" editMode={editMode} required><textarea value={form.concorrentes_referencia} onChange={e => update("concorrentes_referencia", e.target.value)} placeholder="Quem são seus concorrentes diretos?" rows={3} className="input-field resize-none" readOnly={!editMode} required /></Field>
-        <Field label="Qual o mais forte e por quê?" editMode={editMode}><textarea value={form.concorrente_mais_forte} onChange={e => update("concorrente_mais_forte", e.target.value)} placeholder="O que eles fazem bem?" rows={3} className="input-field resize-none" readOnly={!editMode} /></Field>
-        <Field label="Onde você perde para eles?" editMode={editMode}><textarea value={form.pontos_fracos_concorrencia} onChange={e => update("pontos_fracos_concorrencia", e.target.value)} placeholder="Quais são as fraquezas da sua oferta?" rows={3} className="input-field resize-none" readOnly={!editMode} /></Field>
-      </div>
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
-        <Field label="Referência de comunicação" editMode={editMode} required><input value={form.referencia_comunicacao} onChange={e => update("referencia_comunicacao", e.target.value)} placeholder="Ex: Marca X, porque são criativos..." className="input-field" readOnly={!editMode} required /></Field>
-        <Field label="Como você enxerga o mercado" editMode={editMode}>
-          <select value={form.visao_mercado} onChange={e => update("visao_mercado", e.target.value)} className="input-field" disabled={!editMode}>
-            <option value="">Selecione</option>{VISIOES_MERCADO.map(s => <option key={s} value={s}>{s}</option>)}
-          </select>
-        </Field>
-      </div>
-
-      <div className="border-t pt-5 mt-5 space-y-5">
-        <h3 className="font-medium text-ink">Comunicação e Marketing</h3>
-        <Field label="Canais de comunicação que já possui" editMode={editMode} required>
-          <div className="flex flex-wrap gap-2">
-            {CANAIS.map(c => (
-              <button key={c} type="button" onClick={() => editMode && toggleArray("canais_comunicacao_possuidos", c)} className={`px-2 py-1 rounded text-xs font-medium transition-all ${form.canais_comunicacao_possuidos?.includes(c) ? "bg-rausch text-white shadow" : "bg-surface-strong text-body"}`}>{c}</button>
-            ))}
-          </div>
-        </Field>
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
-          <Field label="Qual canal dá mais retorno?" editMode={editMode} required><input value={form.canal_maior_retorno} onChange={e => update("canal_maior_retorno", e.target.value)} className="input-field" readOnly={!editMode} required /></Field>
-          <Field label="Canais preferência de contato" editMode={editMode}><input value={form.canais_preferencia_contato} onChange={e => update("canais_preferencia_contato", e.target.value)} className="input-field" readOnly={!editMode} /></Field>
-        </div>
-        <Field label="Estes canais são monitorados e atualizados?" editMode={editMode}><textarea value={form.monitoramento_canais} onChange={e => update("monitoramento_canais", e.target.value)} rows={2} className="input-field resize-none" readOnly={!editMode} /></Field>
-        <Field label="Ações de marketing efetivas no passado" editMode={editMode}><textarea value={form.acoes_passadas} onChange={e => update("acoes_passadas", e.target.value)} rows={2} className="input-field resize-none" readOnly={!editMode} /></Field>
-        <Field label="Já existiu plano de marketing na empresa?" editMode={editMode}><textarea value={form.plano_marketing_existente} onChange={e => update("plano_marketing_existente", e.target.value)} rows={2} className="input-field resize-none" readOnly={!editMode} /></Field>
-        <Field label="A empresa já trabalhou com agência? Como foi?" editMode={editMode}><textarea value={form.trabalhou_agencia} onChange={e => update("trabalhou_agencia", e.target.value)} rows={2} className="input-field resize-none" readOnly={!editMode} /></Field>
-        <Field label="Equipe ou colaborador dedicado ao marketing?" editMode={editMode}><textarea value={form.equipe_marketing} onChange={e => update("equipe_marketing", e.target.value)} rows={2} className="input-field resize-none" readOnly={!editMode} /></Field>
-      </div>
-    </div>
-  );
-
-  // STEP 6 - Processo de Vendas
   if (step === 6) return (
-    <div className="space-y-5">
-      <Field label="Como é o processo de vendas? É estruturado?" editMode={editMode}><textarea value={form.processo_vendas_estruturado} onChange={e => update("processo_vendas_estruturado", e.target.value)} rows={3} className="input-field resize-none" readOnly={!editMode} /></Field>
+    <StepShell>
+      <Field label="Como funciona o processo de vendas?" required complete={isFilled(form.processo_vendas_estruturado)}><textarea value={form.processo_vendas_estruturado} onChange={(e) => update("processo_vendas_estruturado", e.target.value)} placeholder="Explique o caminho desde o primeiro contato até o fechamento." rows={3} readOnly={!editMode} required /></Field>
       <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
-        <Field label="Utiliza CRM para vendas?" editMode={editMode}><input value={form.crm_utilizado} onChange={e => update("crm_utilizado", e.target.value)} className="input-field" readOnly={!editMode} /></Field>
-        <Field label="Pessoas dedicadas à venda (quantas)?" editMode={editMode}><input value={form.equipe_vendas} onChange={e => update("equipe_vendas", e.target.value)} className="input-field" readOnly={!editMode} /></Field>
-      </div>
-      <Field label="Existe funil desenhado? Porcentagem de conversão?" editMode={editMode}><textarea value={form.funil_vendas_conversao} onChange={e => update("funil_vendas_conversao", e.target.value)} rows={2} className="input-field resize-none" readOnly={!editMode} /></Field>
-      
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
-        <Field label="Canais utilizados para vender" editMode={editMode}>
-          <div className="flex flex-wrap gap-2">
-            {CANAIS.map(c => (
-              <button key={c} type="button" onClick={() => editMode && toggleArray("canais_vendas", c)} className={`px-2 py-1 rounded text-xs font-medium transition-all ${form.canais_vendas?.includes(c) ? "bg-rausch text-white shadow" : "bg-surface-strong text-body"}`}>{c}</button>
-            ))}
-          </div>
+        <Field label="Utiliza CRM?" required complete={isFilled(form.crm_utilizado)}>
+          <select value={form.crm_utilizado} onChange={(e) => update("crm_utilizado", e.target.value)} disabled={!editMode} required>
+            <option value="">Ex.: Kommo, RD Station, Hubspot ou não utiliza.</option>
+            <option value="Sim">Sim</option>
+            <option value="Não">Não</option>
+            <option value="Não sei">Não sei</option>
+          </select>
         </Field>
-        <Field label="Custo de aquisição de clientes (CAC)" editMode={editMode}><input value={form.custo_aquisicao_cac} onChange={e => update("custo_aquisicao_cac", e.target.value)} className="input-field" readOnly={!editMode} /></Field>
+        <Field label="Quantas pessoas vendem?" required complete={isFilled(form.equipe_vendas)}><input value={form.equipe_vendas} onChange={(e) => update("equipe_vendas", e.target.value)} placeholder="Ex.: 1 vendedor, 3 consultores" readOnly={!editMode} required /></Field>
       </div>
-    </div>
+      <Field label="Existe funil de vendas?" complete={isFilled(form.funil_vendas_conversao)}><textarea value={form.funil_vendas_conversao} onChange={(e) => update("funil_vendas_conversao", e.target.value)} placeholder="Explique rapidamente." rows={2} readOnly={!editMode} /></Field>
+      <Checklist label="Canais utilizados para vender" required values={CANAIS_VENDA} selected={form.canais_vendas} disabled={!editMode} onToggle={(v) => toggleArray("canais_vendas", v)} />
+      <Field label="CAC" complete={isFilled(form.custo_aquisicao_cac)}><input value={form.custo_aquisicao_cac} onChange={(e) => update("custo_aquisicao_cac", e.target.value)} placeholder="Se souber, informe quanto custa adquirir um cliente." readOnly={!editMode} /></Field>
+    </StepShell>
   );
 
-  // STEP 7 - Identidade Visual
   if (step === 7) return (
-    <div className={`space-y-5 ${(!editMode || !isMaster) ? 'opacity-80 pointer-events-none' : ''}`}>
-      <div className="bg-warning-bg p-3 rounded text-sm text-warning-text mb-4 border border-warning-bg">
-        {!isMaster ? "Aba exclusiva para edição do time Totum." : "Edição permitida. Apenas Master pode alterar."}
-      </div>
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
-        <Field label="Cor primária" editMode={editMode && isMaster}>
-          <div className="flex items-center gap-3">
-            <input type="color" value={form.cor_primaria} onChange={e => update("cor_primaria", e.target.value)} className="w-12 h-12 rounded-none border cursor-pointer" disabled={!editMode || !isMaster} />
-            <input value={form.cor_primaria} onChange={e => update("cor_primaria", e.target.value)} className="input-field font-mono uppercase" readOnly={!editMode || !isMaster} />
-          </div>
-        </Field>
-        <Field label="Cor secundária" editMode={editMode && isMaster}>
-          <div className="flex items-center gap-3">
-            <input type="color" value={form.cor_secundaria} onChange={e => update("cor_secundaria", e.target.value)} className="w-12 h-12 rounded-none border cursor-pointer" disabled={!editMode || !isMaster} />
-            <input value={form.cor_secundaria} onChange={e => update("cor_secundaria", e.target.value)} className="input-field font-mono uppercase" readOnly={!editMode || !isMaster} />
-          </div>
-        </Field>
-      </div>
-      <Field label="Fontes utilizadas" editMode={editMode}><input value={form.fontes} onChange={e => update("fontes", e.target.value)} placeholder="Ex: Inter, Montserrat" className="input-field" readOnly={!editMode} /></Field>
-      <div className="bg-warning-bg border border-warning-bg rounded-md p-4 flex items-start gap-3">
-        <AlertCircle className="w-5 h-5 text-warning-text shrink-0 mt-0.5" />
-        <div>
-          <p className="text-sm font-medium text-warning-text">Faça o upload dos arquivos na página &quot;Arquivos do Cliente&quot;</p>
-          <p className="text-xs text-warning-text mt-1">Envie o logo e materiais de comunicação/marketing na aba &quot;Arquivos do Cliente&quot;.</p>
-        </div>
-      </div>
-      <Field label="Key visual / Elementos gráficos" editMode={editMode}>
-        <textarea value={form.key_visual_desc} onChange={e => update("key_visual_desc", e.target.value)} placeholder="Descreva os elementos visuais principais" rows={3} className="input-field resize-none" readOnly={!editMode} />
+    <StepShell>
+      <Checklist label="Canais de atendimento" required values={CANAIS_ATENDIMENTO} selected={form.canais_atendimento} disabled={!editMode} onToggle={(v) => toggleArray("canais_atendimento", v)} />
+      <Field label="SLA de resposta" complete={isFilled(form.sla_resposta)}>
+        <select value={form.sla_resposta} onChange={(e) => update("sla_resposta", e.target.value)} disabled={!editMode}>
+          <option value="">Ex.: Respondemos em até 15 minutos</option>
+          {SLAS.map((s) => <option key={s} value={s}>{s}</option>)}
+        </select>
       </Field>
-      <div>
-        <label className="block text-sm font-medium text-ink mb-2">Imagens do Key Visual</label>
-        <input ref={fileInputRef} type="file" accept="image/*" multiple onChange={handleImageUpload} className="hidden" disabled={!editMode} />
-        {editMode && (
-          <button type="button" onClick={() => fileInputRef.current?.click()} className="flex items-center gap-2 px-4 py-3 border-2 border-dashed border-hairline rounded-md text-sm text-muted hover:border-rausch hover:text-rausch transition-colors w-full justify-center">
-            <Upload className="w-4 h-4" /> Clique para fazer upload de imagens
-          </button>
-        )}
-        {form.key_visual_images.length > 0 && (
-          <div className="flex flex-wrap gap-3 mt-3">
-            {form.key_visual_images.map((img, i) => (
-              <div key={i} className="relative w-24 h-24 rounded-md overflow-hidden border group">
-                {/* eslint-disable-next-line @next/next/no-img-element */}
-                <img src={img} alt={`key visual ${i}`} className="w-full h-full object-cover" />
-                {editMode && (
-                  <button type="button" onClick={() => removeImage(i)} className="absolute top-1 right-1 w-6 h-6 bg-danger text-white rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
-                    <X className="w-3 h-3" />
-                  </button>
-                )}
+      <Field label="Observações adicionais" complete={isFilled(form.informacoes_adicionais)}><textarea value={form.informacoes_adicionais} onChange={(e) => update("informacoes_adicionais", e.target.value)} placeholder="Informações que considera importantes para a equipe Totum." rows={3} readOnly={!editMode} /></Field>
+
+      <div className="totum-upload">
+        <div>
+          <p className="text-lg font-light text-white">Identidade Visual e Materiais de Marketing</p>
+          <p className="mt-2 text-sm text-white-soft">Envie logos, apresentações, fotos ou materiais que ajudem a Totum a personalizar sua estratégia. Isso não bloqueia a finalização.</p>
+        </div>
+        <input ref={fileInputRef} type="file" accept="image/png,image/jpeg,application/pdf" multiple onChange={handleMaterialUpload} className="hidden" disabled={!editMode} />
+        <button type="button" onClick={() => fileInputRef.current?.click()} className="totum-dropzone">
+          <Upload className="h-8 w-8 text-rausch" />
+          <span>Arraste seus arquivos aqui ou clique para selecionar</span>
+          <small>Até 5 arquivos, 10MB cada. PNG, JPG ou PDF.</small>
+        </button>
+        {form.material_file_names.length > 0 && (
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+            {form.material_file_names.map((name, idx) => (
+              <div key={`${name}-${idx}`} className="flex items-center justify-between gap-3 rounded-md border border-border-strong bg-navy-elevated px-3 py-2 text-sm text-white-soft">
+                <span className="truncate">{name}</span>
+                <button type="button" onClick={() => removeMaterial(idx)} className="text-danger hover:text-white">
+                  <X className="h-4 w-4" />
+                </button>
               </div>
             ))}
           </div>
         )}
+        <label className="flex items-start gap-3 text-sm text-white-soft">
+          <input
+            type="checkbox"
+            checked={form.enviar_materiais_depois}
+            onChange={(e) => update("enviar_materiais_depois", e.target.checked)}
+            className="mt-1 h-4 w-4 accent-rausch"
+          />
+          <span>
+            Prefiro enviar esses materiais posteriormente.
+            {form.enviar_materiais_depois && <em className="mt-1 block text-xs not-italic text-muted-soft">Tudo bem. Enviaremos um lembrete por email e sua estratégia será parcialmente personalizada até lá.</em>}
+          </span>
+        </label>
       </div>
-      <Field label="Personalidade visual" editMode={editMode}><textarea value={form.personalidade_visual} onChange={e => update("personalidade_visual", e.target.value)} placeholder="Como a marca deve ser percebida visualmente?" rows={3} className="input-field resize-none" readOnly={!editMode} /></Field>
-    </div>
-  );
-
-  // STEP 8 - Operação e Contatos
-  if (step === 8) return (
-    <div className="space-y-5">
-      <div>
-        <label className="block text-sm font-medium text-ink mb-2">Canais de atendimento (suporte/operação) <span className="text-rausch">*</span></label>
-        <div className="flex flex-wrap gap-2">{CANAIS.map(c => (
-          <button key={c} type="button" onClick={() => editMode && toggleArray("canais_atendimento", c)} className={`px-4 py-2 rounded-md text-sm font-medium transition-all ${form.canais_atendimento.includes(c) ? "bg-rausch text-white shadow" : "bg-surface-strong text-body"}`}>{c}</button>
-        ))}</div>
-      </div>
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
-        <Field label="SLA de resposta" editMode={editMode}>
-          <select value={form.sla_resposta} onChange={e => update("sla_resposta", e.target.value)} className="input-field" disabled={!editMode}>
-            <option value="">Selecione</option>{SLAS.map(s => <option key={s} value={s}>{s}</option>)}
-          </select>
-        </Field>
-      </div>
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
-        <Field label="Horário início" editMode={editMode}><input type="time" value={form.horario_inicio} onChange={e => update("horario_inicio", e.target.value)} className="input-field" readOnly={!editMode} /></Field>
-        <Field label="Horário fim" editMode={editMode}><input type="time" value={form.horario_fim} onChange={e => update("horario_fim", e.target.value)} className="input-field" readOnly={!editMode} /></Field>
-      </div>
-      <div>
-        <label className="block text-sm font-medium text-ink mb-2">Dias de atendimento</label>
-        <div className="flex flex-wrap gap-2">{DIAS.map(d => (
-          <button key={d} type="button" onClick={() => editMode && toggleArray("dias_atendimento", d)} className={`w-12 h-12 rounded-md text-sm font-medium transition-all ${form.dias_atendimento.includes(d) ? "bg-rausch text-white shadow" : "bg-surface-strong text-body"}`}>{d}</button>
-        ))}</div>
-      </div>
-      <Field label="Observações Adicionais" editMode={editMode}><textarea value={form.informacoes_adicionais} onChange={e => update("informacoes_adicionais", e.target.value)} placeholder="Algo mais que devamos saber?" rows={3} className="input-field resize-none" readOnly={!editMode} /></Field>
-    </div>
-  );
-
-  // STEP 9 - Persona
-  if (step === 9) return (
-    <div className={`space-y-6 ${(!editMode || !isMaster) ? 'opacity-80 pointer-events-none' : ''}`}>
-      <div className="bg-warning-bg p-3 rounded text-sm text-warning-text mb-4 border border-warning-bg">
-        {!isMaster ? "Aba exclusiva para edição do time Totum." : "Edição permitida. Apenas Master pode alterar."}
-      </div>
-      {form.personas.map((persona, idx) => (
-        <div key={idx} className="border rounded-md p-5 space-y-4 relative">
-          {form.personas.length > 1 && editMode && (
-            <button type="button" onClick={() => removePersona(idx)} className="absolute top-3 right-3 p-1.5 text-danger-text hover:bg-danger-bg rounded-lg transition-colors">
-              <Trash2 className="w-4 h-4" />
-            </button>
-          )}
-          <h4 className="text-sm font-semibold text-ink">Persona {idx + 1}</h4>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <Field label="Nome" editMode={editMode}><input value={persona.nome} onChange={e => updatePersona(idx, "nome", e.target.value)} placeholder="Ex: Ana, a empresária" className="input-field" readOnly={!editMode} /></Field>
-            <Field label="Idade" editMode={editMode}><input value={persona.idade} onChange={e => updatePersona(idx, "idade", e.target.value)} placeholder="Ex: 32 anos" className="input-field" readOnly={!editMode} /></Field>
-          </div>
-          <Field label="Ocupação" editMode={editMode}><input value={persona.ocupacao} onChange={e => updatePersona(idx, "ocupacao", e.target.value)} placeholder="Ex: Empresária, mãe, freelancer" className="input-field" readOnly={!editMode} /></Field>
-          <Field label="Objetivos" editMode={editMode}><textarea value={persona.objetivos} onChange={e => updatePersona(idx, "objetivos", e.target.value)} placeholder="O que essa persona quer alcançar?" rows={2} className="input-field resize-none" readOnly={!editMode} /></Field>
-          <Field label="Dores" editMode={editMode}><textarea value={persona.dores} onChange={e => updatePersona(idx, "dores", e.target.value)} placeholder="Quais são as principais dores?" rows={2} className="input-field resize-none" readOnly={!editMode} /></Field>
-        </div>
-      ))}
-      {editMode && (
-        <button type="button" onClick={addPersona} className="flex items-center gap-2 px-4 py-3 border-2 border-dashed border-hairline rounded-md text-sm text-muted hover:border-rausch hover:text-rausch transition-colors w-full justify-center">
-          <Plus className="w-4 h-4" /> Adicionar outra persona
-        </button>
-      )}
-    </div>
-  );
-
-  // STEP 10 - Círculo Dourado
-  if (step === 10) return (
-    <div className={`space-y-5 ${(!editMode || !isMaster) ? 'opacity-80 pointer-events-none' : ''}`}>
-      <div className="bg-warning-bg p-3 rounded text-sm text-warning-text mb-4 border border-warning-bg">
-        {!isMaster ? "Aba exclusiva para edição do time Totum." : "Edição permitida. Apenas Master pode alterar."}
-      </div>
-      <div className="bg-danger-bg border border-danger-bg rounded-md p-5">
-        <div className="flex items-center gap-2 mb-2">
-          <div className="w-8 h-8 rounded-full bg-danger text-white flex items-center justify-center text-sm font-bold">P</div>
-          <h4 className="font-semibold text-danger-text">Porquê</h4>
-        </div>
-        <p className="text-xs text-danger-text mb-2">Propósito, causa, crença — por que a empresa existe?</p>
-        <textarea value={form.circulo_dourado.porque} onChange={e => setForm(f => ({ ...f, circulo_dourado: { ...f.circulo_dourado, porque: e.target.value } }))} placeholder="Ex: Acreditamos que toda empresa merece comunicação de qualidade..." rows={3} className="input-field resize-none bg-canvas" readOnly={!editMode} />
-      </div>
-      <div className="bg-surface-soft border border-hairline rounded-md p-5">
-        <div className="flex items-center gap-2 mb-2">
-          <div className="w-8 h-8 rounded-full bg-surface-soft text-ink flex items-center justify-center text-sm font-bold">Q</div>
-          <h4 className="font-semibold text-rausch">O que</h4>
-        </div>
-        <p className="text-xs text-rausch mb-2">Produto, serviço, resultado — o que a empresa oferece?</p>
-        <textarea value={form.circulo_dourado.o_que} onChange={e => setForm(f => ({ ...f, circulo_dourado: { ...f.circulo_dourado, o_que: e.target.value } }))} placeholder="Ex: Criamos estratégias de marketing digital..." rows={3} className="input-field resize-none bg-canvas" readOnly={!editMode} />
-      </div>
-      <div className="bg-success-bg border border-success/20 rounded-md p-5">
-        <div className="flex items-center gap-2 mb-2">
-          <div className="w-8 h-8 rounded-full bg-success text-white flex items-center justify-center text-sm font-bold">C</div>
-          <h4 className="font-semibold text-success-text">Como</h4>
-        </div>
-        <p className="text-xs text-success-text mb-2">Processo, diferencial, método — como a empresa entrega?</p>
-        <textarea value={form.circulo_dourado.como} onChange={e => setForm(f => ({ ...f, circulo_dourado: { ...f.circulo_dourado, como: e.target.value } }))} placeholder="Ex: Através de uma metodologia própria..." rows={3} className="input-field resize-none bg-canvas" readOnly={!editMode} />
-      </div>
-    </div>
-  );
-
-  // STEP 11 - Características da Marca
-  if (step === 11) return (
-    <div className={`space-y-5 ${(!editMode || !isMaster) ? 'opacity-80 pointer-events-none' : ''}`}>
-      <div className="bg-warning-bg p-3 rounded text-sm text-warning-text mb-4 border border-warning-bg">
-        {!isMaster ? "Aba exclusiva para edição do time Totum." : "Edição permitida. Apenas Master pode alterar."}
-      </div>
-      <Field label="Tom de voz da marca" editMode={editMode}>
-        <select value={form.tom_voz} onChange={e => update("tom_voz", e.target.value)} className="input-field" disabled={!editMode}>
-          <option value="">Selecione</option>{TONS_VOZ.map(t => <option key={t} value={t}>{t}</option>)}
-        </select>
-      </Field>
-      <Field label="Missão" editMode={editMode}><textarea value={form.caracteristicas_marca.missao} onChange={e => setForm(f => ({ ...f, caracteristicas_marca: { ...f.caracteristicas_marca, missao: e.target.value } }))} placeholder="Qual é a missão da marca?" rows={3} className="input-field resize-none" readOnly={!editMode} /></Field>
-      <Field label="Visão" editMode={editMode}><textarea value={form.caracteristicas_marca.visao} onChange={e => setForm(f => ({ ...f, caracteristicas_marca: { ...f.caracteristicas_marca, visao: e.target.value } }))} placeholder="Qual é a visão de futuro?" rows={3} className="input-field resize-none" readOnly={!editMode} /></Field>
-      <Field label="Valores" editMode={editMode}><textarea value={form.caracteristicas_marca.valores} onChange={e => setForm(f => ({ ...f, caracteristicas_marca: { ...f.caracteristicas_marca, valores: e.target.value } }))} placeholder="Quais são os valores principais?" rows={3} className="input-field resize-none" readOnly={!editMode} /></Field>
-      <Field label="Personalidade da marca" editMode={editMode}><textarea value={form.caracteristicas_marca.personalidade} onChange={e => setForm(f => ({ ...f, caracteristicas_marca: { ...f.caracteristicas_marca, personalidade: e.target.value } }))} placeholder="Se a marca fosse uma pessoa, como ela seria?" rows={3} className="input-field resize-none" readOnly={!editMode} /></Field>
-    </div>
-  );
-
-  // STEP 12 - PUV
-  if (step === 12) return (
-    <div className={`space-y-5 ${(!editMode || !isMaster) ? 'opacity-80 pointer-events-none' : ''}`}>
-      <div className="bg-warning-bg p-3 rounded text-sm text-warning-text mb-4 border border-warning-bg">
-        {!isMaster ? "Aba exclusiva para edição do time Totum." : "Edição permitida. Apenas Master pode alterar."}
-      </div>
-      <div className="bg-gradient-to-br from-rausch/5 to-rausch/5 border border-hairline rounded-md p-6">
-        <h4 className="font-semibold text-ink mb-2 flex items-center gap-2">
-          <Check className="w-5 h-5 text-rausch" />
-          Proposta Única de Valor (PUV)
-        </h4>
-        <p className="text-sm text-body mb-4">O que torna esse cliente único? Por que alguém deveria escolhê-lo?</p>
-        <textarea value={form.puv} onChange={e => update("puv", e.target.value)} placeholder="Ex: Somos o único estúdio de design que combina estratégia de marca com execução em 48h..." rows={5} className="input-field resize-none bg-canvas" readOnly={!editMode} />
-      </div>
-    </div>
+    </StepShell>
   );
 
   return null;
 }
 
-const isBlank = (v: unknown) => v === undefined || v === null || (typeof v === "string" && v.trim() === "");
-
-export function validateStep(step: number, form: FormState): { ok: boolean; missing: string[] } {
-  const missing: string[] = [];
-  const need = (cond: boolean, label: string) => { if (cond) missing.push(label); };
-
-  if (step === 1) {
-    need(isBlank(form.nome), "Nome da empresa");
-    need(isBlank(form.cnpj), "CNPJ");
-    need(isBlank(form.ramo_atuacao), "Ramo de atuação");
-    need(isBlank(form.email_responsavel), "Email corporativo");
-    need(isBlank(form.telefone), "Telefone");
-  }
-  if (step === 2) {
-    need(isBlank(form.modelo_negocio), "Qual o modelo de negócio?");
-    need(isBlank(form.diferencial_competitivo), "Diferencial frente aos concorrentes");
-    need(isBlank(form.produto_mais_forte), "Produto mais forte");
-    need(isBlank(form.ticket_medio_atual), "Ticket médio Atual");
-  }
-  if (step === 3) {
-    need(isBlank(form.maior_objetivo_mkt), "Maior objetivo com o marketing digital hoje");
-    need(isBlank(form.principal_meta), "Principal meta");
-    need(!form.meses_alta_faturamento || form.meses_alta_faturamento.length === 0, "Meses de aumento de faturamento");
-  }
-  if (step === 4) {
-    need(isBlank(form.porcentagem_homens), "Homens (%)");
-    need(isBlank(form.porcentagem_mulheres), "Mulheres (%)");
-    need(isBlank(form.abrangencia_geografica), "Regiões de Atendimento");
-    need(isBlank(form.dores_principais), "Principais dúvidas e dores ao contatar a empresa");
-    need(isBlank(form.base_dados_clientes), "Vocês já têm uma lista com o contato desses clientes?");
-  }
-  if (step === 5) {
-    need(isBlank(form.concorrentes_referencia), "Principais concorrentes");
-    need(isBlank(form.referencia_comunicacao), "Referência de comunicação");
-    need(!form.canais_comunicacao_possuidos || form.canais_comunicacao_possuidos.length === 0, "Canais de comunicação que já possui");
-    need(isBlank(form.canal_maior_retorno), "Qual canal dá mais retorno?");
-  }
-  if (step === 8) {
-    need(!form.canais_atendimento || form.canais_atendimento.length === 0, "Canais de atendimento (suporte/operação)");
-  }
-
-  return { ok: missing.length === 0, missing };
+function StepShell({ children }: { children: React.ReactNode }) {
+  return <div className="space-y-5">{children}</div>;
 }
 
-function Field({ label, editMode: _editMode, required, children }: { label: string; editMode: boolean; required?: boolean; children: React.ReactNode }) {
+function Field({
+  label,
+  required,
+  help,
+  complete,
+  children,
+}: {
+  label: string;
+  required?: boolean;
+  help?: string;
+  complete?: boolean;
+  children: React.ReactNode;
+}) {
   return (
-    <div>
-      <label className="block text-sm font-medium text-ink mb-2">
-        {label} {required && <span className="text-rausch">*</span>}
+    <div className="space-y-2">
+      <label className="totum-label">
+        <span>{label} {required && <b>*</b>}</span>
+        <span className="flex items-center gap-2">
+          {help && (
+            <span className="group relative inline-flex">
+              <HelpCircle className="h-4 w-4 text-muted-soft" />
+              <span className="pointer-events-none absolute right-0 top-6 z-20 hidden w-64 rounded-md border border-border-strong bg-navy-card p-3 text-xs normal-case tracking-normal text-white-soft shadow-brand group-hover:block">
+                {help}
+              </span>
+            </span>
+          )}
+          {complete && <Check className="h-4 w-4 text-success" />}
+        </span>
       </label>
       {children}
+    </div>
+  );
+}
+
+function Checklist({
+  label,
+  required,
+  values,
+  selected,
+  disabled,
+  onToggle,
+}: {
+  label: string;
+  required?: boolean;
+  values: string[];
+  selected: string[];
+  disabled?: boolean;
+  onToggle: (value: string) => void;
+}) {
+  return (
+    <div className="space-y-3">
+      <label className="totum-label">
+        <span>{label} {required && <b>*</b>}</span>
+        {selected.length > 0 && <Check className="h-4 w-4 text-success" />}
+      </label>
+      <div className="flex flex-wrap gap-2">
+        {values.map((value) => {
+          const active = selected.includes(value);
+          return (
+            <button
+              key={value}
+              type="button"
+              disabled={disabled}
+              onClick={() => onToggle(value)}
+              className={`totum-chip ${active ? "is-active" : ""}`}
+            >
+              {value}
+            </button>
+          );
+        })}
+      </div>
     </div>
   );
 }

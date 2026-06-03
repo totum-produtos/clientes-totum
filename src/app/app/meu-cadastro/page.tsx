@@ -552,7 +552,7 @@ export default function MeuCadastroPage() {
 
       {/* Barra fixa inferior para Salvar (Sticky UX) */}
       {editMode && (
-        <div className="fixed bottom-0 left-0 right-0 p-4 bg-white dark:bg-ink border-t border-hairline z-50 shadow-[0_-4px_15px_rgba(0,0,0,0.05)] flex items-center justify-center animate-in slide-in-from-bottom-5">
+        <div className="fixed bottom-0 left-0 right-0 p-4 bg-navy-card border-t border-hairline z-50 shadow-[0_-4px_15px_rgba(0,0,0,0.05)] flex items-center justify-center animate-in slide-in-from-bottom-5">
           <div className="w-full max-w-5xl flex items-center justify-between px-6">
             <span className="text-sm font-medium text-muted hidden md:block">Você possui alterações não salvas no briefing.</span>
             <div className="flex items-center gap-3 w-full md:w-auto justify-end">

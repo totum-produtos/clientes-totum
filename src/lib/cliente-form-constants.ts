@@ -1,28 +1,48 @@
 // src/lib/cliente-form-constants.ts
-import { Building2, Briefcase, Target, Palette, Phone, Users, CircleDot, Award, Star, Activity, Megaphone, ShoppingCart } from "lucide-react";
+import { Building2, Briefcase, Target, Phone, Activity, Megaphone, ShoppingCart } from "lucide-react";
 
 export const STEPS = [
-  { id: 1, label: "Informações da Empresa", icon: Building2 },
-  { id: 2, label: "Sobre o Negócio", icon: Briefcase },
-  { id: 3, label: "Objetivos e Sazonalidade", icon: Activity },
-  { id: 4, label: "Público-Alvo", icon: Target },
-  { id: 5, label: "Concorrência e Comunicação", icon: Megaphone },
-  { id: 6, label: "Processo de Vendas", icon: ShoppingCart },
-  { id: 7, label: "Identidade Visual", icon: Palette },
-  { id: 8, label: "Operação e Contatos", icon: Phone },
-  { id: 9, label: "Persona", icon: Users },
-  { id: 10, label: "Círculo Dourado", icon: CircleDot },
-  { id: 11, label: "Características da Marca", icon: Star },
-  { id: 12, label: "PUV", icon: Award },
+  { id: 1, label: "Conhecendo sua Empresa", icon: Building2 },
+  { id: 2, label: "Entendendo seu Negócio", icon: Briefcase },
+  { id: 3, label: "Objetivos e Crescimento", icon: Activity },
+  { id: 4, label: "Seus Clientes", icon: Target },
+  { id: 5, label: "Mercado e Comunicação", icon: Megaphone },
+  { id: 6, label: "Vendas e Atendimento", icon: ShoppingCart },
+  { id: 7, label: "Operação e Materiais", icon: Phone },
 ];
 
-export const RAMOS = ["Saúde", "Tecnologia", "Educação", "E-commerce", "Serviços", "Outros"];
+export const RAMOS = [
+  "Saúde e Bem-estar", "Educação", "Construção Civil", "Imobiliário", "Automotivo",
+  "Jurídico", "Financeiro", "Tecnologia", "Marketing e Publicidade", "Turismo",
+  "Alimentação", "Indústria", "Comércio Local", "Vendas de Produtos", "E-commerce",
+  "Prestação de Serviços", "Transporte e Logística", "Moda e Beleza", "Eventos", "Outro",
+];
+export const MODELOS_NEGOCIO = [
+  "Prestação de Serviços", "Venda de Produtos", "Loja Física", "E-commerce",
+  "Assinatura", "Franquia", "Marketplace", "Educação", "SaaS", "Outro",
+];
+export const OBJETIVOS_MARKETING = [
+  "Gerar mais leads", "Aumentar vendas", "Aumentar faturamento", "Fortalecer a marca",
+  "Melhorar presença digital", "Estruturar marketing", "Estruturar vendas", "Implantar CRM",
+  "Automatizar processos", "Expandir para novas regiões",
+];
 export const TEMPOS_MERCADO = ["Menos de 1 ano", "1-3 anos", "3-5 anos", "5+ anos"];
 export const TAMANHOS = ["Startup", "PME", "Grande empresa"];
 export const FATURAMENTOS = ["Até R$ 10k", "R$ 10k-50k", "R$ 50k-200k", "R$ 200k-1M", "R$ 1M+"];
 export const GENEROS = ["Masculino", "Feminino", "Ambos"];
 export const TONS_VOZ = ["Formal", "Descontraído", "Técnico", "Inspirador", "Humorístico"];
 export const CANAIS = ["WhatsApp", "Email", "Telefone", "Chat", "Redes Sociais", "Cara a cara"];
+export const CANAIS_COMUNICACAO = [
+  "Instagram", "Facebook", "TikTok", "LinkedIn", "YouTube", "WhatsApp",
+  "Google Meu Negócio", "Site", "Blog", "E-mail Marketing", "Outro",
+];
+export const CANAIS_VENDA = [
+  "WhatsApp", "Telefone", "Presencial", "Site", "Instagram", "Facebook",
+  "E-mail", "Representantes", "Marketplace", "Outro",
+];
+export const CANAIS_ATENDIMENTO = [
+  "WhatsApp", "Telefone", "E-mail", "Chat do Site", "Instagram", "Facebook", "Presencial",
+];
 export const DIAS = ["Seg", "Ter", "Qua", "Qui", "Sex", "Sáb", "Dom"];
 export const SLAS = ["1h", "4h", "24h", "48h"];
 export const CLASSES_SOCIAIS = ["A+", "A", "B+", "B", "B-", "C", "D", "D-"];
@@ -118,6 +138,9 @@ export type FormState = {
   equipe_vendas: string;
   canais_vendas: string[];
   custo_aquisicao_cac: string;
+  material_files: string[];
+  material_file_names: string[];
+  enviar_materiais_depois: boolean;
   briefing_completed: boolean;
 };
 
@@ -157,5 +180,6 @@ export const DEFAULT_FORM_STATE: FormState = {
   canais_preferencia_contato: "", acoes_passadas: "", plano_marketing_existente: "",
   trabalhou_agencia: "", equipe_marketing: "", processo_vendas_estruturado: "",
   funil_vendas_conversao: "", equipe_vendas: "", canais_vendas: [], custo_aquisicao_cac: "",
+  material_files: [], material_file_names: [], enviar_materiais_depois: false,
   briefing_completed: false,
 };

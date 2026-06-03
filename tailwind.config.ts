@@ -10,52 +10,61 @@ const config: Config = {
   theme: {
     extend: {
       colors: {
-        // Airbnb Design System — Rausch
+        // Totum Red Theme — dark only. Legacy names are kept as aliases so
+        // existing screens inherit the new system without a noisy rewrite.
         rausch: {
-          DEFAULT: "#ff385c",
-          active: "#e00b41",
-          disabled: "#ffd1da",
+          DEFAULT: "#da2128",
+          active: "#e3433e",
+          disabled: "#4b2026",
         },
-        luxe: "#460479",
-        plus: "#92174d",
-        ink: "#222222",
-        body: "#3f3f3f",
+        "rausch-light": "#e3433e",
+        "totum-secondary": "#077ac7",
+        "secondary-purple": "#6b21ef",
+        luxe: "#6b21ef",
+        plus: "#e3433e",
+        ink: "#ffffff",
+        body: "#d1cece",
         muted: {
-          DEFAULT: "#6a6a6a",
-          soft: "#929292",
+          DEFAULT: "#9ca3af",
+          soft: "#9ca3af",
         },
         hairline: {
-          DEFAULT: "#dddddd",
-          soft: "#ebebeb",
+          DEFAULT: "#1f192a",
+          soft: "#1b1728",
         },
-        "border-strong": "#c1c1c1",
-        canvas: "#ffffff",
-        "surface-soft": "#f7f7f7",
-        "surface-card": "#ffffff",
-        "surface-strong": "#f2f2f2",
+        "border-strong": "#1f192a",
+        canvas: "#0e0918",
+        "navy-deep": "#0e0918",
+        "navy-card": "#1b1728",
+        "navy-elevated": "#1f192a",
+        "surface-soft": "#1b1728",
+        "surface-card": "#1b1728",
+        "surface-strong": "#1f192a",
+        "white-soft": "#d1cece",
+        "red-light": "#ef9c9a",
         "on-primary": "#ffffff",
         "on-dark": "#ffffff",
-        "legal-link": "#428bff",
-        "star-rating": "#222222",
+        "legal-link": "#077ac7",
+        "star-rating": "#da2128",
         scrim: "#000000",
-        "error-text": "#c13515",
-        "error-text-hover": "#b32505",
+        "error-text": "#d91616",
+        "error-text-hover": "#ef9c9a",
 
         // Semantic status
         success: {
-          DEFAULT: "#008a05",
-          bg: "#e6f4ea",
-          text: "#008a05",
+          DEFAULT: "#35a670",
+          bg: "#123527",
+          text: "#67d99b",
         },
         warning: {
           DEFAULT: "#eaa800",
-          bg: "#fef7e0",
-          text: "#b38600",
+          bg: "#3f3212",
+          text: "#ffd166",
         },
         danger: {
-          DEFAULT: "#c13515",
-          bg: "#fcece8",
-          text: "#c13515",
+          DEFAULT: "#d91616",
+          bg: "#3a1218",
+          text: "#ef9c9a",
         },
 
         // shadcn/ui compatibility
@@ -98,25 +107,20 @@ const config: Config = {
       },
       fontFamily: {
         cereal: [
+          "Geomanist",
           "Inter",
-          "Circular",
           "-apple-system",
           "system-ui",
           "Roboto",
           "Helvetica Neue",
           "sans-serif",
         ],
-        // Editorial: serif display para títulos/etiquetas de prestígio.
-        // Carregado via next/font (ver app/layout.tsx).
         display: [
-          "var(--font-display)",
-          "Fraunces",
-          "Georgia",
-          "serif",
+          "Geomanist",
+          "Inter",
+          "sans-serif",
         ],
-        // Mono refinada — números, etapas, metadados.
         mono: [
-          "var(--font-mono)",
           "JetBrains Mono",
           "SFMono-Regular",
           "Menlo",
@@ -164,8 +168,10 @@ const config: Config = {
         section: "64px",
       },
       boxShadow: {
-        airbnb: "rgba(0, 0, 0, 0.02) 0 0 0 1px, rgba(0, 0, 0, 0.04) 0 2px 6px 0, rgba(0, 0, 0, 0.1) 0 4px 8px 0",
-        "airbnb-hover": "rgba(0, 0, 0, 0.02) 0 0 0 1px, rgba(0, 0, 0, 0.04) 0 2px 6px, rgba(0, 0, 0, 0.1) 0 4px 8px",
+        airbnb: "0 14px 40px rgba(0, 0, 0, 0.28)",
+        "airbnb-hover": "0 18px 55px rgba(218, 33, 40, 0.18)",
+        brand: "inset 0 1px 1px #ffffff18, 0 16px 50px #08080855",
+        red: "0 7px 80px -12px rgba(218, 33, 40, 0.8)",
       },
     },
   },

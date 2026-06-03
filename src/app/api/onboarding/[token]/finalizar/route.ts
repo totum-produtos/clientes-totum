@@ -53,7 +53,8 @@ const PROFILE_KEYS = [
   "canais_preferencia_contato", "monitoramento_canais", "acoes_passadas",
   "plano_marketing_existente", "trabalhou_agencia", "equipe_marketing",
   "processo_vendas_estruturado", "funil_vendas_conversao", "equipe_vendas",
-  "canais_vendas", "custo_aquisicao_cac",
+  "canais_vendas", "custo_aquisicao_cac", "material_files",
+  "material_file_names", "enviar_materiais_depois",
 ];
 
 async function enviarCredenciais(opts: {

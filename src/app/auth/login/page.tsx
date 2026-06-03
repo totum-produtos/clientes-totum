@@ -48,7 +48,6 @@ export default function LoginPage() {
 
   return (
     <SignInPage
-      heroImageSrc="/login-hero.jpg"
       brandTagline="Marketing para Resultados"
       email={email}
       password={password}
@@ -61,9 +60,9 @@ export default function LoginPage() {
       onSubmit={handleSubmit}
       onResetPassword={() => router.push("/auth/forgot-password")}
       footer={
-        <div className="text-center text-sm text-muted">
+        <div className="text-center text-sm text-muted-soft">
           Não tem acesso?{" "}
-          <Link href="/auth/register" className="text-rausch hover:text-rausch-active font-medium transition-colors">
+          <Link href="/auth/register" className="text-rausch hover:text-rausch-light font-medium transition-colors">
             Falar com a Totum
           </Link>
         </div>

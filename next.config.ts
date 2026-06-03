@@ -3,6 +3,14 @@ import type { NextConfig } from "next";
 const nextConfig: NextConfig = {
   output: 'standalone',
   outputFileTracingRoot: process.cwd(),
+  outputFileTracingExcludes: {
+    "*": [
+      ".claude/**/*",
+      "clientes-totum/**/*",
+      "coverage/**/*",
+      "out/**/*",
+    ],
+  },
   images: {
     unoptimized: true,
   },

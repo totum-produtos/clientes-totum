@@ -51,6 +51,15 @@ function gerarSlug(nome: string) {
   );
 }
 
+function gerarSenhaTemporaria() {
+  const bytes = new Uint8Array(18);
+  crypto.getRandomValues(bytes);
+  return Buffer.from(bytes)
+    .toString("base64url")
+    .replace(/[-_]/g, "A")
+    .slice(0, 18);
+}
+
 export async function POST(request: Request) {
   let createdClientId: string | null = null;
   const admin = createClient(SUPABASE_URL, SERVICE_ROLE_KEY, {
@@ -119,10 +128,11 @@ export async function POST(request: Request) {
     }
     createdClientId = client.id;
 
-    // 3. Cria usuário com senha padrão Mudar@123
+    // 3. Cria usuário com senha temporária única
+    const senhaTemporaria = gerarSenhaTemporaria();
     const { data: authData, error: authErr } = await admin.auth.admin.createUser({
       email: body.email_responsavel,
-      password: "Mudar@123",
+      password: senhaTemporaria,
       email_confirm: true,
       user_metadata: {
         portal_client_id: createdClientId,
@@ -159,7 +169,7 @@ export async function POST(request: Request) {
 
 Acesse: https://cliente.grupototum.com
 Login: ${body.email_responsavel}
-Senha temporária: Mudar@123
+Senha temporária: ${senhaTemporaria}
 
 Ao acessar pela primeira vez, o sistema exigirá que você redefina esta senha para uma de sua preferência. Estamos ansiosos para começar!`;
 

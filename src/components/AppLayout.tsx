@@ -16,18 +16,29 @@ import {
     ChevronDown,
     LogOut,
     User,
-    Moon,
-    Sun,
     ClipboardList,
     Bell,
     LayoutGrid
 } from 'lucide-react';
 import { useGlobal } from "@/lib/context/GlobalContext";
 import { createSPASassClient } from "@/lib/supabase/client";
-import { useDarkMode } from "@/lib/hooks/useDarkMode";
 import Image from "next/image";
 import NotificationBell from "./NotificationBell";
 import SpoofingSelector from "./SpoofingSelector";
+
+type NavItem = {
+    name: string;
+    href: string;
+    icon: React.ComponentType<{ className?: string }>;
+    clientOnly: boolean;
+};
+
+type NavGroup = {
+    title: string;
+    icon: React.ComponentType<{ className?: string }>;
+    adminOnly?: boolean;
+    items: NavItem[];
+};
 
 export default function AppLayout({ children }: { children: React.ReactNode }) {
     const [isSidebarOpen, setSidebarOpen] = useState(false);
@@ -36,10 +47,9 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
     const router = useRouter();
 
     const { user, profile, client } = useGlobal();
-    const { isDark, toggle } = useDarkMode();
     const isMaster = user?.role === 'master';
 
-    const navigationGroups = [
+    const navigationGroups: NavGroup[] = [
         {
             title: "Meu Negócio",
             icon: Building2,
@@ -104,7 +114,7 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
     const toggleSidebar = () => setSidebarOpen(!isSidebarOpen);
 
     return (
-        <div className="min-h-screen bg-surface-strong dark:bg-ink transition-colors">
+        <div className="min-h-screen bg-canvas text-white-soft transition-colors">
             {isSidebarOpen && (
                 <div
                     className="fixed inset-0 bg-scrim/50 z-20 lg:hidden"
@@ -113,16 +123,16 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
             )}
 
             {/* Sidebar */}
-            <div className={`fixed inset-y-0 left-0 w-64 bg-canvas dark:bg-ink dark:border-r dark:border-hairline shadow-airbnb transform transition-transform duration-200 ease-in-out z-30 
+            <div className={`fixed inset-y-0 left-0 w-64 bg-navy-card border-r border-border-strong shadow-airbnb transform transition-transform duration-200 ease-in-out z-30
                 ${isSidebarOpen ? 'translate-x-0' : '-translate-x-full'} lg:translate-x-0`}>
 
-                <div className="h-16 flex items-center justify-between px-4 border-b">
+                <div className="h-16 flex items-center justify-between px-4 border-b border-border-strong">
                     <Link href="/app" className="flex items-center gap-2">
-                        <Image src="/logo.png" alt="Totum" width={140} height={64} className="h-10 w-auto" />
+                        <Image src="/logo.png" alt="Totum" width={140} height={64} className="h-10 w-auto brightness-0 invert" />
                     </Link>
                     <button
                         onClick={toggleSidebar}
-                        className="lg:hidden text-muted hover:text-ink"
+                        className="lg:hidden text-muted-soft hover:text-white"
                     >
                         <X className="h-6 w-6" />
                     </button>
@@ -146,10 +156,10 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
             </div>
 
             <div className="lg:pl-64">
-                <div className="sticky top-0 z-10 flex items-center justify-between h-16 bg-canvas dark:bg-ink shadow-airbnb px-4">
+                <div className="sticky top-0 z-10 flex items-center justify-between h-16 bg-navy-card border-b border-border-strong shadow-airbnb px-4">
                     <button
                         onClick={toggleSidebar}
-                        className="lg:hidden text-muted hover:text-ink"
+                        className="lg:hidden text-muted-soft hover:text-white"
                     >
                         <Menu className="h-6 w-6" />
                     </button>
@@ -163,11 +173,11 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
                             aria-expanded={isUserDropdownOpen}
                             aria-haspopup="menu"
                             aria-label="Menu do usuário"
-                            className="flex items-center space-x-2 text-sm text-ink hover:text-ink"
+                            className="flex items-center space-x-2 text-sm text-white-soft hover:text-white"
                         >
                             <div className="w-8 h-8 rounded-full bg-rausch/10 flex items-center justify-center overflow-hidden" aria-hidden="true">
                                 {profile?.avatar_url ? (
-                                    <img src={profile.avatar_url} alt="" className="w-full h-full object-cover" />
+                                    <Image src={profile.avatar_url} alt="" width={32} height={32} unoptimized className="w-full h-full object-cover" />
                                 ) : (
                                     <span className="text-rausch-active font-medium">
                                         {user ? getInitials(user.email) : '??'}
@@ -179,12 +189,12 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
                         </button>
 
                         {isUserDropdownOpen && (
-                            <div className="absolute right-0 mt-2 w-64 bg-canvas rounded-md shadow-airbnb border z-50">
-                                <div className="p-2 border-b border-hairline-soft">
+                            <div className="absolute right-0 mt-2 w-64 bg-navy-card rounded-md shadow-airbnb border border-border-strong z-50">
+                                <div className="p-2 border-b border-border-strong">
                                     <div className="flex items-center gap-2">
                                         <div className="w-9 h-9 rounded-full bg-rausch/10 flex items-center justify-center overflow-hidden shrink-0">
                                             {profile?.avatar_url ? (
-                                                <img src={profile.avatar_url} alt="Avatar" className="w-full h-full object-cover" />
+                                                <Image src={profile.avatar_url} alt="Avatar" width={36} height={36} unoptimized className="w-full h-full object-cover" />
                                             ) : (
                                                 <span className="text-rausch-active font-medium text-sm">
                                                     {user ? getInitials(user.email) : '??'}
@@ -192,7 +202,7 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
                                             )}
                                         </div>
                                         <div className="min-w-0">
-                                            <p className="text-sm font-medium text-ink truncate">
+                                            <p className="text-sm font-medium text-white truncate">
                                                 {profile?.display_name || user?.email?.split('@')[0] || 'Usuário'}
                                             </p>
                                             <p className="text-xs text-muted truncate">{user?.email}</p>
@@ -203,19 +213,9 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
                                     <button
                                         onClick={() => {
                                             setUserDropdownOpen(false);
-                                            toggle();
-                                        }}
-                                        className="w-full flex items-center px-4 py-2 text-sm text-ink hover:bg-surface-soft"
-                                    >
-                                        {isDark ? <Sun className="mr-3 h-4 w-4 text-muted-soft" /> : <Moon className="mr-3 h-4 w-4 text-muted-soft" />}
-                                        {isDark ? 'Modo claro' : 'Modo escuro'}
-                                    </button>
-                                    <button
-                                        onClick={() => {
-                                            setUserDropdownOpen(false);
                                             handleGoToProfile()
                                         }}
-                                        className="w-full flex items-center px-4 py-2 text-sm text-ink hover:bg-surface-soft"
+                                        className="w-full flex items-center px-4 py-2 text-sm text-white-soft hover:bg-navy-elevated hover:text-white"
                                     >
                                         <User className="mr-3 h-4 w-4 text-muted-soft" />
                                         Meu Perfil
@@ -239,10 +239,10 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
 
                 <main className="p-4 relative">
                     {!isMaster && client && !client.profile_data?.briefing_completed && pathname !== '/app/meu-cadastro' && (
-                        <div className="absolute inset-0 bg-canvas/80 backdrop-blur-sm z-50 flex flex-col items-center justify-center p-6 text-center rounded-lg">
-                            <div className="bg-white dark:bg-ink border p-8 rounded-xl shadow-xl max-w-md w-full">
+                        <div className="absolute inset-0 bg-canvas/85 backdrop-blur-sm z-50 flex flex-col items-center justify-center p-6 text-center rounded-lg">
+                            <div className="bg-navy-card border border-border-strong p-8 rounded-lg shadow-xl max-w-md w-full">
                                 <ClipboardList className="w-12 h-12 text-rausch mx-auto mb-4" />
-                                <h2 className="text-xl font-bold text-ink mb-2">Briefing Obrigatório Pendente</h2>
+                                <h2 className="text-xl font-bold text-white mb-2">Briefing Obrigatório Pendente</h2>
                                 <p className="text-muted text-sm mb-6">
                                     Para liberar o acesso completo ao portal e continuarmos com a estratégia, precisamos que você preencha as informações do seu negócio.
                                 </p>
@@ -261,15 +261,16 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
     );
 }
 
-function SidebarGroup({ group, pathname, isMaster, closeSidebar }: { group: any; pathname: string; isMaster: boolean; closeSidebar: () => void }) {
+function SidebarGroup({ group, pathname, isMaster, closeSidebar }: { group: NavGroup; pathname: string; isMaster: boolean; closeSidebar: () => void }) {
+    const GroupIcon = group.icon;
     // Check if any item in this group is currently active
-    const hasActiveItem = group.items.some((item: any) => pathname.startsWith(item.href) && (item.href !== '/app' || pathname === '/app'));
+    const hasActiveItem = group.items.some((item) => pathname.startsWith(item.href) && (item.href !== '/app' || pathname === '/app'));
     
     // We open the group by default if it has an active item, or if it's the "Meu Negócio" group
     const [isOpen, setIsOpen] = useState(hasActiveItem || group.title === "Meu Negócio");
 
     // Filter items based on user role
-    const visibleItems = group.items.filter((item: any) => isMaster || item.clientOnly);
+    const visibleItems = group.items.filter((item) => isMaster || item.clientOnly);
 
     if (visibleItems.length === 0) return null;
     if (group.adminOnly && !isMaster) return null;
@@ -278,10 +279,10 @@ function SidebarGroup({ group, pathname, isMaster, closeSidebar }: { group: any;
         <div className="mb-2">
             <button
                 onClick={() => setIsOpen(!isOpen)}
-                className="w-full flex items-center justify-between px-3 py-2 text-xs font-semibold text-muted uppercase tracking-wider hover:text-ink transition-colors group"
+                className="w-full flex items-center justify-between px-3 py-2 text-xs font-semibold text-muted-soft uppercase tracking-wider hover:text-white transition-colors group"
             >
                 <div className="flex items-center gap-2">
-                    <group.icon className="w-4 h-4 text-muted-soft group-hover:text-muted" />
+                    <GroupIcon className="w-4 h-4 text-muted-soft group-hover:text-white-soft" />
                     {group.title}
                 </div>
                 <ChevronDown className={`w-4 h-4 transition-transform duration-200 ${isOpen ? "rotate-180" : ""}`} />
@@ -292,7 +293,8 @@ function SidebarGroup({ group, pathname, isMaster, closeSidebar }: { group: any;
                     isOpen ? "max-h-96 opacity-100" : "max-h-0 opacity-0"
                 }`}
             >
-                {visibleItems.map((item: any) => {
+                {visibleItems.map((item) => {
+                    const ItemIcon = item.icon;
                     const isActive = pathname === item.href;
                     return (
                         <Link
@@ -302,13 +304,13 @@ function SidebarGroup({ group, pathname, isMaster, closeSidebar }: { group: any;
                             className={`group flex items-center pl-9 pr-2 py-2 text-sm font-medium rounded-md transition-colors relative ${
                                 isActive
                                     ? 'bg-rausch/10 text-rausch'
-                                    : 'text-body hover:bg-surface-soft hover:text-ink'
+                                    : 'text-white-soft hover:bg-navy-elevated hover:text-white'
                             }`}
                         >
                             {isActive && <div className="absolute left-0 top-0 bottom-0 w-1 bg-rausch rounded-r-full" />}
-                            <item.icon
+                            <ItemIcon
                                 className={`mr-3 h-4 w-4 ${
-                                    isActive ? 'text-rausch' : 'text-muted-soft group-hover:text-muted'
+                                    isActive ? 'text-rausch' : 'text-muted-soft group-hover:text-white-soft'
                                 }`}
                             />
                             {item.name}
