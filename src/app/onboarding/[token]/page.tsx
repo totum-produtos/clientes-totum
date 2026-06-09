@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useEffect, useMemo, useRef, useState } from "react";
+import React, { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import Image from "next/image";
 import { useParams } from "next/navigation";
 import { Check, AlertCircle, Copy, ArrowLeft, ArrowRight, Eye, EyeOff, Play, ShieldCheck } from "lucide-react";
@@ -44,6 +44,7 @@ export default function OnboardingPage() {
   const [step, setStep] = useState(1);
   const [savedAt, setSavedAt] = useState<Date | null>(null);
   const [saving, setSaving] = useState(false);
+  const [saveError, setSaveError] = useState(false);
   const [submitting, setSubmitting] = useState(false);
   const [result, setResult] = useState<FinishResult | null>(null);
   const [copied, setCopied] = useState(false);
@@ -52,7 +53,12 @@ export default function OnboardingPage() {
 
   const { form, setForm, update, toggleArray, addPersona, removePersona, updatePersona } = useClienteForm();
   const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const retryRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const saveAttempt = useRef(0);
   const initialized = useRef(false);
+  // Mantém sempre o payload mais recente para que retries enviem dados atuais.
+  const latest = useRef({ form, step });
+  latest.current = { form, step };
 
   // 1) Carrega convite
   useEffect(() => {
@@ -89,24 +95,49 @@ export default function OnboardingPage() {
     return () => { cancelled = true; };
   }, [token, setForm]);
 
-  // 2) Auto-save (debounced)
+  // 2) Auto-save — grava o rascunho e, em caso de falha, avisa + re-tenta.
+  const persistDraft = useCallback(async () => {
+    setSaving(true);
+    try {
+      const { form: f, step: s } = latest.current;
+      const res = await fetch(`/api/onboarding/${token}/salvar`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ draft_data: f, current_step: s }),
+      });
+      if (!res.ok) throw new Error(`HTTP ${res.status}`);
+      setSavedAt(new Date());
+      setSaveError(false);
+      saveAttempt.current = 0;
+    } catch {
+      setSaveError(true);
+      // Backoff: re-tenta até 4 vezes (2.5s, 5s, 7.5s, 10s).
+      if (saveAttempt.current < 4) {
+        saveAttempt.current += 1;
+        if (retryRef.current) clearTimeout(retryRef.current);
+        retryRef.current = setTimeout(() => { void persistDraft(); }, 2500 * saveAttempt.current);
+      }
+    } finally {
+      setSaving(false);
+    }
+  }, [token]);
+
+  // Dispara o auto-save (debounced) a cada mudança no formulário.
   useEffect(() => {
     if (!initialized.current || phase !== "form") return;
     if (debounceRef.current) clearTimeout(debounceRef.current);
-    debounceRef.current = setTimeout(async () => {
-      setSaving(true);
-      try {
-        const res = await fetch(`/api/onboarding/${token}/salvar`, {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ draft_data: form, current_step: step }),
-        });
-        if (res.ok) setSavedAt(new Date());
-      } catch { /* silencioso */ }
-      finally { setSaving(false); }
-    }, 1200);
+    if (retryRef.current) clearTimeout(retryRef.current); // nova edição cancela retry pendente
+    debounceRef.current = setTimeout(() => { void persistDraft(); }, 1200);
     return () => { if (debounceRef.current) clearTimeout(debounceRef.current); };
-  }, [form, step, token, phase]);
+  }, [form, step, phase, persistDraft]);
+
+  // Salvamento manual imediato (botão "Tentar agora").
+  const retrySaveNow = () => {
+    saveAttempt.current = 0;
+    if (retryRef.current) clearTimeout(retryRef.current);
+    if (debounceRef.current) clearTimeout(debounceRef.current);
+    void persistDraft();
+  };
 
   const goNext = () => {
     const { ok, missing } = validateStep(step, form);
@@ -172,9 +203,10 @@ export default function OnboardingPage() {
   const progressPct = useMemo(() => Math.round((step / STEPS.length) * 100), [step]);
   const savedLabel = useMemo(() => {
     if (saving) return "Salvando…";
+    if (saveError) return "Falha ao salvar";
     if (!savedAt) return "";
     return `Salvo · ${savedAt.toLocaleTimeString("pt-BR", { hour: "2-digit", minute: "2-digit" })}`;
-  }, [saving, savedAt]);
+  }, [saving, saveError, savedAt]);
 
   /* ---------- LOADING ---------- */
   if (phase === "loading") {
@@ -355,15 +387,26 @@ export default function OnboardingPage() {
             {savedLabel && (
               <span
                 className={`hidden sm:flex items-center gap-2 font-mono text-[10px] tracking-[0.18em] uppercase ${
-                  saving ? "text-white/55" : "text-white/75"
+                  saveError ? "text-red-light" : saving ? "text-white/55" : "text-white/75"
                 }`}
               >
                 {saving ? (
                   <span className="w-1.5 h-1.5 rounded-full bg-rausch animate-pulse" />
+                ) : saveError ? (
+                  <AlertCircle className="w-3 h-3" />
                 ) : (
                   <Check className="w-3 h-3" />
                 )}
                 {savedLabel}
+                {saveError && !saving && (
+                  <button
+                    type="button"
+                    onClick={retrySaveNow}
+                    className="ml-1 underline underline-offset-2 hover:text-white"
+                  >
+                    Tentar agora
+                  </button>
+                )}
               </span>
             )}
             <span className="font-mono text-[10px] tracking-[0.22em] uppercase text-white/75">
@@ -398,6 +441,22 @@ export default function OnboardingPage() {
             <div className="mb-8 flex items-start gap-3 rounded-md border border-danger/30 bg-danger/10 p-4">
               <AlertCircle className="mt-0.5 h-4 w-4 shrink-0 text-rausch" />
               <p className="text-sm leading-relaxed text-red-light">{stepError}</p>
+            </div>
+          )}
+
+          {saveError && !saving && (
+            <div className="mb-8 flex flex-wrap items-center gap-3 rounded-md border border-danger/30 bg-danger/10 p-4 sm:hidden">
+              <AlertCircle className="h-4 w-4 shrink-0 text-rausch" />
+              <p className="flex-1 text-sm leading-relaxed text-red-light">
+                Não conseguimos salvar suas respostas. Verifique sua conexão.
+              </p>
+              <button
+                type="button"
+                onClick={retrySaveNow}
+                className="rounded-md bg-rausch px-3 py-1.5 text-xs font-medium uppercase tracking-[0.18em] text-white hover:bg-rausch-light"
+              >
+                Tentar agora
+              </button>
             </div>
           )}
 
