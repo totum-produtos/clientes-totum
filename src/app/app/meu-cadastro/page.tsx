@@ -4,6 +4,7 @@ import React, { useState, useEffect, useMemo } from "react";
 import Link from "next/link";
 import { useGlobal } from "@/lib/context/GlobalContext";
 import { createSPASassClient } from "@/lib/supabase/client";
+import { logEvent } from "@/lib/log-event";
 import {
   Building2, Briefcase, Target, Palette, Phone, Users, CircleDot, Star, Award,
   Edit3, Save, X, Clock, CheckCircle, AlertCircle, ChevronDown, ChevronUp,
@@ -353,7 +354,7 @@ export default function MeuCadastroPage() {
           columnUpdates[key] = newVal;
           directSaves++;
         } else {
-          await sb.from("client_profile_changes").insert({
+          const { error: insErr } = await sb.from("client_profile_changes").insert({
             portal_client_id: client!.id,
             requested_by: user.id,
             field_path: key,
@@ -361,6 +362,7 @@ export default function MeuCadastroPage() {
             new_value: String(newVal),
             status: "pendente"
           });
+          if (insErr) throw insErr;
           created++;
         }
       }
@@ -378,7 +380,7 @@ export default function MeuCadastroPage() {
           profileUpdates[key] = newVal;
           directSaves++;
         } else {
-          await sb.from("client_profile_changes").insert({
+          const { error: insErr } = await sb.from("client_profile_changes").insert({
             portal_client_id: client!.id,
             requested_by: user.id,
             field_path: `profile_data.${key}`,
@@ -386,6 +388,7 @@ export default function MeuCadastroPage() {
             new_value: newStr,
             status: "pendente"
           });
+          if (insErr) throw insErr;
           created++;
         }
       }
@@ -393,7 +396,15 @@ export default function MeuCadastroPage() {
       if (isAdmin && directSaves > 0) {
         const payload: any = { ...columnUpdates };
         if (Object.keys(profileUpdates).length > 0) payload.profile_data = profileUpdates;
-        await sb.from("portal_clients").update(payload).eq("id", client!.id);
+        // Captura erro E confirma que uma linha foi gravada: o Supabase não
+        // retorna erro quando o UPDATE casa 0 linhas (sem permissão / id
+        // inexistente), o que antes mostrava "salvo" sem ter salvo nada.
+        const { data: rows, error: updErr } = await sb
+          .from("portal_clients").update(payload).eq("id", client!.id).select("id");
+        if (updErr) throw updErr;
+        if (!rows || rows.length === 0) {
+          throw new Error("Nada foi salvo: cliente não encontrado ou sem permissão. Recarregue a página e tente novamente.");
+        }
         setMessage(`✅ ${directSaves} alteração(ões) salva(s).`);
         await loadClientData();
         setEditMode(false);
@@ -424,7 +435,14 @@ export default function MeuCadastroPage() {
         setMessage("Nenhuma alteração detectada.");
       }
     } catch (err: any) {
-      setMessage("❌ Erro: " + (err.message || "Falha ao enviar alterações"));
+      const msg = err?.message || "Falha ao enviar alterações";
+      setMessage("❌ Erro: " + msg);
+      try {
+        const sb = await createSPASassClient();
+        await logEvent(sb.getSupabaseClient(), "error", "meu-cadastro:handleSave", msg, {
+          clientId: client?.id, userId: user?.id,
+        });
+      } catch { /* logging não deve quebrar o fluxo */ }
     } finally {
       setLoading(false);
     }
