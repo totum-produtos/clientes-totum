@@ -15,7 +15,8 @@ const nextConfig: NextConfig = {
     unoptimized: true,
   },
   eslint: {
-    ignoreDuringBuilds: true,
+    // Lint volta a rodar no build — erros de lint barram o deploy.
+    ignoreDuringBuilds: false,
   },
   typescript: {
     ignoreBuildErrors: false,

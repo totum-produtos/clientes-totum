@@ -4,8 +4,9 @@ import { useGlobal } from "@/lib/context/GlobalContext";
 import { createSPASassClient } from "@/lib/supabase/client";
 import { Plus, Upload, RefreshCw, CalendarDays, ArrowLeft } from "lucide-react";
 import CalendarGrid from "@/components/calendar/CalendarGrid";
-import PostModal from "@/components/calendar/PostModal";
-import BulkPostModal from "@/components/calendar/BulkPostModal";
+import PostModal, { type Post as PostModalData } from "@/components/calendar/PostModal";
+import BulkPostModal, { type BulkPost } from "@/components/calendar/BulkPostModal";
+import type { TablesInsert, TablesUpdate } from "@/lib/types";
 import { useToast } from "@/components/ui/ToastProvider";
 import ConfirmDialog from "@/components/ConfirmDialog";
 import { useSearchParams } from "next/navigation";
@@ -115,7 +116,7 @@ function CalendarioContent() {
     }
   };
 
-  const handleSavePost = async (postData: any) => {
+  const handleSavePost = async (postData: PostModalData) => {
     const targetClientId = clientIdParam || client?.id;
     if (!targetClientId) return;
     const supabase = await createSPASassClient();
@@ -123,14 +124,14 @@ function CalendarioContent() {
       ...postData,
       portal_client_id: targetClientId,
       creator: user?.id,
-      published_at: new Date(postData.published_at).toISOString(),
+      published_at: new Date(postData.published_at ?? "").toISOString(),
     };
 
     if (selectedPost?.id) {
       const { error } = await supabase
         .getSupabaseClient()
         .from("wanda_posts")
-        .update(payload)
+        .update(payload as TablesUpdate<"wanda_posts">)
         .eq("id", selectedPost.id);
       if (error) {
         showError("Erro ao atualizar post");
@@ -144,7 +145,7 @@ function CalendarioContent() {
       const { error } = await supabase
         .getSupabaseClient()
         .from("wanda_posts")
-        .insert({ ...payload, post_id: `post_${Date.now()}` });
+        .insert({ ...payload, post_id: `post_${Date.now()}` } as unknown as TablesInsert<"wanda_posts">);
       if (error) {
         showError("Erro ao criar post");
         console.error("Erro ao criar:", error);
@@ -181,7 +182,7 @@ function CalendarioContent() {
     setPendingDeleteId(null);
   };
 
-  const handleBulkSave = async (bulkPosts: any[]) => {
+  const handleBulkSave = async (bulkPosts: BulkPost[]) => {
     const targetClientId = clientIdParam || client?.id;
     if (!targetClientId) return;
     const supabase = await createSPASassClient();
@@ -194,7 +195,7 @@ function CalendarioContent() {
     const { error } = await supabase
       .getSupabaseClient()
       .from("wanda_posts")
-      .insert(payload);
+      .insert(payload as unknown as TablesInsert<"wanda_posts">[]);
     if (error) {
       showError("Erro ao criar posts em massa");
       console.error("Erro ao criar posts:", error);

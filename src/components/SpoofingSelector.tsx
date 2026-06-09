@@ -3,7 +3,7 @@
 import React, { useEffect, useState } from "react";
 import { useGlobal } from "@/lib/context/GlobalContext";
 import { createSPASassClient } from "@/lib/supabase/client";
-import { ChevronDown, Users, X } from "lucide-react";
+import { ChevronDown, Users } from "lucide-react";
 
 export default function SpoofingSelector() {
     const { user, client, setSpoofedClient } = useGlobal();

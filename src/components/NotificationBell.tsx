@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState, useEffect, useRef } from "react";
-import { Bell, Check, X, Clock, CheckCircle, XCircle, FileText } from "lucide-react";
+import { Bell, Clock, CheckCircle, XCircle, FileText } from "lucide-react";
 import { createSPASassClient } from "@/lib/supabase/client";
 import { useRouter } from "next/navigation";
 
@@ -12,14 +12,13 @@ interface Notification {
   type: string;
   read: boolean;
   created_at: string | null;
-  data?: any;
+  data?: unknown;
 }
 
 export default function NotificationBell() {
   const [open, setOpen] = useState(false);
   const [notifications, setNotifications] = useState<Notification[]>([]);
   const [unreadCount, setUnreadCount] = useState(0);
-  const [loading, setLoading] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
   const router = useRouter();
 

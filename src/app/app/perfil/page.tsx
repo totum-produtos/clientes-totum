@@ -3,9 +3,10 @@
 import React, { useState, useEffect, useRef } from "react";
 import { useGlobal } from "@/lib/context/GlobalContext";
 import { createSPASassClient } from "@/lib/supabase/client";
+import type { LucideIcon } from "lucide-react";
 import {
-  User, Camera, Check, Lock, Globe, Clock, Phone, Briefcase,
-  FileText, ChevronDown, ChevronUp, Eye, EyeOff, AlertCircle
+  User, Camera, Check, Lock, Globe, Briefcase,
+  ChevronDown, ChevronUp, Eye, EyeOff, AlertCircle
 } from "lucide-react";
 import { LoadingSpinner } from "@/components/ui/LoadingSpinner";
 
@@ -89,8 +90,8 @@ export default function PerfilPage() {
       if (upsertError) throw upsertError;
       setMessage("Perfil atualizado com sucesso!");
       refreshData();
-    } catch (err: any) {
-      setError(err.message || "Erro ao salvar perfil");
+    } catch (err: unknown) {
+      setError(err instanceof Error ? err.message : "Erro ao salvar perfil");
     } finally {
       setLoading(false);
     }
@@ -118,8 +119,8 @@ export default function PerfilPage() {
 
       setMessage("Foto atualizada!");
       refreshData();
-    } catch (err: any) {
-      setError(err.message || "Erro ao fazer upload");
+    } catch (err: unknown) {
+      setError(err instanceof Error ? err.message : "Erro ao fazer upload");
     } finally {
       setUploading(false);
     }
@@ -147,8 +148,8 @@ export default function PerfilPage() {
       if (error) throw error;
       setSenhaMessage("Senha alterada com sucesso!");
       setSenhaForm({ currentPassword: "", newPassword: "", confirmPassword: "" });
-    } catch (err: any) {
-      setSenhaError(err.message || "Erro ao alterar senha");
+    } catch (err: unknown) {
+      setSenhaError(err instanceof Error ? err.message : "Erro ao alterar senha");
     } finally {
       setSenhaLoading(false);
     }
@@ -376,7 +377,14 @@ export default function PerfilPage() {
   );
 }
 
-function Section({ id, label, icon: Icon, expanded, toggle, children }: any) {
+function Section({ id, label, icon: Icon, expanded, toggle, children }: {
+  id: string;
+  label: string;
+  icon: LucideIcon;
+  expanded: string[];
+  toggle: (id: string) => void;
+  children: React.ReactNode;
+}) {
   const isOpen = expanded.includes(id);
   return (
     <div className="bg-canvas rounded-md border border-hairline shadow-airbnb overflow-hidden">

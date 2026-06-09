@@ -2,7 +2,7 @@
 
 import React, { useState } from "react";
 import { useRouter } from "next/navigation";
-import { Check, ChevronRight, Copy, Link2 } from "lucide-react";
+import { Check, ChevronRight, Copy } from "lucide-react";
 import { STEPS } from "@/lib/cliente-form-constants";
 import { useClienteForm } from "@/hooks/useClienteForm";
 import { ClienteFormSteps, validateStep } from "@/components/ClienteFormSteps";

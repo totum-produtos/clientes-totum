@@ -8,7 +8,7 @@ const circuloDouradoOptions = [
   { value: 'como', label: 'Como', desc: 'Processo, diferencial, método' },
 ];
 
-interface Post {
+export interface Post {
   id?: number;
   subject?: string;
   tipo?: string;
