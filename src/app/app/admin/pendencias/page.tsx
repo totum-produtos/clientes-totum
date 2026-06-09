@@ -35,7 +35,7 @@ export default function PendenciasPage() {
                     if (!c.drive_folder_cliente_id) {
                         pendencias.push("drive_missing");
                     }
-                    const pd = c.profile_data as Record<string, any>;
+                    const pd = c.profile_data as Record<string, unknown>;
                     if (!pd || !pd.briefing_completed) {
                         pendencias.push("briefing_missing");
                     }

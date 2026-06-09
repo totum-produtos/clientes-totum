@@ -2,7 +2,7 @@
 import React, { useState } from 'react';
 import { X, Upload, Save, Download } from 'lucide-react';
 
-interface BulkPost {
+export interface BulkPost {
     subject: string;
     tipo: string;
     published_at: string;

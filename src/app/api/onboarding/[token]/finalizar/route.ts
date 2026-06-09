@@ -7,6 +7,7 @@
 import { NextResponse } from "next/server";
 import { createClient } from "@supabase/supabase-js";
 import { randomBytes } from "crypto";
+import { rateLimit } from "@/lib/rate-limit";
 
 const SUPABASE_URL = process.env.NEXT_PUBLIC_SUPABASE_URL || "";
 const SERVICE_ROLE_KEY = process.env.PRIVATE_SUPABASE_SERVICE_KEY || "";
@@ -131,6 +132,15 @@ export async function POST(
   const { token } = await context.params;
   if (!token) {
     return NextResponse.json({ error: "Token ausente" }, { status: 400 });
+  }
+
+  // Finalização cria conta + dispara email. Limite apertado: 10/min por IP.
+  const rl = rateLimit(request, { key: "onboarding-finalizar", limit: 10, windowMs: 60_000 });
+  if (!rl.ok) {
+    return NextResponse.json(
+      { error: "Muitas tentativas. Aguarde um momento." },
+      { status: 429, headers: rl.headers },
+    );
   }
 
   const admin = createClient(SUPABASE_URL, SERVICE_ROLE_KEY, {

@@ -1,17 +1,23 @@
 "use client";
 
 import React, { useState, useEffect, useMemo } from "react";
-import Link from "next/link";
 import { useGlobal } from "@/lib/context/GlobalContext";
 import { createSPASassClient } from "@/lib/supabase/client";
 import { logEvent } from "@/lib/log-event";
 import {
-  Building2, Briefcase, Target, Palette, Phone, Users, CircleDot, Star, Award,
+  Building2, Briefcase, Target, Users, CircleDot, Star, Award,
   Edit3, Save, X, Clock, CheckCircle, AlertCircle, ChevronDown, ChevronUp,
-  ShoppingCart, Megaphone, Globe, TrendingUp, Sparkles, Flag, Link2, FolderUp, Lock
+  ShoppingCart, Megaphone, TrendingUp, Sparkles, Link2, FolderUp, Lock
 } from "lucide-react";
+import type { LucideIcon } from "lucide-react";
 import { LoadingSpinner, PageLoader } from "@/components/ui/LoadingSpinner";
 import { PageError } from "@/components/ui/PageError";
+
+// Dados do cliente carregados do banco (colunas dinâmicas + campos _edit_*)
+type ClientData = {
+  profile_data?: unknown;
+  [key: string]: unknown;
+};
 
 // Tipo de campo do briefing
 type FieldType = "text" | "textarea" | "select" | "file-link";
@@ -30,7 +36,7 @@ type BriefingField = {
 type BriefingSection = {
   id: string;
   label: string;
-  icon: any;
+  icon: LucideIcon;
   lockedForClient?: boolean; // só admin/master editam; cliente apenas visualiza
   fields: BriefingField[];
 };
@@ -214,7 +220,7 @@ const ALL_PROFILE_FIELDS = SECTIONS.flatMap(s => s.fields.filter(f => f.source =
 
 export default function MeuCadastroPage() {
   const { user, client, loading: globalLoading, refreshData } = useGlobal();
-  const [clientData, setClientData] = useState<any>(null);
+  const [clientData, setClientData] = useState<ClientData | null>(null);
   const [editMode, setEditMode] = useState(false);
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState("");
@@ -273,20 +279,20 @@ export default function MeuCadastroPage() {
     setExpanded(prev => prev.includes(id) ? prev.filter(x => x !== id) : [...prev, id]);
   };
 
-  const getValue = (field: BriefingField, defaultVal: any = "") => {
+  const getValue = (field: BriefingField, defaultVal: unknown = "") => {
     if (!clientData) return defaultVal;
-    if (editMode && (clientData as any)[`_edit_${field.key}`] !== undefined) {
-      return (clientData as any)[`_edit_${field.key}`];
+    if (editMode && clientData[`_edit_${field.key}`] !== undefined) {
+      return clientData[`_edit_${field.key}`];
     }
     if (field.source === "column") {
       return clientData[field.key] ?? defaultVal;
     }
-    const pd = clientData.profile_data || {};
+    const pd = (clientData.profile_data || {}) as Record<string, unknown>;
     return pd[field.key] ?? defaultVal;
   };
 
-  const setEditValue = (key: string, value: any) => {
-    setClientData((prev: any) => ({ ...prev, [`_edit_${key}`]: value }));
+  const setEditValue = (key: string, value: unknown) => {
+    setClientData((prev) => ({ ...(prev ?? {}), [`_edit_${key}`]: value }));
   };
 
   // Cálculo da barra de progresso
@@ -295,7 +301,7 @@ export default function MeuCadastroPage() {
     const allFields = SECTIONS.flatMap(s => s.fields).filter(f => f.type !== "file-link");
     const total = allFields.length;
     let filled = 0;
-    const pd = clientData.profile_data || {};
+    const pd = (clientData.profile_data || {}) as Record<string, unknown>;
     for (const f of allFields) {
       const val = f.source === "column" ? clientData[f.key] : pd[f.key];
       if (val && String(val).trim() !== "") filled++;
@@ -330,7 +336,7 @@ export default function MeuCadastroPage() {
     try {
       const supabase = await createSPASassClient();
       const sb = supabase.getSupabaseClient();
-      const pd = clientData.profile_data || {};
+      const pd = (clientData.profile_data || {}) as Record<string, unknown>;
       let created = 0;
       let directSaves = 0;
 
@@ -340,12 +346,12 @@ export default function MeuCadastroPage() {
         SECTIONS.filter(s => s.lockedForClient).flatMap(s => s.fields.map(f => f.key))
       );
 
-      const columnUpdates: Record<string, any> = {};
-      const profileUpdates: Record<string, any> = { ...pd };
+      const columnUpdates: Record<string, unknown> = {};
+      const profileUpdates: Record<string, unknown> = { ...pd };
 
       for (const key of ALL_COLUMN_FIELDS) {
         const oldVal = clientData[key] ?? "";
-        const newVal = (clientData as any)[`_edit_${key}`];
+        const newVal = clientData[`_edit_${key}`];
         if (newVal === undefined) continue;
         if (String(oldVal) === String(newVal)) continue;
         if (!isAdmin && lockedKeys.has(key)) continue;
@@ -369,7 +375,7 @@ export default function MeuCadastroPage() {
 
       for (const key of ALL_PROFILE_FIELDS) {
         const oldVal = pd[key] ?? "";
-        const newVal = (clientData as any)[`_edit_${key}`];
+        const newVal = clientData[`_edit_${key}`];
         if (newVal === undefined) continue;
         const oldStr = typeof oldVal === "object" ? JSON.stringify(oldVal) : String(oldVal);
         const newStr = typeof newVal === "object" ? JSON.stringify(newVal) : String(newVal);
@@ -394,7 +400,7 @@ export default function MeuCadastroPage() {
       }
 
       if (isAdmin && directSaves > 0) {
-        const payload: any = { ...columnUpdates };
+        const payload: Record<string, unknown> = { ...columnUpdates };
         if (Object.keys(profileUpdates).length > 0) payload.profile_data = profileUpdates;
         // Captura erro E confirma que uma linha foi gravada: o Supabase não
         // retorna erro quando o UPDATE casa 0 linhas (sem permissão / id
@@ -413,7 +419,7 @@ export default function MeuCadastroPage() {
         setMessage(`✅ ${created} alteração(ões) enviada(s) para aprovação.`);
         
         // If the briefing wasn't completed yet, mark it as completed now
-        if (!clientData.profile_data?.briefing_completed) {
+        if (!(clientData.profile_data as Record<string, unknown> | null)?.briefing_completed) {
             try {
                 const session = await supabase.getSupabaseClient().auth.getSession();
                 const token = session.data.session?.access_token;
@@ -434,8 +440,8 @@ export default function MeuCadastroPage() {
       } else {
         setMessage("Nenhuma alteração detectada.");
       }
-    } catch (err: any) {
-      const msg = err?.message || "Falha ao enviar alterações";
+    } catch (err: unknown) {
+      const msg = err instanceof Error ? err.message : "Falha ao enviar alterações";
       setMessage("❌ Erro: " + msg);
       try {
         const sb = await createSPASassClient();
@@ -474,7 +480,7 @@ export default function MeuCadastroPage() {
     );
   }
 
-  const driveUrl = clientData.google_drive_folder_url;
+  const driveUrl = clientData.google_drive_folder_url as string | null | undefined;
 
   return (
     <div className="min-h-screen bg-surface-soft pb-12">
@@ -558,7 +564,7 @@ export default function MeuCadastroPage() {
                     field={field}
                     editMode={canEditThisSection}
                     value={getValue(field)}
-                    onChange={(v: any) => setEditValue(field.key, v)}
+                    onChange={(v: unknown) => setEditValue(field.key, v)}
                     driveUrl={driveUrl}
                   />
                 ))}
@@ -588,7 +594,15 @@ export default function MeuCadastroPage() {
   );
 }
 
-function Section({ id, label, icon: Icon, expanded, toggle, children, locked }: any) {
+function Section({ id, label, icon: Icon, expanded, toggle, children, locked }: {
+  id: string;
+  label: string;
+  icon: LucideIcon;
+  expanded: string[];
+  toggle: (id: string) => void;
+  children: React.ReactNode;
+  locked?: boolean;
+}) {
   const isOpen = expanded.includes(id);
   return (
     <div className="bg-canvas rounded-lg border shadow-airbnb overflow-hidden">
@@ -613,7 +627,14 @@ function Section({ id, label, icon: Icon, expanded, toggle, children, locked }: 
   );
 }
 
-function FieldRenderer({ field, editMode, value, onChange, driveUrl }: any) {
+function FieldRenderer({ field, editMode, value, onChange, driveUrl }: {
+  field: BriefingField;
+  editMode: boolean;
+  value: unknown;
+  onChange: (value: unknown) => void;
+  driveUrl?: string | null;
+}) {
+  const display = value == null ? "" : String(value);
   if (field.type === "file-link") {
     return (
       <div className="md:col-span-2">
@@ -655,7 +676,7 @@ function FieldRenderer({ field, editMode, value, onChange, driveUrl }: any) {
         </label>
         {editMode ? (
           <textarea
-            value={value || ""}
+            value={display}
             onChange={e => onChange(e.target.value)}
             rows={3}
             className="input-field resize-none"
@@ -663,7 +684,7 @@ function FieldRenderer({ field, editMode, value, onChange, driveUrl }: any) {
           />
         ) : (
           <div className="px-4 py-3 bg-surface-soft rounded-md text-sm text-ink min-h-[80px] whitespace-pre-wrap">
-            {value || <span className="text-muted-soft italic">—</span>}
+            {display || <span className="text-muted-soft italic">—</span>}
           </div>
         )}
       </div>
@@ -678,7 +699,7 @@ function FieldRenderer({ field, editMode, value, onChange, driveUrl }: any) {
         </label>
         {editMode ? (
           <select
-            value={value || ""}
+            value={display}
             onChange={e => onChange(e.target.value)}
             className="input-field"
           >
@@ -689,7 +710,7 @@ function FieldRenderer({ field, editMode, value, onChange, driveUrl }: any) {
           </select>
         ) : (
           <div className="px-4 py-3 bg-surface-soft rounded-md text-sm text-ink min-h-[44px] flex items-center">
-            {value || <span className="text-muted-soft italic">—</span>}
+            {display || <span className="text-muted-soft italic">—</span>}
           </div>
         )}
       </div>
@@ -703,14 +724,14 @@ function FieldRenderer({ field, editMode, value, onChange, driveUrl }: any) {
       </label>
       {editMode ? (
         <input
-          value={value || ""}
+          value={display}
           onChange={e => onChange(e.target.value)}
           className="input-field"
           placeholder={field.hint || ""}
         />
       ) : (
         <div className="px-4 py-3 bg-surface-soft rounded-md text-sm text-ink min-h-[44px] flex items-center">
-          {value || <span className="text-muted-soft italic">—</span>}
+          {display || <span className="text-muted-soft italic">—</span>}
         </div>
       )}
     </div>

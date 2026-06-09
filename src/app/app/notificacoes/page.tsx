@@ -16,7 +16,7 @@ interface Notification {
   type: string;
   read: boolean;
   created_at: string | null;
-  data?: any;
+  data?: unknown;
 }
 
 type FilterType = "todas" | "nao_lidas" | "lidas";

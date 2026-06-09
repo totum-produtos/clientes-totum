@@ -1,5 +1,5 @@
 "use client";
-import React, { useCallback, useEffect, useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
 import { useGlobal } from '@/lib/context/GlobalContext';
@@ -103,7 +103,7 @@ export default function ArquivosPage() {
     );
   }
 
-  const handleUpload = useCallback(async (e: React.ChangeEvent<HTMLInputElement>) => {
+  async function handleUpload(e: React.ChangeEvent<HTMLInputElement>) {
     if (!client || !e.target.files?.length) return;
     setUploading(true);
     setError('');
@@ -126,7 +126,7 @@ export default function ArquivosPage() {
     }
     setUploading(false);
     e.target.value = '';
-  }, [client, showError, showSuccess]);
+  }
 
   async function handleDownload(name: string) {
     if (!client) return;

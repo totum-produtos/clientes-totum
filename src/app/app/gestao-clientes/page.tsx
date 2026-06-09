@@ -57,7 +57,7 @@ export default function GestaoClientesPage() {
   const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
   const [clienteParaDeletar, setClienteParaDeletar] = useState<Cliente | null>(null);
   const [deleteLoading, setDeleteLoading] = useState(false);
-  const [actionMessage, setActionMessage] = useState('');
+  const [, setActionMessage] = useState('');
   const [error, setError] = useState('');
   const [togglingId, setTogglingId] = useState<string | null>(null);
 

@@ -2,10 +2,9 @@
 import React from 'react';
 import { useGlobal } from '@/lib/context/GlobalContext';
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
-import { CalendarDays, FolderOpen, BarChart3, TrendingUp, Users, CheckCircle2, Clock } from 'lucide-react';
+import { CalendarDays, BarChart3, TrendingUp, Users, CheckCircle2 } from 'lucide-react';
 import Link from 'next/link';
 import { PageLoader } from '@/components/ui/LoadingSpinner';
-import { EmptyState } from '@/components/ui/EmptyState';
 
 export default function DashboardPage() {
     const { loading, client, posts, tarefas, projetos } = useGlobal();
@@ -15,7 +14,6 @@ export default function DashboardPage() {
     }
 
     const totalViews = posts.reduce((sum, p) => sum + (p.views || 0), 0);
-    const totalLikes = posts.reduce((sum, p) => sum + (p.likes || 0), 0);
     const avgEngagement = posts.length > 0 ? (posts.reduce((sum, p) => sum + (p.engagement_rate || 0), 0) / posts.length).toFixed(1) : '0';
     const tarefasPendentes = tarefas.filter(t => t.status !== 'concluido').length;
 

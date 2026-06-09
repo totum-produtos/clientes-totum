@@ -1,9 +1,10 @@
 // src/lib/api-middleware.ts
 import { NextResponse } from "next/server";
+import type { User } from "@supabase/supabase-js";
 import { createSSRClient } from "@/lib/supabase/server";
 
 export type ApiContext = {
-    user: any;
+    user: User;
     role: "master" | "cliente";
     clientId: string | null;
 };
@@ -37,7 +38,7 @@ export function withAuth(
             }
 
             // 4. Buscar vínculo com o cliente (se for role cliente)
-            let clientId = null;
+            let clientId: string | null = null;
             if (role === "cliente") {
                 const { data: linkData } = await supabase
                     .from("portal_client_users")
@@ -45,8 +46,9 @@ export function withAuth(
                     .eq("user_id", user.id)
                     .single();
                 
-                if ((linkData as any)?.client_id) {
-                    clientId = (linkData as any).client_id;
+                const link = linkData as { client_id: string | null } | null;
+                if (link?.client_id) {
+                    clientId = link.client_id;
                 }
             }
 
@@ -57,7 +59,7 @@ export function withAuth(
                 clientId
             });
 
-        } catch (error: any) {
+        } catch (error: unknown) {
             console.error("API Middleware Error:", error);
             return NextResponse.json(
                 { error: "Erro interno no servidor." },

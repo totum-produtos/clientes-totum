@@ -3,6 +3,7 @@
 
 import { NextResponse } from "next/server";
 import { createClient } from "@supabase/supabase-js";
+import { rateLimit } from "@/lib/rate-limit";
 
 const SUPABASE_URL = process.env.NEXT_PUBLIC_SUPABASE_URL || "";
 const SERVICE_ROLE_KEY = process.env.PRIVATE_SUPABASE_SERVICE_KEY || "";
@@ -19,6 +20,16 @@ export async function POST(
   const { token } = await context.params;
   if (!token) {
     return NextResponse.json({ error: "Token ausente" }, { status: 400 });
+  }
+
+  // Autosave dispara ~1 req/1.2s por usuário (~50/min). 120/min por IP
+  // deixa folga pra digitação legítima e barra floods.
+  const rl = rateLimit(request, { key: "onboarding-salvar", limit: 120, windowMs: 60_000 });
+  if (!rl.ok) {
+    return NextResponse.json(
+      { error: "Muitas requisições. Aguarde um momento." },
+      { status: 429, headers: rl.headers },
+    );
   }
 
   let body: Body;
