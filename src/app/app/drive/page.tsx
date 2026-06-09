@@ -4,6 +4,7 @@ import Link from 'next/link';
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
 import { useGlobal } from '@/lib/context/GlobalContext';
 import { createSPASassClient } from '@/lib/supabase/client';
+import { persistOrThrow } from '@/lib/persist';
 import { Folder, ExternalLink, Unlink, Cloud } from 'lucide-react';
 import { useToast } from "@/components/ui/ToastProvider";
 import ConfirmDialog from "@/components/ConfirmDialog";
@@ -71,19 +72,23 @@ export default function DrivePage() {
       return;
     }
     setSaving(true);
-    const supabase = await createSPASassClient();
-    const { error } = await supabase.getSupabaseClient()
-      .from('portal_clients')
-      .update({ drive_folder_cliente_id: id })
-      .eq('id', client.id);
-
-    if (error) {
-      showError('Erro: ' + error.message);
-    } else {
+    try {
+      const supabase = await createSPASassClient();
+      const sb = supabase.getSupabaseClient();
+      await persistOrThrow(
+        sb.from('portal_clients')
+          .update({ drive_folder_cliente_id: id })
+          .eq('id', client.id)
+          .select('id'),
+        { db: sb, source: 'drive:saveDriveFolder', metadata: { clientId: client.id, folderId: id } },
+      );
       setFolderId(id);
       showSuccess('Pasta do Google Drive vinculada com sucesso!');
+    } catch (err: unknown) {
+      showError('Erro: ' + (err instanceof Error ? err.message : 'Falha ao vincular pasta'));
+    } finally {
+      setSaving(false);
     }
-    setSaving(false);
   }
 
   async function disconnectDrive() {
@@ -93,15 +98,24 @@ export default function DrivePage() {
 
   const confirmDisconnect = async () => {
     if (!client) return;
-    const supabase = await createSPASassClient();
-    await supabase.getSupabaseClient()
-      .from('portal_clients')
-      .update({ drive_folder_cliente_id: null })
-      .eq('id', client.id);
-    setFolderId(null);
-    setDriveUrl('');
-    showSuccess('Vínculo com Google Drive removido');
-    setConfirmOpen(false);
+    try {
+      const supabase = await createSPASassClient();
+      const sb = supabase.getSupabaseClient();
+      await persistOrThrow(
+        sb.from('portal_clients')
+          .update({ drive_folder_cliente_id: null })
+          .eq('id', client.id)
+          .select('id'),
+        { db: sb, source: 'drive:confirmDisconnect', metadata: { clientId: client.id } },
+      );
+      setFolderId(null);
+      setDriveUrl('');
+      showSuccess('Vínculo com Google Drive removido');
+    } catch (err: unknown) {
+      showError('Erro: ' + (err instanceof Error ? err.message : 'Falha ao remover vínculo'));
+    } finally {
+      setConfirmOpen(false);
+    }
   };
 
   if (globalLoading) {

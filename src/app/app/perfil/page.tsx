@@ -3,6 +3,7 @@
 import React, { useState, useEffect, useRef } from "react";
 import { useGlobal } from "@/lib/context/GlobalContext";
 import { createSPASassClient } from "@/lib/supabase/client";
+import { persistOrThrow } from "@/lib/persist";
 import type { LucideIcon } from "lucide-react";
 import {
   User, Camera, Check, Lock, Globe, Briefcase,
@@ -75,19 +76,21 @@ export default function PerfilPage() {
     setLoading(true); setMessage(""); setError("");
     try {
       const supabase = await createSPASassClient();
-      const { error: upsertError } = await supabase.getSupabaseClient()
-        .from("profiles")
-        .upsert({
-          id: user.id,
-          display_name: form.display_name,
-          bio: form.bio,
-          telefone: form.telefone,
-          cargo: form.cargo,
-          timezone: form.timezone,
-          idioma: form.idioma,
-        }, { onConflict: "id" });
-
-      if (upsertError) throw upsertError;
+      const sb = supabase.getSupabaseClient();
+      await persistOrThrow(
+        sb.from("profiles")
+          .upsert({
+            id: user.id,
+            display_name: form.display_name,
+            bio: form.bio,
+            telefone: form.telefone,
+            cargo: form.cargo,
+            timezone: form.timezone,
+            idioma: form.idioma,
+          }, { onConflict: "id" })
+          .select("id"),
+        { db: sb, source: "perfil:handleSave", metadata: { userId: user.id } },
+      );
       setMessage("Perfil atualizado com sucesso!");
       refreshData();
     } catch (err: unknown) {
@@ -115,7 +118,10 @@ export default function PerfilPage() {
 
       const { data: { publicUrl } } = sb.storage.from("avatars").getPublicUrl(filePath);
 
-      await sb.from("profiles").upsert({ id: user.id, avatar_url: publicUrl }, { onConflict: "id" });
+      await persistOrThrow(
+        sb.from("profiles").upsert({ id: user.id, avatar_url: publicUrl }, { onConflict: "id" }).select("id"),
+        { db: sb, source: "perfil:handleAvatarUpload", metadata: { userId: user.id } },
+      );
 
       setMessage("Foto atualizada!");
       refreshData();

@@ -1,0 +1,39 @@
+name: CI
+
+# Porta de qualidade: roda em todo PR e push para main.
+# É o que faz o guard de escrita, o lint e o build realmente bloquearem
+# código inseguro antes de chegar em produção.
+
+on:
+  pull_request:
+    branches: [main]
+  push:
+    branches: [main]
+
+jobs:
+  verificar:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+
+      - name: Instalar dependências
+        run: npm ci
+
+      - name: Lint
+        run: npm run lint
+
+      - name: Testes (inclui guard anti-perda-de-dados)
+        run: npm test
+
+      - name: Build
+        run: npm run build
+        env:
+          # Valores dummy só para o build passar (não conectam a nada real).
+          NEXT_PUBLIC_SUPABASE_URL: https://example.supabase.co
+          NEXT_PUBLIC_SUPABASE_ANON_KEY: dummy-anon-key
+          PRIVATE_SUPABASE_SERVICE_KEY: dummy-service-key

@@ -4,6 +4,7 @@ import React, { useState, useEffect } from "react";
 import { useRouter, useParams } from "next/navigation";
 import { createSPASassClient } from "@/lib/supabase/client";
 import { logEvent } from "@/lib/log-event";
+import { persistOrThrow } from "@/lib/persist";
 import {
   Check, ChevronRight, AlertCircle, X,
   Edit3, Save, ArrowLeft, Lock, KeyRound, Copy, Eye, EyeOff,
@@ -173,15 +174,14 @@ export default function EditarClientePage() {
     setDriveSaving(true); setDriveSaved("");
     try {
       const supabase = await createSPASassClient();
-      const { data: rows, error: e } = await supabase.getSupabaseClient()
-        .from("portal_clients")
-        .update({ google_drive_folder_url: driveUrl || null })
-        .eq("id", clientId)
-        .select("id");
-      if (e) throw e;
-      if (!rows || rows.length === 0) {
-        throw new Error("registro não encontrado ou sem permissão");
-      }
+      const sb = supabase.getSupabaseClient();
+      await persistOrThrow(
+        sb.from("portal_clients")
+          .update({ google_drive_folder_url: driveUrl || null })
+          .eq("id", clientId)
+          .select("id"),
+        { db: sb, source: "admin/clientes/[id]:handleSaveDrive", metadata: { clientId } },
+      );
       setDriveSaved("Pasta atualizada com sucesso");
       setTimeout(() => setDriveSaved(""), 3000);
     } catch (err: unknown) {
@@ -213,7 +213,9 @@ export default function EditarClientePage() {
     setSaving(true); setError(""); setMessage("");
     try {
       const supabase = await createSPASassClient();
-      const { data: updatedRows, error: updateError } = await supabase.getSupabaseClient().from("portal_clients").update({
+      const sb = supabase.getSupabaseClient();
+      await persistOrThrow(
+        sb.from("portal_clients").update({
         nome: form.nome,
         cnpj: form.cnpj,
         nome_responsavel: form.nome_responsavel,
@@ -253,17 +255,12 @@ export default function EditarClientePage() {
           caracteristicas_marca: form.caracteristicas_marca,
           puv: form.puv,
         },
-      }).eq("id", clientId).select("id");
-
-      if (updateError) throw updateError;
-      // Supabase NÃO retorna erro quando o UPDATE casa 0 linhas (registro
-      // inexistente ou bloqueado por RLS). Sem este check, mostraríamos
-      // "sucesso" sem ter salvo nada.
-      if (!updatedRows || updatedRows.length === 0) {
-        throw new Error(
-          "Nada foi salvo: o cliente não foi encontrado ou você não tem permissão para editá-lo. Recarregue a página e tente novamente.",
-        );
-      }
+      }).eq("id", clientId).select("id"),
+        { db: sb, source: "admin/clientes/[id]:handleSave", metadata: { clientId, userId: user?.id } },
+      );
+      // persistOrThrow confirma que uma linha foi gravada e lança caso o
+      // UPDATE case 0 linhas (registro inexistente ou bloqueado por RLS),
+      // evitando "sucesso" falso sem ter salvo nada.
       setMessage("Cliente atualizado com sucesso!");
       setEditMode(false);
     } catch (err: unknown) {

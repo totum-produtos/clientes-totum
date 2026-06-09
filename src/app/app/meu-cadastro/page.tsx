@@ -4,6 +4,7 @@ import React, { useState, useEffect, useMemo } from "react";
 import { useGlobal } from "@/lib/context/GlobalContext";
 import { createSPASassClient } from "@/lib/supabase/client";
 import { logEvent } from "@/lib/log-event";
+import { persistOrThrow } from "@/lib/persist";
 import {
   Building2, Briefcase, Target, Users, CircleDot, Star, Award,
   Edit3, Save, X, Clock, CheckCircle, AlertCircle, ChevronDown, ChevronUp,
@@ -402,15 +403,13 @@ export default function MeuCadastroPage() {
       if (isAdmin && directSaves > 0) {
         const payload: Record<string, unknown> = { ...columnUpdates };
         if (Object.keys(profileUpdates).length > 0) payload.profile_data = profileUpdates;
-        // Captura erro E confirma que uma linha foi gravada: o Supabase não
-        // retorna erro quando o UPDATE casa 0 linhas (sem permissão / id
-        // inexistente), o que antes mostrava "salvo" sem ter salvo nada.
-        const { data: rows, error: updErr } = await sb
-          .from("portal_clients").update(payload).eq("id", client!.id).select("id");
-        if (updErr) throw updErr;
-        if (!rows || rows.length === 0) {
-          throw new Error("Nada foi salvo: cliente não encontrado ou sem permissão. Recarregue a página e tente novamente.");
-        }
+        // Confirma que uma linha foi gravada: o Supabase não retorna erro
+        // quando o UPDATE casa 0 linhas (sem permissão / id inexistente), o
+        // que antes mostrava "salvo" sem ter salvo nada. persistOrThrow lança.
+        await persistOrThrow(
+          sb.from("portal_clients").update(payload).eq("id", client!.id).select("id"),
+          { db: sb, source: "meu-cadastro:handleSave", metadata: { clientId: client!.id, userId: user.id } },
+        );
         setMessage(`✅ ${directSaves} alteração(ões) salva(s).`);
         await loadClientData();
         setEditMode(false);
