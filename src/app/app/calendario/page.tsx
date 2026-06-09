@@ -2,6 +2,7 @@
 import React, { Suspense, useEffect, useState } from "react";
 import { useGlobal } from "@/lib/context/GlobalContext";
 import { createSPASassClient } from "@/lib/supabase/client";
+import { persistOrThrow } from "@/lib/persist";
 import { Plus, Upload, RefreshCw, CalendarDays, ArrowLeft } from "lucide-react";
 import CalendarGrid from "@/components/calendar/CalendarGrid";
 import PostModal, { type Post as PostModalData } from "@/components/calendar/PostModal";
@@ -128,18 +129,21 @@ function CalendarioContent() {
     };
 
     if (selectedPost?.id) {
-      const { error } = await supabase
-        .getSupabaseClient()
-        .from("wanda_posts")
-        .update(payload as TablesUpdate<"wanda_posts">)
-        .eq("id", selectedPost.id);
-      if (error) {
-        showError("Erro ao atualizar post");
-        console.error("Erro ao atualizar:", error);
-      } else {
+      const sb = supabase.getSupabaseClient();
+      try {
+        await persistOrThrow(
+          sb.from("wanda_posts")
+            .update(payload as TablesUpdate<"wanda_posts">)
+            .eq("id", selectedPost.id)
+            .select("id"),
+          { db: sb, source: "calendario:handleSavePost", metadata: { postId: selectedPost.id, clientId: targetClientId } },
+        );
         showSuccess("Post atualizado com sucesso");
         setModalOpen(false);
         fetchPosts();
+      } catch (error) {
+        showError("Erro ao atualizar post");
+        console.error("Erro ao atualizar:", error);
       }
     } else {
       const { error } = await supabase

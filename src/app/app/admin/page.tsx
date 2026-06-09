@@ -2,6 +2,7 @@
 import React, { useEffect, useState } from 'react';
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
 import { createSPASassClient } from '@/lib/supabase/client';
+import { persistOrThrow } from '@/lib/persist';
 import { Plus, Link2, Users, Building2, Clock, CheckCircle, XCircle, Mail, Loader2, Edit3, Power, PowerOff, Send, Copy, Check } from 'lucide-react';
 import { LoadingSpinner } from '@/components/ui/LoadingSpinner';
 import Link from 'next/link';
@@ -192,11 +193,11 @@ export default function AdminPage() {
         try {
             const novoStatus = client.status === 'inactive' ? 'active' : 'inactive';
             const supabase = await createSPASassClient();
-            const { error: toggleError } = await supabase.getSupabaseClient()
-                .from('portal_clients')
-                .update({ status: novoStatus })
-                .eq('id', client.id);
-            if (toggleError) throw toggleError;
+            const sb = supabase.getSupabaseClient();
+            await persistOrThrow(
+                sb.from('portal_clients').update({ status: novoStatus }).eq('id', client.id).select('id'),
+                { db: sb, source: 'admin:handleToggleStatus', metadata: { clientId: client.id, novoStatus } },
+            );
             setMessage(`Cliente ${novoStatus === 'active' ? 'ativado' : 'inativado'} com sucesso!`);
             fetchData();
         } catch (err: unknown) {
@@ -212,6 +213,9 @@ export default function AdminPage() {
         const client = supabase.getSupabaseClient();
         
         let successCount = 0;
+        let failCount = 0;
+        // persistOrThrow lança por item; tratamos cada um para não abortar o
+        // lote inteiro e reportamos o número de falhas ao final.
         for (const change of pendingChanges) {
             try {
                 if (change.field_path.startsWith('profile_data.')) {
@@ -219,15 +223,24 @@ export default function AdminPage() {
                     const { data: pc } = await client.from('portal_clients').select('profile_data').eq('id', change.portal_client_id).single();
                     const current = (pc?.profile_data || {}) as JsonObject;
                     const newVal = parseProfileValue(change.new_value);
-                    await client.from('portal_clients').update({ profile_data: { ...current, [field]: newVal } }).eq('id', change.portal_client_id);
+                    await persistOrThrow(
+                        client.from('portal_clients').update({ profile_data: { ...current, [field]: newVal } }).eq('id', change.portal_client_id).select('id'),
+                        { db: client, source: 'admin:handleApproveAll', metadata: { changeId: change.id, clientId: change.portal_client_id, field: change.field_path } },
+                    );
                 } else {
-                    await client.from('portal_clients').update({ [change.field_path]: change.new_value }).eq('id', change.portal_client_id);
+                    await persistOrThrow(
+                        client.from('portal_clients').update({ [change.field_path]: change.new_value }).eq('id', change.portal_client_id).select('id'),
+                        { db: client, source: 'admin:handleApproveAll', metadata: { changeId: change.id, clientId: change.portal_client_id, field: change.field_path } },
+                    );
                 }
 
-                await client.from('client_profile_changes').update({
-                    status: 'aprovado',
-                    reviewed_at: new Date().toISOString()
-                }).eq('id', change.id);
+                await persistOrThrow(
+                    client.from('client_profile_changes').update({
+                        status: 'aprovado',
+                        reviewed_at: new Date().toISOString()
+                    }).eq('id', change.id).select('id'),
+                    { db: client, source: 'admin:handleApproveAll', metadata: { changeId: change.id } },
+                );
 
                 await client.from('notifications').insert({
                     user_id: change.requested_by,
@@ -239,11 +252,16 @@ export default function AdminPage() {
                 });
                 successCount++;
             } catch (err) {
+                failCount++;
                 console.error("Erro ao aprovar mudança em lote", err);
             }
         }
-        
-        setMessage(`${successCount} alterações aprovadas com sucesso!`);
+
+        setMessage(
+            failCount > 0
+                ? `${successCount} alteração(ões) aprovada(s). ${failCount} falhou(aram) — recarregue e tente novamente.`
+                : `${successCount} alterações aprovadas com sucesso!`,
+        );
         fetchData();
     }
 
@@ -251,34 +269,47 @@ export default function AdminPage() {
         const supabase = await createSPASassClient();
         const client = supabase.getSupabaseClient();
 
-        // Aplicar a alteração
-        if (change.field_path.startsWith('profile_data.')) {
-            const field = change.field_path.replace('profile_data.', '');
-            const { data: pc } = await client.from('portal_clients').select('profile_data').eq('id', change.portal_client_id).single();
-            const current = (pc?.profile_data || {}) as JsonObject;
-            const newVal = parseProfileValue(change.new_value);
-            await client.from('portal_clients').update({ profile_data: { ...current, [field]: newVal } }).eq('id', change.portal_client_id);
-        } else {
-            await client.from('portal_clients').update({ [change.field_path]: change.new_value }).eq('id', change.portal_client_id);
+        try {
+            // Aplicar a alteração
+            if (change.field_path.startsWith('profile_data.')) {
+                const field = change.field_path.replace('profile_data.', '');
+                const { data: pc } = await client.from('portal_clients').select('profile_data').eq('id', change.portal_client_id).single();
+                const current = (pc?.profile_data || {}) as JsonObject;
+                const newVal = parseProfileValue(change.new_value);
+                await persistOrThrow(
+                    client.from('portal_clients').update({ profile_data: { ...current, [field]: newVal } }).eq('id', change.portal_client_id).select('id'),
+                    { db: client, source: 'admin:handleApprove', metadata: { changeId: change.id, clientId: change.portal_client_id, field: change.field_path } },
+                );
+            } else {
+                await persistOrThrow(
+                    client.from('portal_clients').update({ [change.field_path]: change.new_value }).eq('id', change.portal_client_id).select('id'),
+                    { db: client, source: 'admin:handleApprove', metadata: { changeId: change.id, clientId: change.portal_client_id, field: change.field_path } },
+                );
+            }
+
+            // Atualizar status
+            await persistOrThrow(
+                client.from('client_profile_changes').update({
+                    status: 'aprovado',
+                    reviewed_at: new Date().toISOString()
+                }).eq('id', change.id).select('id'),
+                { db: client, source: 'admin:handleApprove', metadata: { changeId: change.id } },
+            );
+
+            // Notificar cliente
+            await client.from('notifications').insert({
+                user_id: change.requested_by,
+                type: 'alteracao_aprovada',
+                title: 'Alteração aprovada',
+                message: `Sua alteração no campo "${change.field_path}" foi aprovada.`,
+                data: { change_id: change.id },
+                read: false
+            });
+
+            setMessage('Alteração aprovada com sucesso!');
+        } catch (err: unknown) {
+            setMessage('Erro ao aprovar alteração: ' + errorMessage(err));
         }
-
-        // Atualizar status
-        await client.from('client_profile_changes').update({
-            status: 'aprovado',
-            reviewed_at: new Date().toISOString()
-        }).eq('id', change.id);
-
-        // Notificar cliente
-        await client.from('notifications').insert({
-            user_id: change.requested_by,
-            type: 'alteracao_aprovada',
-            title: 'Alteração aprovada',
-            message: `Sua alteração no campo "${change.field_path}" foi aprovada.`,
-            data: { change_id: change.id },
-            read: false
-        });
-
-        setMessage('Alteração aprovada com sucesso!');
         fetchData();
     }
 
@@ -323,21 +354,28 @@ export default function AdminPage() {
         const supabase = await createSPASassClient();
         const client = supabase.getSupabaseClient();
 
-        await client.from('client_profile_changes').update({
-            status: 'rejeitado',
-            reviewed_at: new Date().toISOString()
-        }).eq('id', change.id);
+        try {
+            await persistOrThrow(
+                client.from('client_profile_changes').update({
+                    status: 'rejeitado',
+                    reviewed_at: new Date().toISOString()
+                }).eq('id', change.id).select('id'),
+                { db: client, source: 'admin:handleReject', metadata: { changeId: change.id } },
+            );
 
-        await client.from('notifications').insert({
-            user_id: change.requested_by,
-            type: 'alteracao_rejeitada',
-            title: 'Alteração rejeitada',
-            message: `Sua alteração no campo "${change.field_path}" foi rejeitada.`,
-            data: { change_id: change.id },
-            read: false
-        });
+            await client.from('notifications').insert({
+                user_id: change.requested_by,
+                type: 'alteracao_rejeitada',
+                title: 'Alteração rejeitada',
+                message: `Sua alteração no campo "${change.field_path}" foi rejeitada.`,
+                data: { change_id: change.id },
+                read: false
+            });
 
-        setMessage('Alteração rejeitada.');
+            setMessage('Alteração rejeitada.');
+        } catch (err: unknown) {
+            setMessage('Erro ao rejeitar alteração: ' + errorMessage(err));
+        }
         fetchData();
     }
 

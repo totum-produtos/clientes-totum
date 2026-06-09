@@ -4,6 +4,7 @@ import Link from 'next/link';
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
 import { useGlobal } from '@/lib/context/GlobalContext';
 import { createSPASassClient } from '@/lib/supabase/client';
+import { persistOrThrow } from '@/lib/persist';
 import { TrendingUp, Eye, Heart, BarChart3, Megaphone, DollarSign, Target, MousePointerClick } from 'lucide-react';
 import { useToast } from "@/components/ui/ToastProvider";
 import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianGrid } from 'recharts';
@@ -88,42 +89,52 @@ export default function CampanhasPage() {
     async function connectMeta() {
         if (!client || !metaAccountId || !metaToken) return;
         setConnecting('meta');
-        const supabase = await createSPASassClient();
-        const { error } = await supabase.getSupabaseClient()
-            .from('portal_clients')
-            .update({
-                meta_ad_account_id: metaAccountId,
-                meta_access_token: metaToken,
-            })
-            .eq('id', client.id);
-        setConnecting(null);
-        if (!error) {
+        try {
+            const supabase = await createSPASassClient();
+            const sb = supabase.getSupabaseClient();
+            await persistOrThrow(
+                sb.from('portal_clients')
+                    .update({
+                        meta_ad_account_id: metaAccountId,
+                        meta_access_token: metaToken,
+                    })
+                    .eq('id', client.id)
+                    .select('id'),
+                { db: sb, source: 'campanhas:connectMeta', metadata: { clientId: client.id } },
+            );
             setMetaAccountId('');
             setMetaToken('');
             showSuccess('Meta Ads conectado! A sincronização ocorre em background.');
-        } else {
-            showError('Erro: ' + error.message);
+        } catch (err: unknown) {
+            showError('Erro: ' + (err instanceof Error ? err.message : 'Falha ao conectar'));
+        } finally {
+            setConnecting(null);
         }
     }
 
     async function connectGoogle() {
         if (!client || !googleCustomerId || !googleDevToken) return;
         setConnecting('google');
-        const supabase = await createSPASassClient();
-        const { error } = await supabase.getSupabaseClient()
-            .from('portal_clients')
-            .update({
-                google_customer_id: googleCustomerId,
-                google_developer_token: googleDevToken,
-            })
-            .eq('id', client.id);
-        setConnecting(null);
-        if (!error) {
+        try {
+            const supabase = await createSPASassClient();
+            const sb = supabase.getSupabaseClient();
+            await persistOrThrow(
+                sb.from('portal_clients')
+                    .update({
+                        google_customer_id: googleCustomerId,
+                        google_developer_token: googleDevToken,
+                    })
+                    .eq('id', client.id)
+                    .select('id'),
+                { db: sb, source: 'campanhas:connectGoogle', metadata: { clientId: client.id } },
+            );
             setGoogleCustomerId('');
             setGoogleDevToken('');
             showSuccess('Google Ads conectado! A sincronização ocorre em background.');
-        } else {
-            showError('Erro: ' + error.message);
+        } catch (err: unknown) {
+            showError('Erro: ' + (err instanceof Error ? err.message : 'Falha ao conectar'));
+        } finally {
+            setConnecting(null);
         }
     }
 

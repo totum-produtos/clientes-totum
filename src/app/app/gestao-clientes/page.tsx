@@ -2,6 +2,7 @@
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { Card, CardContent } from '@/components/ui/card';
 import { createSPASassClient } from '@/lib/supabase/client';
+import { persistOrThrow } from '@/lib/persist';
 import { useRouter } from 'next/navigation';
 import {
   Building2,
@@ -130,11 +131,11 @@ export default function GestaoClientesPage() {
     try {
       const novoStatus = cliente.status === 'inactive' ? 'active' : 'inactive';
       const supabase = await createSPASassClient();
-      const { error: toggleError } = await supabase.getSupabaseClient()
-        .from('portal_clients')
-        .update({ status: novoStatus })
-        .eq('id', cliente.id);
-      if (toggleError) throw toggleError;
+      const sb = supabase.getSupabaseClient();
+      await persistOrThrow(
+        sb.from('portal_clients').update({ status: novoStatus }).eq('id', cliente.id).select('id'),
+        { db: sb, source: 'gestao-clientes:handleToggleStatus', metadata: { clientId: cliente.id, novoStatus } },
+      );
       setActionMessage(`Cliente ${novoStatus === 'active' ? 'ativado' : 'inativado'} com sucesso!`);
       fetchClientes();
     } catch (err: unknown) {
