@@ -3,6 +3,7 @@
 import React, { useState, useEffect } from "react";
 import { useRouter, useParams } from "next/navigation";
 import { createSPASassClient } from "@/lib/supabase/client";
+import { logEvent } from "@/lib/log-event";
 import {
   Check, ChevronRight, AlertCircle, X,
   Edit3, Save, ArrowLeft, Lock, KeyRound, Copy, Eye, EyeOff,
@@ -266,7 +267,14 @@ export default function EditarClientePage() {
       setMessage("Cliente atualizado com sucesso!");
       setEditMode(false);
     } catch (err: unknown) {
-      setError(err instanceof Error ? err.message : "Erro ao atualizar cliente");
+      const msg = err instanceof Error ? err.message : "Erro ao atualizar cliente";
+      setError(msg);
+      try {
+        const sb = await createSPASassClient();
+        await logEvent(sb.getSupabaseClient(), "error", "admin/clientes/[id]:handleSave", msg, {
+          clientId, userId: user?.id,
+        });
+      } catch { /* logging não deve quebrar o fluxo */ }
     } finally {
       setSaving(false);
     }

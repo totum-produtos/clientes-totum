@@ -4,6 +4,7 @@ import React, { useState, useEffect, useMemo } from "react";
 import Link from "next/link";
 import { useGlobal } from "@/lib/context/GlobalContext";
 import { createSPASassClient } from "@/lib/supabase/client";
+import { logEvent } from "@/lib/log-event";
 import {
   Building2, Briefcase, Target, Palette, Phone, Users, CircleDot, Star, Award,
   Edit3, Save, X, Clock, CheckCircle, AlertCircle, ChevronDown, ChevronUp,
@@ -434,7 +435,14 @@ export default function MeuCadastroPage() {
         setMessage("Nenhuma alteração detectada.");
       }
     } catch (err: any) {
-      setMessage("❌ Erro: " + (err.message || "Falha ao enviar alterações"));
+      const msg = err?.message || "Falha ao enviar alterações";
+      setMessage("❌ Erro: " + msg);
+      try {
+        const sb = await createSPASassClient();
+        await logEvent(sb.getSupabaseClient(), "error", "meu-cadastro:handleSave", msg, {
+          clientId: client?.id, userId: user?.id,
+        });
+      } catch { /* logging não deve quebrar o fluxo */ }
     } finally {
       setLoading(false);
     }
