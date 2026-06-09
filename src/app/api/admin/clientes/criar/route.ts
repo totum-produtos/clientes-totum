@@ -180,11 +180,22 @@ Ao acessar pela primeira vez, o sistema exigirá que você redefina esta senha p
       welcomeMessage: welcomeMessage,
     });
   } catch (err) {
+    const message = err instanceof Error ? err.message : "Erro desconhecido";
+    // Registra o motivo da falha ANTES do rollback — senão a criação some
+    // sem deixar rastro (era a origem do "criei e sumiu"). Protegido para
+    // que uma falha de logging não impeça o rollback.
+    try {
+      await admin.from("system_logs").insert({
+        level: "error",
+        source: "api/admin/clientes/criar",
+        message,
+        metadata: { createdClientId, rolledBack: Boolean(createdClientId) },
+      });
+    } catch { /* logging não deve quebrar o rollback */ }
     // Rollback: se o portal_client foi criado mas algo depois falhou, remove
     if (createdClientId) {
       await admin.from("portal_clients").delete().eq("id", createdClientId);
     }
-    const message = err instanceof Error ? err.message : "Erro desconhecido";
     return NextResponse.json({ error: message }, { status: 500 });
   }
 }
