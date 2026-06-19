@@ -272,14 +272,15 @@ export async function POST(
     // 7. envia email com credenciais (não derruba a request se falhar)
     const mail = await enviarCredenciais({ nome, email, senha });
 
+    if (!mail.sent) {
+      console.error(`[onboarding] Email NÃO enviado para ${email}. Razão: ${mail.reason}. Redefina a senha manualmente no Supabase Auth.`);
+    }
+
     return NextResponse.json({
       success: true,
       client_id: createdClientId,
       email,
       email_sent: mail.sent,
-      // dev fallback: se o email não foi enviado, devolve a senha para o admin
-      // copiar manualmente (não exposto ao cliente — só ao chamador da API).
-      password_fallback: mail.sent ? undefined : senha,
     });
   } catch (err) {
     if (createdClientId) {
