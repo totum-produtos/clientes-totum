@@ -1,7 +1,7 @@
 // src/lib/context/GlobalContext.tsx
 'use client';
 
-import React, { createContext, useContext, useState, useEffect } from 'react';
+import React, { createContext, useContext, useState, useEffect, useCallback, useMemo } from 'react';
 import { createSPASassClientAuthenticated as createSPASassClient } from '@/lib/supabase/client';
 import { Tables } from '@/lib/types';
 
@@ -52,7 +52,7 @@ export function GlobalProvider({ children }: { children: React.ReactNode }) {
     const [projetos, setProjetos] = useState<Projeto[]>([]);
     const [profile, setProfile] = useState<Profile>(null);
 
-    async function loadData() {
+    const loadData = useCallback(async () => {
         try {
             const supabase = await createSPASassClient();
             const sb = supabase.getSupabaseClient();
@@ -135,23 +135,28 @@ export function GlobalProvider({ children }: { children: React.ReactNode }) {
         } finally {
             setLoading(false);
         }
-    }
+    }, []);
 
     useEffect(() => {
         loadData();
-    }, []);
+    }, [loadData]);
 
-    const handleSetSpoofedClient = (id: string | null) => {
+    const handleSetSpoofedClient = useCallback((id: string | null) => {
         if (id) {
             localStorage.setItem('totum_spoofed_client_id', id);
         } else {
             localStorage.removeItem('totum_spoofed_client_id');
         }
         loadData();
-    };
+    }, [loadData]);
+
+    const value = useMemo(
+        () => ({ loading, user, profile, client, posts, tarefas, projetos, refreshData: loadData, setSpoofedClient: handleSetSpoofedClient }),
+        [loading, user, profile, client, posts, tarefas, projetos, loadData, handleSetSpoofedClient]
+    );
 
     return (
-        <GlobalContext.Provider value={{ loading, user, profile, client, posts, tarefas, projetos, refreshData: loadData, setSpoofedClient: handleSetSpoofedClient }}>
+        <GlobalContext.Provider value={value}>
             {children}
         </GlobalContext.Provider>
     );

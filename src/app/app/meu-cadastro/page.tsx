@@ -235,7 +235,7 @@ export default function MeuCadastroPage() {
       loadClientData();
       loadPendingCount();
     }
-  }, [client]);
+  }, [client?.id]);
 
   async function loadClientData() {
     try {
@@ -349,6 +349,14 @@ export default function MeuCadastroPage() {
 
       const columnUpdates: Record<string, unknown> = {};
       const profileUpdates: Record<string, unknown> = { ...pd };
+      const pendingRows: Array<{
+        portal_client_id: string;
+        requested_by: string;
+        field_path: string;
+        old_value: string;
+        new_value: string;
+        status: string;
+      }> = [];
 
       for (const key of ALL_COLUMN_FIELDS) {
         const oldVal = clientData[key] ?? "";
@@ -361,7 +369,7 @@ export default function MeuCadastroPage() {
           columnUpdates[key] = newVal;
           directSaves++;
         } else {
-          const { error: insErr } = await sb.from("client_profile_changes").insert({
+          pendingRows.push({
             portal_client_id: client!.id,
             requested_by: user.id,
             field_path: key,
@@ -369,8 +377,6 @@ export default function MeuCadastroPage() {
             new_value: String(newVal),
             status: "pendente"
           });
-          if (insErr) throw insErr;
-          created++;
         }
       }
 
@@ -387,7 +393,7 @@ export default function MeuCadastroPage() {
           profileUpdates[key] = newVal;
           directSaves++;
         } else {
-          const { error: insErr } = await sb.from("client_profile_changes").insert({
+          pendingRows.push({
             portal_client_id: client!.id,
             requested_by: user.id,
             field_path: `profile_data.${key}`,
@@ -395,9 +401,13 @@ export default function MeuCadastroPage() {
             new_value: newStr,
             status: "pendente"
           });
-          if (insErr) throw insErr;
-          created++;
         }
+      }
+
+      if (pendingRows.length > 0) {
+        const { error: insErr } = await sb.from("client_profile_changes").insert(pendingRows);
+        if (insErr) throw insErr;
+        created += pendingRows.length;
       }
 
       if (isAdmin && directSaves > 0) {

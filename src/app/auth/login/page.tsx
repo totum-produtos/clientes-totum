@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { createSPASassClient } from "@/lib/supabase/client";
@@ -12,7 +12,6 @@ export default function LoginPage() {
   const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
-  const [showMFAPrompt, setShowMFAPrompt] = useState(false);
   const router = useRouter();
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
@@ -31,7 +30,7 @@ export default function LoginPage() {
       if (mfaError) throw mfaError;
 
       if (mfaData.nextLevel === "aal2" && mfaData.nextLevel !== mfaData.currentLevel) {
-        setShowMFAPrompt(true);
+        router.push("/auth/2fa");
       } else {
         router.push("/app");
       }
@@ -41,10 +40,6 @@ export default function LoginPage() {
       setLoading(false);
     }
   };
-
-  useEffect(() => {
-    if (showMFAPrompt) router.push("/auth/2fa");
-  }, [showMFAPrompt, router]);
 
   return (
     <SignInPage

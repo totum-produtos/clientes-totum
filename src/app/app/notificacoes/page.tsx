@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect } from "react";
 import { createSPASassClient } from "@/lib/supabase/client";
+import { useGlobal } from "@/lib/context/GlobalContext";
 import {
   Bell, Clock, CheckCircle, XCircle, FileText, Check, Trash2, Filter
 } from "lucide-react";
@@ -25,18 +26,22 @@ export default function NotificacoesPage() {
   const [notifications, setNotifications] = useState<Notification[]>([]);
   const [filter, setFilter] = useState<FilterType>("todas");
   const [loading, setLoading] = useState(true);
+  const { user } = useGlobal();
 
   useEffect(() => {
+    if (!user) return;
     loadNotifications();
-  }, []);
+  }, [user]);
 
   async function loadNotifications() {
+    if (!user) return;
     setLoading(true);
     try {
       const supabase = await createSPASassClient();
       const { data } = await supabase.getSupabaseClient()
         .from("notifications")
         .select("*")
+        .eq("user_id", user.id)
         .order("created_at", { ascending: false });
       setNotifications(data || []);
     } catch (err) {
@@ -47,20 +52,23 @@ export default function NotificacoesPage() {
   }
 
   async function markAsRead(id: string) {
+    if (!user) return;
     const supabase = await createSPASassClient();
-    await supabase.getSupabaseClient().from("notifications").update({ read: true }).eq("id", id);
+    await supabase.getSupabaseClient().from("notifications").update({ read: true }).eq("id", id).eq("user_id", user.id);
     loadNotifications();
   }
 
   async function markAllAsRead() {
+    if (!user) return;
     const supabase = await createSPASassClient();
-    await supabase.getSupabaseClient().from("notifications").update({ read: true }).eq("read", false);
+    await supabase.getSupabaseClient().from("notifications").update({ read: true }).eq("read", false).eq("user_id", user.id);
     loadNotifications();
   }
 
   async function deleteNotification(id: string) {
+    if (!user) return;
     const supabase = await createSPASassClient();
-    await supabase.getSupabaseClient().from("notifications").delete().eq("id", id);
+    await supabase.getSupabaseClient().from("notifications").delete().eq("id", id).eq("user_id", user.id);
     loadNotifications();
   }
 

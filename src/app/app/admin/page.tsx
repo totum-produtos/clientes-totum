@@ -7,6 +7,8 @@ import { Plus, Link2, Users, Building2, Clock, CheckCircle, XCircle, Mail, Loade
 import { LoadingSpinner } from '@/components/ui/LoadingSpinner';
 import Link from 'next/link';
 import type { Json } from '@/lib/types';
+import type { SupabaseClient } from '@supabase/supabase-js';
+import type { Database } from '@/lib/types';
 
 type JsonObject = { [key: string]: Json | undefined };
 
@@ -55,6 +57,44 @@ function parseProfileValue(value: string): Json {
 
 function errorMessage(error: unknown) {
     return error instanceof Error ? error.message : 'Erro desconhecido';
+}
+
+// Aplica uma mudança de perfil pendente: atualiza o campo, marca a solicitação
+// como aprovada e notifica o cliente. Usado tanto pela aprovação individual
+// quanto pelo "aprovar todos" — mantém as duas em sincronia.
+async function applyProfileChange(client: SupabaseClient<Database>, change: ProfileChange, source: string) {
+    if (change.field_path.startsWith('profile_data.')) {
+        const field = change.field_path.replace('profile_data.', '');
+        const { data: pc } = await client.from('portal_clients').select('profile_data').eq('id', change.portal_client_id).single();
+        const current = (pc?.profile_data || {}) as JsonObject;
+        const newVal = parseProfileValue(change.new_value);
+        await persistOrThrow(
+            client.from('portal_clients').update({ profile_data: { ...current, [field]: newVal } }).eq('id', change.portal_client_id).select('id'),
+            { db: client, source, metadata: { changeId: change.id, clientId: change.portal_client_id, field: change.field_path } },
+        );
+    } else {
+        await persistOrThrow(
+            client.from('portal_clients').update({ [change.field_path]: change.new_value }).eq('id', change.portal_client_id).select('id'),
+            { db: client, source, metadata: { changeId: change.id, clientId: change.portal_client_id, field: change.field_path } },
+        );
+    }
+
+    await persistOrThrow(
+        client.from('client_profile_changes').update({
+            status: 'aprovado',
+            reviewed_at: new Date().toISOString()
+        }).eq('id', change.id).select('id'),
+        { db: client, source, metadata: { changeId: change.id } },
+    );
+
+    await client.from('notifications').insert({
+        user_id: change.requested_by,
+        type: 'alteracao_aprovada',
+        title: 'Alteração aprovada',
+        message: `Sua alteração no campo "${change.field_path}" foi aprovada.`,
+        data: { change_id: change.id },
+        read: false
+    });
 }
 
 export default function AdminPage() {
@@ -125,23 +165,20 @@ export default function AdminPage() {
         const supabase = await createSPASassClient();
         const client = supabase.getSupabaseClient();
 
-        const { data: clientsData } = await client.from('portal_clients').select('*').order('created_at', { ascending: false });
-        setClients((clientsData || []) as PortalClient[]);
+        const [clientsRes, usersRes, authUsersRes, changesRes] = await Promise.all([
+            client.from('portal_clients').select('*').order('created_at', { ascending: false }),
+            client.from('portal_client_users').select('*'),
+            // Buscar auth users via API route segura (service role server-side)
+            fetch('/api/admin/usuarios')
+                .then(res => (res.ok ? res.json() : { users: [] }))
+                .catch(() => ({ users: [] })), // silencia se não autorizado
+            client.from('client_profile_changes').select('*').eq('status', 'pendente').order('created_at', { ascending: false }),
+        ]);
 
-        const { data: usersData } = await client.from('portal_client_users').select('*');
-        setUsers(usersData || []);
-
-        // Buscar auth users via API route segura (service role server-side)
-        try {
-            const res = await fetch('/api/admin/usuarios');
-            if (res.ok) {
-                const json = await res.json();
-                setAuthUsers(json.users || []);
-            }
-        } catch { /* silencia se não autorizado */ }
-
-        const { data: changesData } = await client.from('client_profile_changes').select('*').eq('status', 'pendente').order('created_at', { ascending: false });
-        setPendingChanges((changesData || []) as ProfileChange[]);
+        setClients((clientsRes.data || []) as PortalClient[]);
+        setUsers(usersRes.data || []);
+        setAuthUsers(authUsersRes.users || []);
+        setPendingChanges((changesRes.data || []) as ProfileChange[]);
 
         setLoading(false);
     }
@@ -214,42 +251,11 @@ export default function AdminPage() {
         
         let successCount = 0;
         let failCount = 0;
-        // persistOrThrow lança por item; tratamos cada um para não abortar o
+        // applyProfileChange lança por item; tratamos cada um para não abortar o
         // lote inteiro e reportamos o número de falhas ao final.
         for (const change of pendingChanges) {
             try {
-                if (change.field_path.startsWith('profile_data.')) {
-                    const field = change.field_path.replace('profile_data.', '');
-                    const { data: pc } = await client.from('portal_clients').select('profile_data').eq('id', change.portal_client_id).single();
-                    const current = (pc?.profile_data || {}) as JsonObject;
-                    const newVal = parseProfileValue(change.new_value);
-                    await persistOrThrow(
-                        client.from('portal_clients').update({ profile_data: { ...current, [field]: newVal } }).eq('id', change.portal_client_id).select('id'),
-                        { db: client, source: 'admin:handleApproveAll', metadata: { changeId: change.id, clientId: change.portal_client_id, field: change.field_path } },
-                    );
-                } else {
-                    await persistOrThrow(
-                        client.from('portal_clients').update({ [change.field_path]: change.new_value }).eq('id', change.portal_client_id).select('id'),
-                        { db: client, source: 'admin:handleApproveAll', metadata: { changeId: change.id, clientId: change.portal_client_id, field: change.field_path } },
-                    );
-                }
-
-                await persistOrThrow(
-                    client.from('client_profile_changes').update({
-                        status: 'aprovado',
-                        reviewed_at: new Date().toISOString()
-                    }).eq('id', change.id).select('id'),
-                    { db: client, source: 'admin:handleApproveAll', metadata: { changeId: change.id } },
-                );
-
-                await client.from('notifications').insert({
-                    user_id: change.requested_by,
-                    type: 'alteracao_aprovada',
-                    title: 'Alteração aprovada',
-                    message: `Sua alteração no campo "${change.field_path}" foi aprovada.`,
-                    data: { change_id: change.id },
-                    read: false
-                });
+                await applyProfileChange(client, change, 'admin:handleApproveAll');
                 successCount++;
             } catch (err) {
                 failCount++;
@@ -270,42 +276,7 @@ export default function AdminPage() {
         const client = supabase.getSupabaseClient();
 
         try {
-            // Aplicar a alteração
-            if (change.field_path.startsWith('profile_data.')) {
-                const field = change.field_path.replace('profile_data.', '');
-                const { data: pc } = await client.from('portal_clients').select('profile_data').eq('id', change.portal_client_id).single();
-                const current = (pc?.profile_data || {}) as JsonObject;
-                const newVal = parseProfileValue(change.new_value);
-                await persistOrThrow(
-                    client.from('portal_clients').update({ profile_data: { ...current, [field]: newVal } }).eq('id', change.portal_client_id).select('id'),
-                    { db: client, source: 'admin:handleApprove', metadata: { changeId: change.id, clientId: change.portal_client_id, field: change.field_path } },
-                );
-            } else {
-                await persistOrThrow(
-                    client.from('portal_clients').update({ [change.field_path]: change.new_value }).eq('id', change.portal_client_id).select('id'),
-                    { db: client, source: 'admin:handleApprove', metadata: { changeId: change.id, clientId: change.portal_client_id, field: change.field_path } },
-                );
-            }
-
-            // Atualizar status
-            await persistOrThrow(
-                client.from('client_profile_changes').update({
-                    status: 'aprovado',
-                    reviewed_at: new Date().toISOString()
-                }).eq('id', change.id).select('id'),
-                { db: client, source: 'admin:handleApprove', metadata: { changeId: change.id } },
-            );
-
-            // Notificar cliente
-            await client.from('notifications').insert({
-                user_id: change.requested_by,
-                type: 'alteracao_aprovada',
-                title: 'Alteração aprovada',
-                message: `Sua alteração no campo "${change.field_path}" foi aprovada.`,
-                data: { change_id: change.id },
-                read: false
-            });
-
+            await applyProfileChange(client, change, 'admin:handleApprove');
             setMessage('Alteração aprovada com sucesso!');
         } catch (err: unknown) {
             setMessage('Erro ao aprovar alteração: ' + errorMessage(err));

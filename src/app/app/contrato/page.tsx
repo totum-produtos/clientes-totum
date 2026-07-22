@@ -54,11 +54,13 @@ export default function ContratoPage() {
     useEffect(() => {
         if (!client) return;
         let channel: RealtimeChannel | null = null;
+        let cancelled = false;
 
         async function setupRealtime() {
             const supabase = await createSPASassClient();
             const clientId = client!.id;
-            channel = supabase.getSupabaseClient()
+            const sb = supabase.getSupabaseClient();
+            const ch = sb
                 .channel('tarefas-realtime-' + clientId)
                 .on('postgres_changes', {
                     event: '*',
@@ -69,10 +71,17 @@ export default function ContratoPage() {
                     fetchTarefas();
                 })
                 .subscribe();
+
+            if (cancelled) {
+                sb.removeChannel(ch); // cliente já trocou antes da subscription terminar de montar
+                return;
+            }
+            channel = ch;
         }
         setupRealtime();
 
         return () => {
+            cancelled = true;
             if (channel) {
                 createSPASassClient().then(s => s.getSupabaseClient().removeChannel(channel!));
             }

@@ -33,7 +33,21 @@ export async function updateSession(request: NextRequest) {
 
     // IMPORTANT: DO NOT REMOVE auth.getUser()
 
-    const {data: user} = await supabase.auth.getUser()
+    // ponytail: guarda de 3s — Supabase indisponível não pode pendurar o middleware
+    // (evita 504 MIDDLEWARE_INVOCATION_TIMEOUT). Se validações legítimas passarem a
+    // demorar mais que isso, ajuste o valor.
+    let user: Awaited<ReturnType<typeof supabase.auth.getUser>>['data'] = { user: null }
+    try {
+        const result = await Promise.race([
+            supabase.auth.getUser(),
+            new Promise<never>((_, reject) =>
+                setTimeout(() => reject(new Error('supabase-getuser-timeout')), 3000)
+            ),
+        ])
+        user = result.data
+    } catch {
+        user = { user: null }
+    }
     if (
         (!user || !user.user) && request.nextUrl.pathname.startsWith('/app')
     ) {

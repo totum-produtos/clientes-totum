@@ -18,18 +18,19 @@ type PortalClient = {
 };
 
 export default function CentralConteudoPage() {
-    const { user } = useGlobal();
+    const { user, loading: globalLoading } = useGlobal();
     const router = useRouter();
     const [clients, setClients] = useState<PortalClient[]>([]);
     const [loading, setLoading] = useState(true);
 
     useEffect(() => {
+        if (globalLoading) return; // aguarda o GlobalContext resolver o usuário antes de decidir
         if (!user || (user.role !== 'master' && user.role !== 'admin')) {
             router.push('/app'); // Redirect if not admin/master
             return;
         }
         fetchClients();
-    }, [user]);
+    }, [user, globalLoading]);
 
     async function fetchClients() {
         const supabase = await createSPASassClient();

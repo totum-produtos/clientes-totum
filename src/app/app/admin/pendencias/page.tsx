@@ -16,43 +16,52 @@ type ClientePendencia = {
 export default function PendenciasPage() {
     const [clientes, setClientes] = useState<ClientePendencia[]>([]);
     const [loading, setLoading] = useState(true);
+    const [error, setError] = useState<string | null>(null);
     const [search, setSearch] = useState("");
 
-    useEffect(() => {
-        async function fetchPendencias() {
-            setLoading(true);
-            const supabase = await createSPASassClient();
-            const { data } = await supabase.getSupabaseClient()
-                .from("portal_clients")
-                .select("id, nome, slug, drive_folder_cliente_id, profile_data")
-                .eq("status", "active")
-                .order("nome");
+    async function fetchPendencias() {
+        setLoading(true);
+        setError(null);
+        const supabase = await createSPASassClient();
+        const { data, error: fetchError } = await supabase.getSupabaseClient()
+            .from("portal_clients")
+            .select("id, nome, slug, drive_folder_cliente_id, profile_data")
+            .eq("status", "active")
+            .order("nome");
 
-            if (data) {
-                const pendentes: ClientePendencia[] = [];
-                data.forEach(c => {
-                    const pendencias = [];
-                    if (!c.drive_folder_cliente_id) {
-                        pendencias.push("drive_missing");
-                    }
-                    const pd = c.profile_data as Record<string, unknown>;
-                    if (!pd || !pd.briefing_completed) {
-                        pendencias.push("briefing_missing");
-                    }
-
-                    if (pendencias.length > 0) {
-                        pendentes.push({
-                            id: c.id,
-                            nome: c.nome,
-                            slug: c.slug,
-                            pendencias
-                        });
-                    }
-                });
-                setClientes(pendentes);
-            }
+        if (fetchError) {
+            setError("Não foi possível carregar as pendências. Tente novamente.");
             setLoading(false);
+            return;
         }
+
+        if (data) {
+            const pendentes: ClientePendencia[] = [];
+            data.forEach(c => {
+                const pendencias = [];
+                if (!c.drive_folder_cliente_id) {
+                    pendencias.push("drive_missing");
+                }
+                const pd = c.profile_data as Record<string, unknown>;
+                if (!pd || !pd.briefing_completed) {
+                    pendencias.push("briefing_missing");
+                }
+
+                if (pendencias.length > 0) {
+                    pendentes.push({
+                        id: c.id,
+                        nome: c.nome,
+                        slug: c.slug,
+                        pendencias
+                    });
+                }
+            });
+            setClientes(pendentes);
+        }
+        setLoading(false);
+    }
+
+    useEffect(() => {
         fetchPendencias();
     }, []);
 
@@ -81,6 +90,16 @@ export default function PendenciasPage() {
             {loading ? (
                 <div className="flex justify-center p-8">
                     <LoadingSpinner />
+                </div>
+            ) : error ? (
+                <div className="text-center py-12 bg-canvas rounded-md border border-hairline shadow-airbnb">
+                    <div className="w-16 h-16 rounded-full bg-danger-bg flex items-center justify-center mx-auto mb-4">
+                        <AlertCircle className="w-8 h-8 text-danger-text" />
+                    </div>
+                    <h3 className="text-lg font-bold text-ink mb-1">{error}</h3>
+                    <button onClick={fetchPendencias} className="mt-3 text-sm text-rausch hover:underline font-medium">
+                        Tentar novamente
+                    </button>
                 </div>
             ) : filtered.length === 0 ? (
                 <div className="text-center py-12 bg-canvas rounded-md border border-hairline shadow-airbnb">

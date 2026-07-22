@@ -13,8 +13,11 @@
 // Usa: Supabase Admin API (service role key)
 
 import { NextResponse } from "next/server";
-import { createClient } from "@supabase/supabase-js";
+import { createClient, type SupabaseClient, type User } from "@supabase/supabase-js";
 import { createSSRClient } from "@/lib/supabase/server";
+import type { Database } from "@/lib/types";
+
+type AdminClient = SupabaseClient<Database>;
 
 const SUPABASE_URL = process.env.NEXT_PUBLIC_SUPABASE_URL || "";
 const SERVICE_ROLE_KEY = process.env.PRIVATE_SUPABASE_SERVICE_KEY || "";
@@ -28,18 +31,15 @@ type Body =
  * Necessário porque portal_client pode ter "Biofuturas@gmail.com"
  * enquanto auth.users registrou "biofuturas@gmail.com".
  */
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-async function findAuthUserByEmail(admin: any, email: string) {
+async function findAuthUserByEmail(admin: AdminClient, email: string): Promise<User | null> {
   const { data, error } = await admin.auth.admin.listUsers({ perPage: 1000 });
   if (error) return null;
   const normalized = email.toLowerCase().trim();
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  return (data.users as any[]).find((u) => u.email?.toLowerCase().trim() === normalized) ?? null;
+  return data.users.find((u) => u.email?.toLowerCase().trim() === normalized) ?? null;
 }
 
 /** Garante que portal_client_users e user_roles existem para o par (userId, clientId). */
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-async function ensureClientLink(admin: any, userId: string, clientId: string) {
+async function ensureClientLink(admin: AdminClient, userId: string, clientId: string) {
   await admin
     .from("user_roles")
     .upsert({ user_id: userId, role: "cliente" }, { onConflict: "user_id" });
@@ -130,10 +130,11 @@ export async function POST(request: Request) {
         // Garante vínculo mesmo que tenha sido perdido
         await ensureClientLink(admin, existingUser.id, body.clientId);
 
-        // Usa o email exato do auth (pode diferir em maiúsculas do portal_client)
+        // Usa o email exato do auth (pode diferir em maiúsculas do portal_client);
+        // cai para o email do portal_client no caso raro de o registro auth não ter email.
         const { data: recoveryData, error: recoveryErr } = await admin.auth.admin.generateLink({
           type: "recovery",
-          email: existingUser.email,
+          email: existingUser.email ?? email,
           options: { redirectTo },
         });
 

@@ -90,16 +90,27 @@ export async function DELETE(request: Request) {
     }
 
     // 5. Deleta dados relacionados (order: sem FK dependência de portal_clients primeiro)
-    await admin.from("wanda_posts").delete().eq("portal_client_id", clientId);
-    await admin.from("tarefas").delete().eq("portal_client_id", clientId);
-    await admin.from("projetos").delete().eq("portal_client_id", clientId);
-    await admin.from("ad_campaigns").delete().eq("portal_client_id", clientId);
-    await admin.from("client_profile_changes").delete().eq("portal_client_id", clientId);
-    await admin.from("client_invites").delete().eq("client_id", clientId);
-    await admin.from("rag_documents").delete().eq("client_id", clientId);
+    const cascadeSteps = [
+      { table: "wanda_posts", result: admin.from("wanda_posts").delete().eq("portal_client_id", clientId) },
+      { table: "tarefas", result: admin.from("tarefas").delete().eq("portal_client_id", clientId) },
+      { table: "projetos", result: admin.from("projetos").delete().eq("portal_client_id", clientId) },
+      { table: "ad_campaigns", result: admin.from("ad_campaigns").delete().eq("portal_client_id", clientId) },
+      { table: "client_profile_changes", result: admin.from("client_profile_changes").delete().eq("portal_client_id", clientId) },
+      { table: "client_invites", result: admin.from("client_invites").delete().eq("client_id", clientId) },
+      { table: "rag_documents", result: admin.from("rag_documents").delete().eq("client_id", clientId) },
+      // notifications: campo dentro de JSONB (sem FK real)
+      { table: "notifications", result: admin.from("notifications").delete().eq("data->>client_id" as never, clientId) },
+    ];
 
-    // notifications: campo dentro de JSONB (sem FK real)
-    await admin.from("notifications").delete().eq("data->>client_id" as never, clientId);
+    const cascadeErrors: string[] = [];
+    for (const step of cascadeSteps) {
+      const { error } = await step.result;
+      if (error) cascadeErrors.push(`${step.table}: ${error.message}`);
+    }
+
+    if (cascadeErrors.length > 0) {
+      throw new Error(`Falha ao apagar dados relacionados: ${cascadeErrors.join("; ")}`);
+    }
 
     // 6. Deleta arquivos do Storage (pasta raiz + subpastas)
     let storageWarning = false;

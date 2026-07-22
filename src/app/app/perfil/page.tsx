@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useState, useEffect, useRef } from "react";
+import Image from "next/image";
 import { useGlobal } from "@/lib/context/GlobalContext";
 import { createSPASassClient } from "@/lib/supabase/client";
 import { persistOrThrow } from "@/lib/persist";
@@ -190,7 +191,7 @@ export default function PerfilPage() {
               <div className="flex flex-col items-center">
                 <div className="relative">
                   {profile?.avatar_url ? (
-                    <img src={profile.avatar_url} alt="Avatar" className="w-28 h-28 rounded-full object-cover border-2 border-hairline" />
+                    <Image src={profile.avatar_url} alt="Avatar" width={112} height={112} unoptimized className="w-28 h-28 rounded-full object-cover border-2 border-hairline" />
                   ) : (
                     <div className="w-28 h-28 rounded-full bg-rausch/10 flex items-center justify-center text-rausch text-3xl font-bold">
                       {initials}

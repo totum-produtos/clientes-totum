@@ -77,7 +77,12 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 
-  const { token } = await req.json();
+  let token: string | undefined;
+  try {
+    ({ token } = await req.json());
+  } catch {
+    return NextResponse.json({ error: "Corpo da requisição inválido" }, { status: 400 });
+  }
   if (!token) {
     return NextResponse.json(
       { error: "Token do convite é obrigatório" },

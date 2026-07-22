@@ -22,6 +22,7 @@ import {
   AlertTriangle,
 } from 'lucide-react';
 import { LoadingSpinner } from '@/components/ui/LoadingSpinner';
+import { useToast } from '@/components/ui/ToastProvider';
 
 type Cliente = {
   id: string;
@@ -58,7 +59,7 @@ export default function GestaoClientesPage() {
   const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
   const [clienteParaDeletar, setClienteParaDeletar] = useState<Cliente | null>(null);
   const [deleteLoading, setDeleteLoading] = useState(false);
-  const [, setActionMessage] = useState('');
+  const { showSuccess, showError } = useToast();
   const [error, setError] = useState('');
   const [togglingId, setTogglingId] = useState<string | null>(null);
 
@@ -102,7 +103,6 @@ export default function GestaoClientesPage() {
 
     setClientes(clientesComStats);
     setLoading(false);
-    setActionMessage('');
   }, []);
 
   useEffect(() => {
@@ -136,10 +136,10 @@ export default function GestaoClientesPage() {
         sb.from('portal_clients').update({ status: novoStatus }).eq('id', cliente.id).select('id'),
         { db: sb, source: 'gestao-clientes:handleToggleStatus', metadata: { clientId: cliente.id, novoStatus } },
       );
-      setActionMessage(`Cliente ${novoStatus === 'active' ? 'ativado' : 'inativado'} com sucesso!`);
+      showSuccess(`Cliente ${novoStatus === 'active' ? 'ativado' : 'inativado'} com sucesso!`);
       fetchClientes();
     } catch (err: unknown) {
-      setActionMessage('Erro ao alterar status: ' + (err instanceof Error ? err.message : 'Erro desconhecido'));
+      showError('Erro ao alterar status: ' + (err instanceof Error ? err.message : 'Erro desconhecido'));
     } finally {
       setTogglingId(null);
     }
@@ -153,14 +153,14 @@ export default function GestaoClientesPage() {
       });
       const data = await res.json();
       if (!res.ok) {
-        setActionMessage('Erro ao deletar: ' + (data.error || 'Erro desconhecido'));
+        showError('Erro ao deletar: ' + (data.error || 'Erro desconhecido'));
       } else {
-        setActionMessage(`Cliente "${data.nome}" deletado com sucesso.`);
+        showSuccess(`Cliente "${data.nome}" deletado com sucesso.`);
         setClienteParaDeletar(null);
         fetchClientes();
       }
     } catch {
-      setActionMessage('Erro de rede ao deletar o cliente.');
+      showError('Erro de rede ao deletar o cliente.');
     } finally {
       setDeleteLoading(false);
     }

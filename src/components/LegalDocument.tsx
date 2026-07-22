@@ -16,6 +16,7 @@ const LegalDocument: React.FC<LegalDocumentProps> = ({ filePath, title }) => {
     const [error, setError] = useState<string | null>(null);
 
     useEffect(() => {
+        let cancelled = false;
         setLoading(true);
         setError(null);
 
@@ -27,14 +28,20 @@ const LegalDocument: React.FC<LegalDocumentProps> = ({ filePath, title }) => {
                 return response.text();
             })
             .then(text => {
+                if (cancelled) return;
                 setContent(text);
                 setLoading(false);
             })
             .catch(error => {
+                if (cancelled) return;
                 console.error('Error loading markdown:', error);
                 setError('Failed to load document. Please try again later.');
                 setLoading(false);
             });
+
+        return () => {
+            cancelled = true;
+        };
     }, [filePath]);
 
     return (
