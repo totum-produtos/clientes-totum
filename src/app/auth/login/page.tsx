@@ -60,11 +60,18 @@ export default function LoginPage() {
       onSubmit={handleSubmit}
       onResetPassword={() => router.push("/auth/forgot-password")}
       footer={
-        <div className="text-center text-sm text-muted-soft">
-          Não tem acesso?{" "}
-          <Link href="/auth/register" className="text-rausch hover:text-rausch-light font-medium transition-colors">
-            Falar com a Totum
-          </Link>
+        <div className="text-center text-sm text-muted-soft space-y-2">
+          <div>
+            <Link href="/auth/magic-link" className="text-totum-secondary hover:text-totum-secondary/80 font-medium transition-colors">
+              Entrar sem senha (Magic Link)
+            </Link>
+          </div>
+          <div>
+            Não tem acesso?{" "}
+            <Link href="/auth/register" className="text-rausch hover:text-rausch-light font-medium transition-colors">
+              Falar com a Totum
+            </Link>
+          </div>
         </div>
       }
     />
