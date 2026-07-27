@@ -31,6 +31,16 @@ export class SassClient {
         });
     }
 
+    async loginMagicLink(email: string, redirectTo: string) {
+        return this.client.auth.signInWithOtp({
+            email: email,
+            options: {
+                shouldCreateUser: false,
+                emailRedirectTo: redirectTo,
+            }
+        });
+    }
+
     async exchangeCodeForSession(code: string) {
         return this.client.auth.exchangeCodeForSession(code);
     }
