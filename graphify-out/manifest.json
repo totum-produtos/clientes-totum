@@ -823,5 +823,245 @@
     "mtime": 1785497070.7101135,
     "ast_hash": "8161298c51e55f99a9fda804af0207f6",
     "semantic_hash": "8161298c51e55f99a9fda804af0207f6"
+  },
+  ".github/FUNDING.yml": {
+    "mtime": 1785497069.3021135,
+    "ast_hash": "7f03b07d7da5c8a5076d3a3e218d0809",
+    "semantic_hash": ""
+  },
+  ".github/workflows/ci.yml": {
+    "mtime": 1785497069.3101134,
+    "ast_hash": "c1bdcf718203f8838b854e86a24be3cb",
+    "semantic_hash": ""
+  },
+  "BUGS.md": {
+    "mtime": 1785497069.6141133,
+    "ast_hash": "00b722fc139dafd436d8775b742ea766",
+    "semantic_hash": ""
+  },
+  "CHANGELOG.md": {
+    "mtime": 1785497069.6181135,
+    "ast_hash": "632145df91b15a3eadbb4c3431c03929",
+    "semantic_hash": ""
+  },
+  "CLAUDE.md": {
+    "mtime": 1785497194.0922332,
+    "ast_hash": "3e96677b02f3be3445d8c68a220caa59",
+    "semantic_hash": ""
+  },
+  "Clientes-design.md": {
+    "mtime": 1785497069.7181134,
+    "ast_hash": "e2d67b8e73f237d32322ee2023f2efa6",
+    "semantic_hash": ""
+  },
+  "Email/totum-email-boas-vindas.html": {
+    "mtime": 1785497069.7301135,
+    "ast_hash": "7ed36ef17afe02026486504889392fde",
+    "semantic_hash": ""
+  },
+  "Email/totum-email-preview.html": {
+    "mtime": 1785497069.7341135,
+    "ast_hash": "f42b2cff262462c38c59291bbe5ea80b",
+    "semantic_hash": ""
+  },
+  "KIMI.md": {
+    "mtime": 1785497069.7381134,
+    "ast_hash": "7f9e8979e20144a25163eb7b82bf0b97",
+    "semantic_hash": ""
+  },
+  "PERMISSOES_ACESSO.md": {
+    "mtime": 1785497069.7501135,
+    "ast_hash": "3fcd416eb07cb5a4ffc73761779bc907",
+    "semantic_hash": ""
+  },
+  "PHASE2_INTEGRATION_PLAN.md": {
+    "mtime": 1785497069.7501135,
+    "ast_hash": "39efc58aedaebfbb352dbe68485461f1",
+    "semantic_hash": ""
+  },
+  "README.md": {
+    "mtime": 1785497069.7541134,
+    "ast_hash": "9f0480f26b6f65113032a51776541ed2",
+    "semantic_hash": ""
+  },
+  "README_MOBILE.md": {
+    "mtime": 1785497069.7541134,
+    "ast_hash": "65bf261f9dfd8d9bf2d24c3e8a56d381",
+    "semantic_hash": ""
+  },
+  "README_MOBILE_ZH.md": {
+    "mtime": 1785497069.7581134,
+    "ast_hash": "e7bfe5226ea065ec135ccafdb81dab63",
+    "semantic_hash": ""
+  },
+  "README_ZH.md": {
+    "mtime": 1785497069.7581134,
+    "ast_hash": "b565a72118ce22d2e16c435c5179b080",
+    "semantic_hash": ""
+  },
+  "RLS_AUDIT.md": {
+    "mtime": 1785497069.7621133,
+    "ast_hash": "1a90e39745e7e07edfb61363bbb5f89a",
+    "semantic_hash": ""
+  },
+  "SINCRONIZACAO_TAREFAS.md": {
+    "mtime": 1785497069.7621133,
+    "ast_hash": "8acbe299dd91ffcdae73f19d98ea28e9",
+    "semantic_hash": ""
+  },
+  "TODO.md": {
+    "mtime": 1785497069.7661135,
+    "ast_hash": "5ad3949cee41dd61663789abafbcfbab",
+    "semantic_hash": ""
+  },
+  "[Briefing] Inicial - Completo.md": {
+    "mtime": 1785497069.7701135,
+    "ast_hash": "e9d9b29898c1ec67757b4b4b6da132ae",
+    "semantic_hash": ""
+  },
+  "docker-compose.yml": {
+    "mtime": 1785497069.7781134,
+    "ast_hash": "f1c3925ddb5e3a3991f637df714264e4",
+    "semantic_hash": ""
+  },
+  "docs/relatorio-uiux.md": {
+    "mtime": 1785497069.7821136,
+    "ast_hash": "17e6171638207d37bc92a9636fdf5183",
+    "semantic_hash": ""
+  },
+  "public/terms/privacy-notice.md": {
+    "mtime": 1785497069.8381135,
+    "ast_hash": "d4faa6a2ee964880eba0df206dc868b4",
+    "semantic_hash": ""
+  },
+  "public/terms/refund-policy.md": {
+    "mtime": 1785497069.8421135,
+    "ast_hash": "5c0e6b37c6187a832a6863019543eb02",
+    "semantic_hash": ""
+  },
+  "public/terms/terms-of-service.md": {
+    "mtime": 1785497069.8421135,
+    "ast_hash": "cd761a9e50d6e50499583bf712c8cb5e",
+    "semantic_hash": ""
+  },
+  "supabase/functions/send-invite/totum-email-boas-vindas.html": {
+    "mtime": 1785497070.5461135,
+    "ast_hash": "314a8ae15ed974f5b89a3b2b803900f8",
+    "semantic_hash": ""
+  },
+  "supabase/migrations/README.md": {
+    "mtime": 1785497070.6741135,
+    "ast_hash": "06970e101627d8c874e3c2d0e385c0d1",
+    "semantic_hash": ""
+  },
+  "1 - Persona - Palm & Key.pdf": {
+    "mtime": 1785497069.4381135,
+    "ast_hash": "bde725fb6ed3689d91e7f9b6bade35b7",
+    "semantic_hash": ""
+  },
+  "2 - Circulo Dourado - Palm & Key.pdf": {
+    "mtime": 1785497069.5501134,
+    "ast_hash": "abcd48aa23b32c60ee051cbc358814ab",
+    "semantic_hash": ""
+  },
+  "3 - Caracteristicas da Marca - Palm & Key.pdf": {
+    "mtime": 1785497069.5741134,
+    "ast_hash": "d8d3ea4b6c1e29122ffc775aa8a6df95",
+    "semantic_hash": ""
+  },
+  "4 - PUV - Palm & Key.pdf": {
+    "mtime": 1785497069.6141133,
+    "ast_hash": "05bd18fe80431dc482c6537f4478e190",
+    "semantic_hash": ""
+  },
+  "Cadastro Cliente1.png": {
+    "mtime": 1785497069.6341136,
+    "ast_hash": "8773e447cb732806ff9d0a9f64c8fa51",
+    "semantic_hash": ""
+  },
+  "Cadastro Cliente2.png": {
+    "mtime": 1785497069.6461134,
+    "ast_hash": "bfa2faec18eccc2fde2695627abcb34a",
+    "semantic_hash": ""
+  },
+  "Cadastro Cliente3.png": {
+    "mtime": 1785497069.6621134,
+    "ast_hash": "c770ecde9b6b7aa39844645430005b96",
+    "semantic_hash": ""
+  },
+  "Cadastro Cliente4.png": {
+    "mtime": 1785497069.6741135,
+    "ast_hash": "e536b0ca0f4e1dc26d24e3e04fed28fb",
+    "semantic_hash": ""
+  },
+  "Cadastro Cliente5.png": {
+    "mtime": 1785497069.6821134,
+    "ast_hash": "f59073cc39c51b859e32cf6c594fcb5d",
+    "semantic_hash": ""
+  },
+  "Cadastro Cliente6.png": {
+    "mtime": 1785497069.6861134,
+    "ast_hash": "3b11015a14e91f609d22237bcf144c08",
+    "semantic_hash": ""
+  },
+  "Cadastro Cliente7.png": {
+    "mtime": 1785497069.6981134,
+    "ast_hash": "65feb04e1e1157b05020e1d600f2c801",
+    "semantic_hash": ""
+  },
+  "Cadastro Cliente8.png": {
+    "mtime": 1785497069.7141135,
+    "ast_hash": "567de2ca790d5b5716772461ab0e8193",
+    "semantic_hash": ""
+  },
+  "Favicon-cliente.png": {
+    "mtime": 1785497069.7381134,
+    "ast_hash": "b5c2f51e95b0b2d10b8fadc60df57896",
+    "semantic_hash": ""
+  },
+  "Logo-png.png": {
+    "mtime": 1785497069.7461135,
+    "ast_hash": "e233ac1f04bff4c63b7a5f20265884d6",
+    "semantic_hash": ""
+  },
+  "public/file.svg": {
+    "mtime": 1785497069.8301134,
+    "ast_hash": "d09f95206c3fa0bb9bd9fefabfd0ea71",
+    "semantic_hash": ""
+  },
+  "public/globe.svg": {
+    "mtime": 1785497069.8340793,
+    "ast_hash": "2aaafa6a49b6563925fe440891e32717",
+    "semantic_hash": ""
+  },
+  "public/logo.png": {
+    "mtime": 1785497069.8341134,
+    "ast_hash": "e233ac1f04bff4c63b7a5f20265884d6",
+    "semantic_hash": ""
+  },
+  "public/next.svg": {
+    "mtime": 1785497069.8341134,
+    "ast_hash": "8e061864f388b47f33a1c3780831193e",
+    "semantic_hash": ""
+  },
+  "public/vercel.svg": {
+    "mtime": 1785497069.8421135,
+    "ast_hash": "c0af2f507b369b085b35ef4bbe3bcf1e",
+    "semantic_hash": ""
+  },
+  "public/window.svg": {
+    "mtime": 1785497069.8461134,
+    "ast_hash": "a2760511c65806022ad20adf74370ff3",
+    "semantic_hash": ""
+  },
+  "src/app/apple-icon.png": {
+    "mtime": 1785497070.1821134,
+    "ast_hash": "b5c2f51e95b0b2d10b8fadc60df57896",
+    "semantic_hash": ""
+  },
+  "src/app/icon.png": {
+    "mtime": 1785497070.2741134,
+    "ast_hash": "b5c2f51e95b0b2d10b8fadc60df57896",
+    "semantic_hash": ""
   }
 }
