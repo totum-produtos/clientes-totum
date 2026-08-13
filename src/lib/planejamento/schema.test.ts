@@ -57,9 +57,46 @@ describe("validatePlanContent", () => {
     expect(validatePlanContent({ funis: {} }).ok).toBe(false);
   });
 
+  it("exige que cada funil tenha etapas como lista", () => {
+    expect(
+      validatePlanContent({ funis: [{ nome: "X", etapas: [{ passo: "A" }] }] }).ok,
+    ).toBe(true);
+    const semEtapas = validatePlanContent({ funis: [{ nome: "X" }] });
+    expect(semEtapas.ok).toBe(false);
+    expect(semEtapas.errors.some((e) => e.includes("funis[0].etapas"))).toBe(true);
+  });
+
   it("exige projecao.cenarios como lista", () => {
     expect(validatePlanContent({ projecao: { cenarios: [] } }).ok).toBe(true);
     expect(validatePlanContent({ projecao: {} }).ok).toBe(false);
+  });
+
+  it("exige que cada cenário de projecao tenha meses como lista", () => {
+    const semMeses = validatePlanContent({ projecao: { cenarios: [{ nome: "conservador" }] } });
+    expect(semMeses.ok).toBe(false);
+    expect(semMeses.errors.some((e) => e.includes("projecao.cenarios[0].meses"))).toBe(true);
+  });
+
+  it("rejeita cenários de projecao com meses em ordem/quantidade diferente", () => {
+    const desalinhado = validatePlanContent({
+      projecao: {
+        cenarios: [
+          { nome: "conservador", meses: [{ mes: "jan", valor: 1 }, { mes: "fev", valor: 2 }] },
+          { nome: "agressivo", meses: [{ mes: "fev", valor: 3 }, { mes: "jan", valor: 4 }] },
+        ],
+      },
+    });
+    expect(desalinhado.ok).toBe(false);
+
+    const alinhado = validatePlanContent({
+      projecao: {
+        cenarios: [
+          { nome: "conservador", meses: [{ mes: "jan", valor: 1 }, { mes: "fev", valor: 2 }] },
+          { nome: "agressivo", meses: [{ mes: "jan", valor: 4 }, { mes: "fev", valor: 3 }] },
+        ],
+      },
+    });
+    expect(alinhado.ok).toBe(true);
   });
 
   it("exige calendario_editorial.semanas como lista", () => {
@@ -67,6 +104,34 @@ describe("validatePlanContent", () => {
       validatePlanContent({ calendario_editorial: { semanas: [] } }).ok,
     ).toBe(true);
     expect(validatePlanContent({ calendario_editorial: {} }).ok).toBe(false);
+  });
+
+  it("exige que cada semana do calendário tenha dias, e cada dia tenha posts", () => {
+    const semDias = validatePlanContent({ calendario_editorial: { semanas: [{ label: "S1" }] } });
+    expect(semDias.ok).toBe(false);
+
+    const semPosts = validatePlanContent({
+      calendario_editorial: { semanas: [{ label: "S1", dias: [{ dia: "Segunda" }] }] },
+    });
+    expect(semPosts.ok).toBe(false);
+
+    const completo = validatePlanContent({
+      calendario_editorial: {
+        semanas: [{ label: "S1", dias: [{ dia: "Segunda", posts: [{ formato: "Reel", hook: "..." }] }] }],
+      },
+    });
+    expect(completo.ok).toBe(true);
+  });
+
+  it("exige stack.ferramentas, reels.roteiros, collabs.perfis e metricas.kpis como listas", () => {
+    expect(validatePlanContent({ stack: {} }).ok).toBe(false);
+    expect(validatePlanContent({ stack: { ferramentas: [] } }).ok).toBe(true);
+    expect(validatePlanContent({ reels: {} }).ok).toBe(false);
+    expect(validatePlanContent({ reels: { roteiros: [] } }).ok).toBe(true);
+    expect(validatePlanContent({ collabs: {} }).ok).toBe(false);
+    expect(validatePlanContent({ collabs: { perfis: [] } }).ok).toBe(true);
+    expect(validatePlanContent({ metricas: {} }).ok).toBe(false);
+    expect(validatePlanContent({ metricas: { kpis: [] } }).ok).toBe(true);
   });
 
   it("exige plano_acao com d30 e d90 como listas", () => {

@@ -3,12 +3,9 @@
 // preenchido, respondemos sucesso sem gravar nada (não denuncia pro bot).
 
 import { NextResponse } from "next/server";
-import { createClient } from "@supabase/supabase-js";
 import { rateLimit } from "@/lib/rate-limit";
-import type { Database } from "@/lib/types";
-
-const SUPABASE_URL = process.env.NEXT_PUBLIC_SUPABASE_URL || "";
-const SERVICE_ROLE_KEY = process.env.PRIVATE_SUPABASE_SERVICE_KEY || "";
+import { logEvent } from "@/lib/log-event";
+import { createBioAdminClient, resolveActiveBioProfile } from "@/lib/bio/resolve-active-profile";
 
 interface LeadBody {
   slug?: string;
@@ -58,27 +55,12 @@ export async function POST(request: Request) {
     );
   }
 
-  const admin = createClient<Database>(SUPABASE_URL, SERVICE_ROLE_KEY, {
-    auth: { autoRefreshToken: false, persistSession: false },
-  });
-
-  const { data: client } = await admin
-    .from("portal_clients")
-    .select("id")
-    .eq("slug", slug)
-    .maybeSingle();
-  if (!client) {
+  const admin = createBioAdminClient();
+  const resolved = await resolveActiveBioProfile(admin, slug);
+  if (!resolved || !resolved.profile.lead_capture_enabled) {
     return NextResponse.json({ error: "Não foi possível enviar." }, { status: 400 });
   }
-
-  const { data: profile } = await admin
-    .from("bio_profiles")
-    .select("id, is_active, lead_capture_enabled, display_name")
-    .eq("client_id", client.id)
-    .maybeSingle();
-  if (!profile || !profile.is_active || !profile.lead_capture_enabled) {
-    return NextResponse.json({ error: "Não foi possível enviar." }, { status: 400 });
-  }
+  const { client, profile } = resolved;
 
   let validProductId: string | null = null;
   if (sourceProductId) {
@@ -106,11 +88,17 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: "Não foi possível enviar. Tente novamente." }, { status: 500 });
   }
 
-  await admin.from("bio_click_events").insert({
+  const { error: eventError } = await admin.from("bio_click_events").insert({
     client_id: client.id,
     target_type: "lead_submit",
     target_id: validProductId,
   });
+  if (eventError) {
+    await logEvent(admin, "error", "api/bio/lead", eventError.message, {
+      clientId: client.id,
+      targetId: validProductId,
+    });
+  }
 
   const { data: clientUsers } = await admin
     .from("portal_client_users")

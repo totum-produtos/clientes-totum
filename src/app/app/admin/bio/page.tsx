@@ -24,6 +24,40 @@ type BioProfile = Tables<"bio_profiles">;
 type BioLink = Tables<"bio_links">;
 type BioProduct = Tables<"bio_products">;
 
+// Compartilhado por handleUploadImage/handleUploadProductImage — só o
+// prefixo do path e o que fazer com a URL final diferem entre os dois.
+async function uploadBioAsset(clientId: string, file: File, prefix: string): Promise<string> {
+  const supabase = await createSPASassClient();
+  const sb = supabase.getSupabaseClient();
+  const path = `${clientId}/${prefix}-${Date.now()}.${file.name.split(".").pop()}`;
+  const { error: uploadError } = await sb.storage.from("bio_assets").upload(path, file, {
+    cacheControl: "3600",
+    upsert: true,
+  });
+  if (uploadError) throw uploadError;
+  const { data } = sb.storage.from("bio_assets").getPublicUrl(path);
+  return data.publicUrl;
+}
+
+// Compartilhado por handleMoveLink/handleMoveProduct — calcula a troca de
+// posição; quem persiste o novo `ordem` é o caller (update tipado por tabela).
+function computeSwap<T extends { id: string; ordem: number }>(
+  items: T[],
+  index: number,
+  direction: -1 | 1,
+): { a: T; b: T } | null {
+  const target = index + direction;
+  if (target < 0 || target >= items.length) return null;
+  return { a: items[index], b: items[target] };
+}
+
+function swapInPlace<T>(items: T[], index: number, direction: -1 | 1): T[] {
+  const target = index + direction;
+  const next = [...items];
+  [next[index], next[target]] = [next[target], next[index]];
+  return next;
+}
+
 export default function AdminBioPage() {
   const [clientes, setClientes] = useState<ClienteOption[]>([]);
   const [clientesLoading, setClientesLoading] = useState(true);
@@ -145,16 +179,8 @@ export default function AdminBioPage() {
     setUploadingField(field);
     setError(null);
     try {
-      const supabase = await createSPASassClient();
-      const sb = supabase.getSupabaseClient();
-      const path = `${profile.client_id}/${field}-${Date.now()}.${file.name.split(".").pop()}`;
-      const { error: uploadError } = await sb.storage.from("bio_assets").upload(path, file, {
-        cacheControl: "3600",
-        upsert: true,
-      });
-      if (uploadError) throw uploadError;
-      const { data } = sb.storage.from("bio_assets").getPublicUrl(path);
-      await handleSaveProfile({ [field]: data.publicUrl });
+      const publicUrl = await uploadBioAsset(profile.client_id, file, field);
+      await handleSaveProfile({ [field]: publicUrl });
     } catch (err) {
       console.error(err);
       setError(err instanceof Error ? err.message : "Erro no upload da imagem.");
@@ -203,7 +229,10 @@ export default function AdminBioPage() {
     const supabase = await createSPASassClient();
     const sb = supabase.getSupabaseClient();
     try {
-      await sb.from("bio_links").delete().eq("id", id);
+      await persistOrThrow(
+        sb.from("bio_links").delete().eq("id", id).select("id"),
+        { db: sb, source: "admin/bio:delete-link", metadata: { linkId: id } },
+      );
       await loadBioData(profile.client_id);
     } catch (err) {
       console.error(err);
@@ -212,18 +241,12 @@ export default function AdminBioPage() {
   }
 
   async function handleMoveLink(index: number, direction: -1 | 1) {
-    const target = index + direction;
-    if (target < 0 || target >= links.length) return;
-    const a = links[index];
-    const b = links[target];
-    setLinks((prev) => {
-      const next = [...prev];
-      [next[index], next[target]] = [next[target], next[index]];
-      return next;
-    });
+    const swap = computeSwap(links, index, direction);
+    if (!swap) return;
+    setLinks((prev) => swapInPlace(prev, index, direction));
     await Promise.all([
-      handleUpdateLink(a.id, { ordem: b.ordem }),
-      handleUpdateLink(b.id, { ordem: a.ordem }),
+      handleUpdateLink(swap.a.id, { ordem: swap.b.ordem }),
+      handleUpdateLink(swap.b.id, { ordem: swap.a.ordem }),
     ]);
   }
 
@@ -267,7 +290,10 @@ export default function AdminBioPage() {
     const supabase = await createSPASassClient();
     const sb = supabase.getSupabaseClient();
     try {
-      await sb.from("bio_products").delete().eq("id", id);
+      await persistOrThrow(
+        sb.from("bio_products").delete().eq("id", id).select("id"),
+        { db: sb, source: "admin/bio:delete-product", metadata: { productId: id } },
+      );
       await loadBioData(profile.client_id);
     } catch (err) {
       console.error(err);
@@ -276,18 +302,12 @@ export default function AdminBioPage() {
   }
 
   async function handleMoveProduct(index: number, direction: -1 | 1) {
-    const target = index + direction;
-    if (target < 0 || target >= products.length) return;
-    const a = products[index];
-    const b = products[target];
-    setProducts((prev) => {
-      const next = [...prev];
-      [next[index], next[target]] = [next[target], next[index]];
-      return next;
-    });
+    const swap = computeSwap(products, index, direction);
+    if (!swap) return;
+    setProducts((prev) => swapInPlace(prev, index, direction));
     await Promise.all([
-      handleUpdateProduct(a.id, { ordem: b.ordem }),
-      handleUpdateProduct(b.id, { ordem: a.ordem }),
+      handleUpdateProduct(swap.a.id, { ordem: swap.b.ordem }),
+      handleUpdateProduct(swap.b.id, { ordem: swap.a.ordem }),
     ]);
   }
 
@@ -295,16 +315,8 @@ export default function AdminBioPage() {
     if (!profile) return;
     setUploadingField(`product-${productId}`);
     try {
-      const supabase = await createSPASassClient();
-      const sb = supabase.getSupabaseClient();
-      const path = `${profile.client_id}/product-${productId}-${Date.now()}.${file.name.split(".").pop()}`;
-      const { error: uploadError } = await sb.storage.from("bio_assets").upload(path, file, {
-        cacheControl: "3600",
-        upsert: true,
-      });
-      if (uploadError) throw uploadError;
-      const { data } = sb.storage.from("bio_assets").getPublicUrl(path);
-      await handleUpdateProduct(productId, { image_url: data.publicUrl });
+      const publicUrl = await uploadBioAsset(profile.client_id, file, `product-${productId}`);
+      await handleUpdateProduct(productId, { image_url: publicUrl });
     } catch (err) {
       console.error(err);
       setError(err instanceof Error ? err.message : "Erro no upload da imagem.");
