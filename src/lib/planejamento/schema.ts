@@ -237,14 +237,38 @@ export function validatePlanContent(input: unknown): ValidationResult {
     }
   }
 
-  if ("funis" in content && !Array.isArray(content.funis)) {
-    errors.push('"funis" precisa ser uma lista.');
+  if ("funis" in content) {
+    if (!Array.isArray(content.funis)) {
+      errors.push('"funis" precisa ser uma lista.');
+    } else {
+      content.funis.forEach((funil, i) => {
+        if (!funil || typeof funil !== "object" || !Array.isArray((funil as Record<string, unknown>).etapas)) {
+          errors.push(`"funis[${i}].etapas" precisa ser uma lista.`);
+        }
+      });
+    }
   }
 
   if ("projecao" in content) {
     const proj = content.projecao as Record<string, unknown> | undefined;
     if (!proj || !Array.isArray(proj.cenarios)) {
       errors.push('"projecao.cenarios" precisa ser uma lista.');
+    } else {
+      const cenarios = proj.cenarios as unknown[];
+      cenarios.forEach((cenario, i) => {
+        if (!cenario || typeof cenario !== "object" || !Array.isArray((cenario as Record<string, unknown>).meses)) {
+          errors.push(`"projecao.cenarios[${i}].meses" precisa ser uma lista.`);
+        }
+      });
+      const mesesCounts = cenarios.map((c) =>
+        c && typeof c === "object" && Array.isArray((c as Record<string, unknown>).meses)
+          ? ((c as Record<string, unknown>).meses as unknown[]).map((m) => (m as Record<string, unknown>)?.mes)
+          : null,
+      );
+      const first = mesesCounts.find((m) => m !== null);
+      if (first && mesesCounts.some((m) => m !== null && JSON.stringify(m) !== JSON.stringify(first))) {
+        errors.push('"projecao.cenarios[*].meses" precisa ter os mesmos meses, na mesma ordem, em todos os cenários.');
+      }
     }
   }
 
@@ -252,6 +276,20 @@ export function validatePlanContent(input: unknown): ValidationResult {
     const cal = content.calendario_editorial as Record<string, unknown> | undefined;
     if (!cal || !Array.isArray(cal.semanas)) {
       errors.push('"calendario_editorial.semanas" precisa ser uma lista.');
+    } else {
+      (cal.semanas as unknown[]).forEach((semana, i) => {
+        const dias = semana && typeof semana === "object" ? (semana as Record<string, unknown>).dias : undefined;
+        if (!Array.isArray(dias)) {
+          errors.push(`"calendario_editorial.semanas[${i}].dias" precisa ser uma lista.`);
+          return;
+        }
+        dias.forEach((dia, j) => {
+          const posts = dia && typeof dia === "object" ? (dia as Record<string, unknown>).posts : undefined;
+          if (!Array.isArray(posts)) {
+            errors.push(`"calendario_editorial.semanas[${i}].dias[${j}].posts" precisa ser uma lista.`);
+          }
+        });
+      });
     }
   }
 
@@ -259,6 +297,34 @@ export function validatePlanContent(input: unknown): ValidationResult {
     const pa = content.plano_acao as Record<string, unknown> | undefined;
     if (!pa || !Array.isArray(pa.d30) || !Array.isArray(pa.d90)) {
       errors.push('"plano_acao" precisa ter "d30" e "d90" como listas.');
+    }
+  }
+
+  if ("stack" in content) {
+    const stack = content.stack as Record<string, unknown> | undefined;
+    if (!stack || !Array.isArray(stack.ferramentas)) {
+      errors.push('"stack.ferramentas" precisa ser uma lista.');
+    }
+  }
+
+  if ("reels" in content) {
+    const reels = content.reels as Record<string, unknown> | undefined;
+    if (!reels || !Array.isArray(reels.roteiros)) {
+      errors.push('"reels.roteiros" precisa ser uma lista.');
+    }
+  }
+
+  if ("collabs" in content) {
+    const collabs = content.collabs as Record<string, unknown> | undefined;
+    if (!collabs || !Array.isArray(collabs.perfis)) {
+      errors.push('"collabs.perfis" precisa ser uma lista.');
+    }
+  }
+
+  if ("metricas" in content) {
+    const metricas = content.metricas as Record<string, unknown> | undefined;
+    if (!metricas || !Array.isArray(metricas.kpis)) {
+      errors.push('"metricas.kpis" precisa ser uma lista.');
     }
   }
 

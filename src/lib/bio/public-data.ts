@@ -3,20 +3,13 @@
 // deve ser bundlado no cliente.
 //
 // portal_clients guarda tokens OAuth (google_refresh_token,
-// meta_access_token...) em texto puro. Este é o ÚNICO lugar do projeto
-// autorizado a ler portal_clients para servir dado público — e por isso
-// SEMPRE seleciona colunas explícitas, nunca select('*').
+// meta_access_token...) em texto puro. A checagem de acesso (slug ativo)
+// mora em resolveActiveBioProfile — este arquivo só busca links/produtos
+// em cima do resultado, nunca reimplementa a checagem.
 
-import { createClient } from "@supabase/supabase-js";
-import type { Database } from "@/lib/types";
+import { createBioAdminClient, resolveActiveBioProfile, type ActiveBioProfile } from "./resolve-active-profile";
 
-function adminClient() {
-  return createClient<Database>(
-    process.env.NEXT_PUBLIC_SUPABASE_URL || "",
-    process.env.PRIVATE_SUPABASE_SERVICE_KEY || "",
-    { auth: { autoRefreshToken: false, persistSession: false } },
-  );
-}
+export type PublicBioProfile = ActiveBioProfile["profile"];
 
 export interface PublicBioLink {
   id: string;
@@ -37,45 +30,18 @@ export interface PublicBioProduct {
   ordem: number;
 }
 
-export interface PublicBioProfile {
-  id: string;
-  display_name: string;
-  headline: string | null;
-  avatar_url: string | null;
-  logo_url: string | null;
-  cor_primaria: string | null;
-  cor_secundaria: string | null;
-  cor_fundo: string | null;
-  lead_capture_enabled: boolean;
-  lead_capture_titulo: string | null;
-}
-
 export interface PublicBioData {
-  client: { id: string; nome: string; slug: string };
+  client: ActiveBioProfile["client"];
   profile: PublicBioProfile;
   links: PublicBioLink[];
   products: PublicBioProduct[];
 }
 
 export async function getPublicBio(slug: string): Promise<PublicBioData | null> {
-  if (!slug) return null;
-  const admin = adminClient();
-
-  const { data: client } = await admin
-    .from("portal_clients")
-    .select("id, nome, slug")
-    .eq("slug", slug)
-    .maybeSingle();
-  if (!client) return null;
-
-  const { data: profile } = await admin
-    .from("bio_profiles")
-    .select(
-      "id, display_name, headline, avatar_url, logo_url, cor_primaria, cor_secundaria, cor_fundo, lead_capture_enabled, lead_capture_titulo, is_active",
-    )
-    .eq("client_id", client.id)
-    .maybeSingle();
-  if (!profile || !profile.is_active) return null;
+  const admin = createBioAdminClient();
+  const resolved = await resolveActiveBioProfile(admin, slug);
+  if (!resolved) return null;
+  const { client, profile } = resolved;
 
   const [{ data: links }, { data: products }] = await Promise.all([
     admin
@@ -94,18 +60,7 @@ export async function getPublicBio(slug: string): Promise<PublicBioData | null> 
 
   return {
     client,
-    profile: {
-      id: profile.id,
-      display_name: profile.display_name,
-      headline: profile.headline,
-      avatar_url: profile.avatar_url,
-      logo_url: profile.logo_url,
-      cor_primaria: profile.cor_primaria,
-      cor_secundaria: profile.cor_secundaria,
-      cor_fundo: profile.cor_fundo,
-      lead_capture_enabled: profile.lead_capture_enabled,
-      lead_capture_titulo: profile.lead_capture_titulo,
-    },
+    profile,
     links: links || [],
     products: products || [],
   };

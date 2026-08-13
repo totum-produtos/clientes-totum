@@ -13,12 +13,25 @@ const CENARIO_COLOR: Record<string, string> = {
 export function ProjecaoChart({ cenarios }: { cenarios: CenarioProjecao[] }) {
   if (cenarios.length === 0) return null;
 
-  const meses = cenarios[0]?.meses.map((m) => m.mes) || [];
-  const data = meses.map((mes, i) => {
-    const row: Record<string, string | number> = { mes };
-    for (const cenario of cenarios) {
-      row[cenario.nome] = cenario.meses[i]?.valor ?? 0;
+  // Casa por rótulo de mês (m.mes), não por índice — cenários podem ter
+  // meses em ordem ou quantidade diferentes.
+  const mesesPorCenario = cenarios.map((c) => new Map(c.meses.map((m) => [m.mes, m.valor])));
+  const ordemMeses: string[] = [];
+  const vistos = new Set<string>();
+  for (const cenario of cenarios) {
+    for (const { mes } of cenario.meses) {
+      if (!vistos.has(mes)) {
+        vistos.add(mes);
+        ordemMeses.push(mes);
+      }
     }
+  }
+
+  const data = ordemMeses.map((mes) => {
+    const row: Record<string, string | number> = { mes };
+    cenarios.forEach((cenario, i) => {
+      row[cenario.nome] = mesesPorCenario[i].get(mes) ?? 0;
+    });
     return row;
   });
 

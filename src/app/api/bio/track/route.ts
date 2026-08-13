@@ -4,12 +4,9 @@
 // diferença de resposta, se um slug existe ou não.
 
 import { NextResponse } from "next/server";
-import { createClient } from "@supabase/supabase-js";
 import { rateLimit } from "@/lib/rate-limit";
-import type { Database } from "@/lib/types";
-
-const SUPABASE_URL = process.env.NEXT_PUBLIC_SUPABASE_URL || "";
-const SERVICE_ROLE_KEY = process.env.PRIVATE_SUPABASE_SERVICE_KEY || "";
+import { logEvent } from "@/lib/log-event";
+import { createBioAdminClient, resolveActiveBioProfile } from "@/lib/bio/resolve-active-profile";
 
 type TrackTargetType = "page_view" | "link" | "product";
 const VALID_TARGET_TYPES: TrackTargetType[] = ["page_view", "link", "product"];
@@ -48,23 +45,10 @@ export async function POST(request: Request) {
     return noContent();
   }
 
-  const admin = createClient<Database>(SUPABASE_URL, SERVICE_ROLE_KEY, {
-    auth: { autoRefreshToken: false, persistSession: false },
-  });
-
-  const { data: client } = await admin
-    .from("portal_clients")
-    .select("id")
-    .eq("slug", slug)
-    .maybeSingle();
-  if (!client) return noContent();
-
-  const { data: profile } = await admin
-    .from("bio_profiles")
-    .select("id, is_active")
-    .eq("client_id", client.id)
-    .maybeSingle();
-  if (!profile || !profile.is_active) return noContent();
+  const admin = createBioAdminClient();
+  const resolved = await resolveActiveBioProfile(admin, slug);
+  if (!resolved) return noContent();
+  const { client, profile } = resolved;
 
   if (targetType === "link") {
     if (!targetId) return noContent();
@@ -73,6 +57,7 @@ export async function POST(request: Request) {
       .select("id")
       .eq("id", targetId)
       .eq("bio_id", profile.id)
+      .eq("is_active", true)
       .maybeSingle();
     if (!link) return noContent();
   } else if (targetType === "product") {
@@ -82,15 +67,23 @@ export async function POST(request: Request) {
       .select("id")
       .eq("id", targetId)
       .eq("bio_id", profile.id)
+      .eq("is_active", true)
       .maybeSingle();
     if (!product) return noContent();
   }
 
-  await admin.from("bio_click_events").insert({
+  const { error } = await admin.from("bio_click_events").insert({
     client_id: client.id,
     target_type: targetType,
     target_id: targetType === "page_view" ? null : targetId,
   });
+  if (error) {
+    await logEvent(admin, "error", "api/bio/track", error.message, {
+      clientId: client.id,
+      targetType,
+      targetId,
+    });
+  }
 
   return noContent();
 }
