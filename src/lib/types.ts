@@ -658,6 +658,239 @@ export type Database = {
           },
         ]
       }
+      bio_click_events: {
+        Row: {
+          client_id: string
+          created_at: string
+          id: number
+          target_id: string | null
+          target_type: string
+        }
+        Insert: {
+          client_id: string
+          created_at?: string
+          id?: number
+          target_id?: string | null
+          target_type: string
+        }
+        Update: {
+          client_id?: string
+          created_at?: string
+          id?: number
+          target_id?: string | null
+          target_type?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "bio_click_events_client_id_fkey"
+            columns: ["client_id"]
+            isOneToOne: false
+            referencedRelation: "portal_clients"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      bio_leads: {
+        Row: {
+          client_id: string
+          created_at: string
+          email: string | null
+          id: string
+          nome: string
+          referrer: string | null
+          source_product_id: string | null
+          whatsapp: string | null
+        }
+        Insert: {
+          client_id: string
+          created_at?: string
+          email?: string | null
+          id?: string
+          nome: string
+          referrer?: string | null
+          source_product_id?: string | null
+          whatsapp?: string | null
+        }
+        Update: {
+          client_id?: string
+          created_at?: string
+          email?: string | null
+          id?: string
+          nome?: string
+          referrer?: string | null
+          source_product_id?: string | null
+          whatsapp?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "bio_leads_client_id_fkey"
+            columns: ["client_id"]
+            isOneToOne: false
+            referencedRelation: "portal_clients"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "bio_leads_source_product_id_fkey"
+            columns: ["source_product_id"]
+            isOneToOne: false
+            referencedRelation: "bio_products"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      bio_links: {
+        Row: {
+          bio_id: string
+          created_at: string
+          icone: string | null
+          id: string
+          is_active: boolean
+          label: string
+          ordem: number
+          url: string
+        }
+        Insert: {
+          bio_id: string
+          created_at?: string
+          icone?: string | null
+          id?: string
+          is_active?: boolean
+          label: string
+          ordem?: number
+          url: string
+        }
+        Update: {
+          bio_id?: string
+          created_at?: string
+          icone?: string | null
+          id?: string
+          is_active?: boolean
+          label?: string
+          ordem?: number
+          url?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "bio_links_bio_id_fkey"
+            columns: ["bio_id"]
+            isOneToOne: false
+            referencedRelation: "bio_profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      bio_products: {
+        Row: {
+          bio_id: string
+          created_at: string
+          cta_label: string | null
+          cta_url: string | null
+          descricao: string | null
+          id: string
+          image_url: string | null
+          is_active: boolean
+          nome: string
+          ordem: number
+          preco_label: string | null
+        }
+        Insert: {
+          bio_id: string
+          created_at?: string
+          cta_label?: string | null
+          cta_url?: string | null
+          descricao?: string | null
+          id?: string
+          image_url?: string | null
+          is_active?: boolean
+          nome: string
+          ordem?: number
+          preco_label?: string | null
+        }
+        Update: {
+          bio_id?: string
+          created_at?: string
+          cta_label?: string | null
+          cta_url?: string | null
+          descricao?: string | null
+          id?: string
+          image_url?: string | null
+          is_active?: boolean
+          nome?: string
+          ordem?: number
+          preco_label?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "bio_products_bio_id_fkey"
+            columns: ["bio_id"]
+            isOneToOne: false
+            referencedRelation: "bio_profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      bio_profiles: {
+        Row: {
+          avatar_url: string | null
+          client_id: string
+          cor_fundo: string | null
+          cor_primaria: string | null
+          cor_secundaria: string | null
+          created_at: string
+          display_name: string
+          headline: string | null
+          id: string
+          is_active: boolean
+          lead_capture_enabled: boolean
+          lead_capture_titulo: string | null
+          logo_url: string | null
+          tema: Json
+          updated_at: string
+        }
+        Insert: {
+          avatar_url?: string | null
+          client_id: string
+          cor_fundo?: string | null
+          cor_primaria?: string | null
+          cor_secundaria?: string | null
+          created_at?: string
+          display_name: string
+          headline?: string | null
+          id?: string
+          is_active?: boolean
+          lead_capture_enabled?: boolean
+          lead_capture_titulo?: string | null
+          logo_url?: string | null
+          tema?: Json
+          updated_at?: string
+        }
+        Update: {
+          avatar_url?: string | null
+          client_id?: string
+          cor_fundo?: string | null
+          cor_primaria?: string | null
+          cor_secundaria?: string | null
+          created_at?: string
+          display_name?: string
+          headline?: string | null
+          id?: string
+          is_active?: boolean
+          lead_capture_enabled?: boolean
+          lead_capture_titulo?: string | null
+          logo_url?: string | null
+          tema?: Json
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "bio_profiles_client_id_fkey"
+            columns: ["client_id"]
+            isOneToOne: true
+            referencedRelation: "portal_clients"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       chat_history: {
         Row: {
           created_at: string | null
@@ -1829,6 +2062,56 @@ export type Database = {
           versao?: string | null
         }
         Relationships: []
+      }
+      portal_client_plans: {
+        Row: {
+          client_id: string
+          content: Json
+          created_at: string
+          created_by: string | null
+          id: string
+          periodo_label: string | null
+          published_at: string | null
+          status: string
+          titulo: string
+          updated_at: string
+          versao: number
+        }
+        Insert: {
+          client_id: string
+          content?: Json
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          periodo_label?: string | null
+          published_at?: string | null
+          status?: string
+          titulo: string
+          updated_at?: string
+          versao?: number
+        }
+        Update: {
+          client_id?: string
+          content?: Json
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          periodo_label?: string | null
+          published_at?: string | null
+          status?: string
+          titulo?: string
+          updated_at?: string
+          versao?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "portal_client_plans_client_id_fkey"
+            columns: ["client_id"]
+            isOneToOne: false
+            referencedRelation: "portal_clients"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       portal_client_users: {
         Row: {

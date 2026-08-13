@@ -18,7 +18,9 @@ import {
     User,
     ClipboardList,
     Bell,
-    LayoutGrid
+    LayoutGrid,
+    Target,
+    Link2
 } from 'lucide-react';
 import { useGlobal } from "@/lib/context/GlobalContext";
 import { createSPASassClient } from "@/lib/supabase/client";
@@ -56,6 +58,7 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
             items: [
                 { name: 'Início', href: '/app', icon: Home, clientOnly: true },
                 { name: 'Minha Empresa', href: '/app/meu-cadastro', icon: ClipboardList, clientOnly: true },
+                { name: 'Central de Planejamentos', href: '/app/planejamentos', icon: Target, clientOnly: true },
                 { name: 'Central de Conteúdos', href: '/app/central-conteudo', icon: LayoutGrid, clientOnly: false },
                 { name: 'Notificações', href: '/app/notificacoes', icon: Bell, clientOnly: false },
             ]
@@ -67,6 +70,7 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
                 { name: 'Calendário', href: '/app/calendario', icon: CalendarDays, clientOnly: true },
                 { name: 'Feed de Postagens', href: '/app/feed-postagens', icon: List, clientOnly: true },
                 { name: 'Campanhas', href: '/app/campanhas', icon: BarChart3, clientOnly: false },
+                { name: 'Link na Bio', href: '/app/bio', icon: Link2, clientOnly: true },
             ]
         },
         {
@@ -86,6 +90,8 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
                 { name: 'Central de Clientes', href: '/app/gestao-clientes', icon: Building2, clientOnly: false },
                 { name: 'Admin', href: '/app/admin', icon: User, clientOnly: false },
                 { name: 'Pendências', href: '/app/admin/pendencias', icon: List, clientOnly: false },
+                { name: 'Planejamentos (Gestão)', href: '/app/admin/planejamentos', icon: Target, clientOnly: false },
+                { name: 'Link na Bio (Gestão)', href: '/app/admin/bio', icon: Link2, clientOnly: false },
             ]
         }
     ];
