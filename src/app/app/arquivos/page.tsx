@@ -4,7 +4,9 @@ import Link from 'next/link';
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
 import { useGlobal } from '@/lib/context/GlobalContext';
 import { createSPASassClient } from '@/lib/supabase/client';
-import { FileText, Download, Upload, Trash2, FileArchive, FileSpreadsheet, Image, File } from 'lucide-react';
+// `Image` importado com alias: sem ele o jsx-a11y/alt-text confunde o ícone
+// do lucide com uma tag <img> e emite warning falso-positivo.
+import { FileText, Download, Upload, Trash2, FileArchive, FileSpreadsheet, Image as ImageIcon, File } from 'lucide-react';
 import { useToast } from "@/components/ui/ToastProvider";
 import ConfirmDialog from "@/components/ConfirmDialog";
 import { LoadingSpinner, PageLoader } from "@/components/ui/LoadingSpinner";
@@ -15,8 +17,8 @@ const typeIcons: Record<string, React.ReactNode> = {
   ZIP: <FileArchive className="h-5 w-5 text-warning" />,
   XLSX: <FileSpreadsheet className="h-5 w-5 text-success" />,
   DOCX: <FileText className="h-5 w-5 text-legal-link" />,
-  PNG: <Image className="h-5 w-5 text-luxe" />,
-  JPG: <Image className="h-5 w-5 text-luxe" />,
+  PNG: <ImageIcon className="h-5 w-5 text-luxe" />,
+  JPG: <ImageIcon className="h-5 w-5 text-luxe" />,
 };
 
 type Arquivo = {
