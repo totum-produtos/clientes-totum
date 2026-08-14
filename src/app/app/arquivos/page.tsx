@@ -74,6 +74,7 @@ export default function ArquivosPage() {
 
   useEffect(() => {
     fetchArquivos();
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [client]);
 
   if (globalLoading) {

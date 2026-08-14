@@ -79,6 +79,7 @@ function CalendarioContent() {
 
   useEffect(() => {
     fetchPosts();
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [client, clientIdParam]);
 
   const events = posts

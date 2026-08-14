@@ -194,6 +194,7 @@ export default function AdminPage() {
 
     useEffect(() => {
         fetchData();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     }, []);
 
     async function handleCreateClient(e: React.FormEvent) {

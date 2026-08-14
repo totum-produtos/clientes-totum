@@ -46,6 +46,7 @@ export default function ContratoPage() {
 
     useEffect(() => {
         fetchTarefas();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [client]);
 
     // Realtime subscription: atualiza tarefas sem refresh
@@ -84,6 +85,7 @@ export default function ContratoPage() {
                 createSPASassClient().then(s => s.getSupabaseClient().removeChannel(channel!));
             }
         };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [client]);
 
     if (globalLoading) {

@@ -237,6 +237,7 @@ export default function MeuCadastroPage() {
       loadClientData();
       loadPendingCount();
     }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [client?.id]);
 
   async function loadClientData() {
