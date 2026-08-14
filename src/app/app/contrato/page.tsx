@@ -7,6 +7,7 @@ import { createSPASassClient } from '@/lib/supabase/client';
 import { FileText, CheckCircle2, Clock } from 'lucide-react';
 import type { RealtimeChannel } from '@supabase/supabase-js';
 import { LoadingSpinner, PageLoader } from '@/components/ui/LoadingSpinner';
+import { getTarefas } from "@/services/db/content";
 
 type Tarefa = {
     id: string;
@@ -33,11 +34,8 @@ export default function ContratoPage() {
         try {
             setLoading(true);
             const supabase = await createSPASassClient();
-            const { data } = await supabase.getSupabaseClient()
-                .from('tarefas')
-                .select('id, titulo, status, prioridade, data_limite, departamento, descricao')
-                .eq('portal_client_id', client.id)
-                .order('created_at', { ascending: false });
+            const sb = supabase.getSupabaseClient();
+            const { data } = await getTarefas(sb, client.id);
             setTarefas(data || []);
         } catch (error) {
             console.error("Critical error fetching tasks:", error);

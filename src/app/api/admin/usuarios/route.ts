@@ -5,6 +5,7 @@
 import { NextResponse } from "next/server";
 import { createClient } from "@supabase/supabase-js";
 import { createSSRClient } from "@/lib/supabase/server";
+import { getUserRole } from "@/services/db/users";
 
 const SUPABASE_URL = process.env.NEXT_PUBLIC_SUPABASE_URL || "";
 const SERVICE_ROLE_KEY = process.env.PRIVATE_SUPABASE_SERVICE_KEY || "";
@@ -23,11 +24,7 @@ export async function GET() {
         }
 
         // Verifica se é master
-        const { data: roleData } = await admin
-            .from("user_roles")
-            .select("role")
-            .eq("user_id", userData.user.id)
-            .maybeSingle();
+        const { data: roleData } = await getUserRole(admin, userData.user.id);
 
         if (roleData?.role !== "master") {
             return NextResponse.json({ error: "Acesso negado" }, { status: 403 });

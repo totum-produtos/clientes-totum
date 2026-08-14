@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createClient } from "@supabase/supabase-js";
+import { getClientUserForBriefing, getClientProfileForBriefing, updateClientProfileForBriefing } from "@/services/db/briefing";
 
 function createAdminClient() {
   return createClient(
@@ -24,21 +25,13 @@ export async function POST(req: NextRequest) {
   }
 
   // Find the client linked to this user
-  const { data: pcUser, error: pcUserError } = await supabase
-    .from("portal_client_users")
-    .select("client_id")
-    .eq("user_id", userData.user.id)
-    .single();
+  const { data: pcUser, error: pcUserError } = await getClientUserForBriefing(supabase, userData.user.id);
 
   if (pcUserError || !pcUser) {
     return NextResponse.json({ error: "Cliente não encontrado" }, { status: 404 });
   }
 
-  const { data: client, error: clientError } = await supabase
-    .from("portal_clients")
-    .select("profile_data")
-    .eq("id", pcUser.client_id)
-    .single();
+  const { data: client, error: clientError } = await getClientProfileForBriefing(supabase, pcUser.client_id);
 
   if (clientError || !client) {
     return NextResponse.json({ error: "Dados do cliente não encontrados" }, { status: 404 });
@@ -47,10 +40,7 @@ export async function POST(req: NextRequest) {
   const profileData = client.profile_data || {};
   profileData.briefing_completed = true;
 
-  const { error: updateError } = await supabase
-    .from("portal_clients")
-    .update({ profile_data: profileData })
-    .eq("id", pcUser.client_id);
+  const { error: updateError } = await updateClientProfileForBriefing(supabase, pcUser.client_id, profileData);
 
   if (updateError) {
     return NextResponse.json({ error: "Erro ao atualizar briefing" }, { status: 500 });

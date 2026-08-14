@@ -1,5 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createClient } from "@supabase/supabase-js";
+import { getInviteByToken, markInviteUsed } from "@/services/db/onboarding";
+import { upsertClientUser } from "@/services/db/clients";
 
 type InviteRow = {
   id: string;
@@ -45,11 +47,7 @@ export async function GET(req: NextRequest) {
   }
 
   const supabase = createAdminClient();
-  const { data, error } = await supabase
-    .from("client_invites")
-    .select("id, client_id, email, expires_at, used_at, portal_clients(nome)")
-    .eq("token", token)
-    .single<InviteRow>();
+  const { data, error } = await getInviteByToken(supabase, token) as { data: InviteRow | null; error: unknown };
 
   if (error) {
     return NextResponse.json(
@@ -62,6 +60,7 @@ export async function GET(req: NextRequest) {
   if (validationError) {
     return NextResponse.json({ error: validationError }, { status: 400 });
   }
+  if (!data) return NextResponse.json({ error: "Convite inválido" }, { status: 400 });
 
   return NextResponse.json({
     client_id: data.client_id,
@@ -98,11 +97,7 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: "Sessão inválida" }, { status: 401 });
   }
 
-  const { data: invite, error: inviteError } = await supabase
-    .from("client_invites")
-    .select("id, client_id, email, expires_at, used_at, portal_clients(nome)")
-    .eq("token", token)
-    .single<InviteRow>();
+  const { data: invite, error: inviteError } = await getInviteByToken(supabase, token) as { data: InviteRow | null; error: unknown };
 
   if (inviteError) {
     return NextResponse.json(
@@ -115,6 +110,7 @@ export async function POST(req: NextRequest) {
   if (validationError) {
     return NextResponse.json({ error: validationError }, { status: 400 });
   }
+  if (!invite) return NextResponse.json({ error: "Convite inválido" }, { status: 400 });
 
   if (invite.email.toLowerCase() !== userData.user.email.toLowerCase()) {
     return NextResponse.json(
@@ -123,16 +119,11 @@ export async function POST(req: NextRequest) {
     );
   }
 
-  const { error: linkError } = await supabase
-    .from("portal_client_users")
-    .upsert(
-      {
-        user_id: userData.user.id,
-        client_id: invite.client_id,
-        role: "cliente",
-      },
-      { onConflict: "user_id,client_id" },
-    );
+  const { error: linkError } = await upsertClientUser(supabase, {
+    user_id: userData.user.id,
+    client_id: invite.client_id,
+    role: "cliente",
+  }, "user_id,client_id");
 
   if (linkError) {
     return NextResponse.json(
@@ -141,10 +132,7 @@ export async function POST(req: NextRequest) {
     );
   }
 
-  const { error: usedError } = await supabase
-    .from("client_invites")
-    .update({ used_at: new Date().toISOString() })
-    .eq("id", invite.id);
+  const { error: usedError } = await markInviteUsed(supabase, invite.id, new Date().toISOString());
 
   if (usedError) {
     return NextResponse.json(

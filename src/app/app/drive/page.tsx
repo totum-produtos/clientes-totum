@@ -9,6 +9,7 @@ import { Folder, ExternalLink, Unlink, Cloud } from 'lucide-react';
 import { useToast } from "@/components/ui/ToastProvider";
 import ConfirmDialog from "@/components/ConfirmDialog";
 import { LoadingSpinner, PageLoader } from "@/components/ui/LoadingSpinner";
+import { getClientDriveFolders, updateClientDriveFolderCliente } from "@/services/db/clients";
 
 export default function DrivePage() {
   const { client, loading: globalLoading, user } = useGlobal();
@@ -30,11 +31,8 @@ export default function DrivePage() {
       try {
         setLoading(true);
         const supabase = await createSPASassClient();
-        const { data } = await supabase.getSupabaseClient()
-          .from('portal_clients')
-          .select('drive_folder_id, drive_folder_cliente_id')
-          .eq('id', client.id)
-          .single();
+        const sb = supabase.getSupabaseClient();
+        const { data } = await getClientDriveFolders(sb, client.id);
 
         if (data?.drive_folder_cliente_id) {
           setFolderId(data.drive_folder_cliente_id);
@@ -76,10 +74,7 @@ export default function DrivePage() {
       const supabase = await createSPASassClient();
       const sb = supabase.getSupabaseClient();
       await persistOrThrow(
-        sb.from('portal_clients')
-          .update({ drive_folder_cliente_id: id })
-          .eq('id', client.id)
-          .select('id'),
+        updateClientDriveFolderCliente(sb, client.id, id),
         { db: sb, source: 'drive:saveDriveFolder', metadata: { clientId: client.id, folderId: id } },
       );
       setFolderId(id);
@@ -102,10 +97,7 @@ export default function DrivePage() {
       const supabase = await createSPASassClient();
       const sb = supabase.getSupabaseClient();
       await persistOrThrow(
-        sb.from('portal_clients')
-          .update({ drive_folder_cliente_id: null })
-          .eq('id', client.id)
-          .select('id'),
+        updateClientDriveFolderCliente(sb, client.id, null),
         { db: sb, source: 'drive:confirmDisconnect', metadata: { clientId: client.id } },
       );
       setFolderId(null);

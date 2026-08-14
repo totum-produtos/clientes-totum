@@ -32,6 +32,7 @@ import {
   Sparkles,
 } from 'lucide-react';
 import { LoadingSpinner, PageLoader } from '@/components/ui/LoadingSpinner';
+import { getPostsForFeed } from "@/services/db/calendar";
 
 type Post = {
   id: number;
@@ -106,13 +107,7 @@ export default function FeedPostagensPage() {
         const inicio = startOfMonth(mesAtual).toISOString();
         const fim = endOfMonth(mesAtual).toISOString();
 
-        const { data, error } = await sb
-          .from('wanda_posts')
-          .select('id, subject, tipo, published_at, views, likes, engagement_rate, conversion_rate, created_at')
-          .eq('portal_client_id', client.id)
-          .gte('published_at', inicio)
-          .lte('published_at', fim)
-          .order('published_at', { ascending: false });
+        const { data, error } = await getPostsForFeed(sb, client.id, inicio, fim);
 
         if (!error && data) {
           setPosts(data);

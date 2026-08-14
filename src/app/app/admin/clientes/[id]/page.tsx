@@ -12,6 +12,7 @@ import {
 } from "lucide-react";
 import { STEPS, FormState, DEFAULT_FORM_STATE } from "@/lib/cliente-form-constants";
 import { useClienteForm } from "@/hooks/useClienteForm";
+import { getClientById, updateClientDriveUrl, updateClientFields } from "@/services/db/clients";
 import { ClienteFormSteps, validateStep } from "@/components/ClienteFormSteps";
 import { LoadingSpinner, PageLoader } from "@/components/ui/LoadingSpinner";
 import { useGlobal } from "@/lib/context/GlobalContext";
@@ -57,11 +58,8 @@ export default function EditarClientePage() {
     setLoading(true);
     try {
       const supabase = await createSPASassClient();
-      const { data, error: fetchError } = await supabase.getSupabaseClient()
-        .from("portal_clients")
-        .select("*")
-        .eq("id", clientId)
-        .single();
+      const sb = supabase.getSupabaseClient();
+      const { data, error: fetchError } = await getClientById(sb, clientId);
 
       if (fetchError || !data) {
         setError("Cliente não encontrado");
@@ -176,10 +174,7 @@ export default function EditarClientePage() {
       const supabase = await createSPASassClient();
       const sb = supabase.getSupabaseClient();
       await persistOrThrow(
-        sb.from("portal_clients")
-          .update({ google_drive_folder_url: driveUrl || null })
-          .eq("id", clientId)
-          .select("id"),
+        updateClientDriveUrl(sb, clientId, driveUrl || null),
         { db: sb, source: "admin/clientes/[id]:handleSaveDrive", metadata: { clientId } },
       );
       setDriveSaved("Pasta atualizada com sucesso");
@@ -215,47 +210,47 @@ export default function EditarClientePage() {
       const supabase = await createSPASassClient();
       const sb = supabase.getSupabaseClient();
       await persistOrThrow(
-        sb.from("portal_clients").update({
-        nome: form.nome,
-        cnpj: form.cnpj,
-        nome_responsavel: form.nome_responsavel,
-        email_responsavel: form.email_responsavel,
-        telefone: form.telefone,
-        site: form.site,
-        cor_primaria: form.cor_primaria,
-        cor_secundaria: form.cor_secundaria,
-        ramo_atuacao: form.ramo_atuacao,
-        tempo_mercado: form.tempo_mercado,
-        descricao_negocio: form.descricao_negocio,
-        produtos_servicos: form.produtos_servicos,
-        tamanho_empresa: form.tamanho_empresa,
-        faturamento_mensal: form.faturamento_mensal,
-        profile_data: {
-          nicho_principal: form.nicho_principal,
-          dores_principais: form.dores_principais,
-          desejos_objetivos: form.desejos_objetivos,
-          faixa_etaria: form.faixa_etaria,
-          genero_alvo: form.genero_alvo,
-          localizacao_alvo: form.localizacao_alvo,
-          classe_social: form.classe_social,
-          tom_voz: form.tom_voz,
-          fontes: form.fontes,
-          key_visual_desc: form.key_visual_desc,
-          key_visual_images: form.key_visual_images,
-          personalidade_visual: form.personalidade_visual,
-          canais_atendimento: form.canais_atendimento,
-          crm_utilizado: form.crm_utilizado,
-          sla_resposta: form.sla_resposta,
-          horario_inicio: form.horario_inicio,
-          horario_fim: form.horario_fim,
-          dias_atendimento: form.dias_atendimento,
-          informacoes_adicionais: form.informacoes_adicionais,
-          personas: form.personas,
-          circulo_dourado: form.circulo_dourado,
-          caracteristicas_marca: form.caracteristicas_marca,
-          puv: form.puv,
-        },
-      }).eq("id", clientId).select("id"),
+        updateClientFields(sb, clientId, {
+          nome: form.nome,
+          cnpj: form.cnpj,
+          nome_responsavel: form.nome_responsavel,
+          email_responsavel: form.email_responsavel,
+          telefone: form.telefone,
+          site: form.site,
+          cor_primaria: form.cor_primaria,
+          cor_secundaria: form.cor_secundaria,
+          ramo_atuacao: form.ramo_atuacao,
+          tempo_mercado: form.tempo_mercado,
+          descricao_negocio: form.descricao_negocio,
+          produtos_servicos: form.produtos_servicos,
+          tamanho_empresa: form.tamanho_empresa,
+          faturamento_mensal: form.faturamento_mensal,
+          profile_data: {
+            nicho_principal: form.nicho_principal,
+            dores_principais: form.dores_principais,
+            desejos_objetivos: form.desejos_objetivos,
+            faixa_etaria: form.faixa_etaria,
+            genero_alvo: form.genero_alvo,
+            localizacao_alvo: form.localizacao_alvo,
+            classe_social: form.classe_social,
+            tom_voz: form.tom_voz,
+            fontes: form.fontes,
+            key_visual_desc: form.key_visual_desc,
+            key_visual_images: form.key_visual_images,
+            personalidade_visual: form.personalidade_visual,
+            canais_atendimento: form.canais_atendimento,
+            crm_utilizado: form.crm_utilizado,
+            sla_resposta: form.sla_resposta,
+            horario_inicio: form.horario_inicio,
+            horario_fim: form.horario_fim,
+            dias_atendimento: form.dias_atendimento,
+            informacoes_adicionais: form.informacoes_adicionais,
+            personas: form.personas,
+            circulo_dourado: form.circulo_dourado,
+            caracteristicas_marca: form.caracteristicas_marca,
+            puv: form.puv,
+          },
+        }),
         { db: sb, source: "admin/clientes/[id]:handleSave", metadata: { clientId, userId: user?.id } },
       );
       // persistOrThrow confirma que uma linha foi gravada e lança caso o

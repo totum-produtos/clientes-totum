@@ -239,6 +239,51 @@ Antes de qualquer mudança:
 
 *CLAUDE.md v1.0 — Central do Cliente Totum — Sistema Vibe Coding Totum — 2026-05-10*
 
+## Arquitetura de Camadas — DAL (Data Access Layer)
+
+**Adicionado em:** refactor/camadas-clientes-totum
+
+### Regra fundamental
+Pages, components, hooks e API routes **não chamam `.from()`, `.storage.from()` ou `.rpc()` diretamente**.
+Toda query Supabase passa por uma função em `src/services/db/`.
+
+### Módulos DAL
+
+| Arquivo | Responsabilidade |
+|---------|-----------------|
+| `src/services/db/admin.ts` | `client_profile_changes`, `system_logs` |
+| `src/services/db/bio.ts` | `bio_profiles`, `bio_links`, `bio_products`, `bio_leads`, `bio_click_events` |
+| `src/services/db/briefing.ts` | `portal_clients.profile_data` (briefing flow) |
+| `src/services/db/calendar.ts` | `wanda_posts` |
+| `src/services/db/clients.ts` | `portal_clients`, `portal_client_users` |
+| `src/services/db/content.ts` | `ad_campaigns`, `tarefas`, `projetos`, `rag_documents` |
+| `src/services/db/files.ts` | Storage buckets: `client_files`, `bio_assets`, `avatars` |
+| `src/services/db/notifications.ts` | `notifications` |
+| `src/services/db/onboarding.ts` | `client_invites`, `client_onboarding_invites` |
+| `src/services/db/plans.ts` | `planejamentos` |
+| `src/services/db/users.ts` | `user_roles`, `profiles` |
+
+### Padrão de função
+
+```ts
+// Thin wrapper — sem lógica extra, sem error handling próprio
+export function nomeDescritivo(supabase: SupabaseClient, ...params: T) {
+  return supabase.from('tabela').select(...).eq(...)
+}
+```
+
+- Recebe `SupabaseClient` como 1º parâmetro (não cria o cliente)
+- Retorna o query builder (PromiseLike, compatível com `persistOrThrow`)
+- Ao adicionar queries: crie a função no módulo correto, importe no consumidor
+
+### Camadas intocáveis
+
+- `src/middleware.ts` — auth de rotas
+- `src/lib/rate-limit.ts` — rate limiting
+- `src/lib/supabase/` — clientes Supabase (camada de conexão)
+
+---
+
 ## graphify
 
 This project has a knowledge graph at graphify-out/ with god nodes, community structure, and cross-file relationships.

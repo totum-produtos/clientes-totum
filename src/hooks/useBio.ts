@@ -4,6 +4,13 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { createSPASassClient } from "@/lib/supabase/client";
 import { Tables } from "@/lib/types";
+import {
+  getBioProfileByClient,
+  getBioLeads,
+  getBioClickEvents,
+  getBioLinksLabels,
+  getBioProductsLabels,
+} from "@/services/db/bio";
 
 export type BioLead = Tables<"bio_leads">;
 export type BioClickEvent = Tables<"bio_click_events">;
@@ -43,26 +50,16 @@ export function useBio(clientId: string | null) {
       const sb = supabase.getSupabaseClient();
       const since = new Date(Date.now() - WINDOW_DAYS * 24 * 60 * 60 * 1000).toISOString();
 
-      const { data: profile } = await sb
-        .from("bio_profiles")
-        .select("id")
-        .eq("client_id", clientId)
-        .maybeSingle();
+      const { data: profile } = await getBioProfileByClient(sb, clientId);
 
       const [leadsRes, eventsRes, linksRes, productsRes] = await Promise.all([
-        sb.from("bio_leads").select("*").eq("client_id", clientId).order("created_at", { ascending: false }).limit(200),
-        sb
-          .from("bio_click_events")
-          .select("*")
-          .eq("client_id", clientId)
-          .gte("created_at", since)
-          .order("created_at", { ascending: false })
-          .limit(3000),
+        getBioLeads(sb, clientId),
+        getBioClickEvents(sb, clientId, since),
         profile
-          ? sb.from("bio_links").select("id, label").eq("bio_id", profile.id)
+          ? getBioLinksLabels(sb, profile.id)
           : Promise.resolve({ data: [] as { id: string; label: string }[] }),
         profile
-          ? sb.from("bio_products").select("id, nome").eq("bio_id", profile.id)
+          ? getBioProductsLabels(sb, profile.id)
           : Promise.resolve({ data: [] as { id: string; nome: string }[] }),
       ]);
 

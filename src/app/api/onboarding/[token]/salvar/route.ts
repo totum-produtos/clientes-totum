@@ -4,6 +4,7 @@
 import { NextResponse } from "next/server";
 import { createClient } from "@supabase/supabase-js";
 import { rateLimit } from "@/lib/rate-limit";
+import { getOnboardingInviteForSave, updateOnboardingInviteUsed } from "@/services/db/onboarding";
 
 const SUPABASE_URL = process.env.NEXT_PUBLIC_SUPABASE_URL || "";
 const SERVICE_ROLE_KEY = process.env.PRIVATE_SUPABASE_SERVICE_KEY || "";
@@ -47,11 +48,7 @@ export async function POST(
     auth: { autoRefreshToken: false, persistSession: false },
   });
 
-  const { data: invite, error: lookupErr } = await admin
-    .from("client_onboarding_invites")
-    .select("id, used_at, expires_at")
-    .eq("token", token)
-    .maybeSingle();
+  const { data: invite, error: lookupErr } = await getOnboardingInviteForSave(admin, token);
 
   if (lookupErr) {
     return NextResponse.json({ error: lookupErr.message }, { status: 500 });
@@ -73,10 +70,7 @@ export async function POST(
     updates.current_step = body.current_step;
   }
 
-  const { error: updateErr } = await admin
-    .from("client_onboarding_invites")
-    .update(updates)
-    .eq("id", invite.id);
+  const { error: updateErr } = await updateOnboardingInviteUsed(admin, invite.id, updates);
 
   if (updateErr) {
     return NextResponse.json({ error: updateErr.message }, { status: 500 });

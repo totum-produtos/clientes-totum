@@ -4,6 +4,7 @@
 
 import { NextResponse } from "next/server";
 import { createClient } from "@supabase/supabase-js";
+import { getOnboardingInviteByToken } from "@/services/db/onboarding";
 
 const SUPABASE_URL = process.env.NEXT_PUBLIC_SUPABASE_URL || "";
 const SERVICE_ROLE_KEY = process.env.PRIVATE_SUPABASE_SERVICE_KEY || "";
@@ -24,11 +25,7 @@ export async function GET(
   }
 
   const admin = adminClient();
-  const { data: invite, error } = await admin
-    .from("client_onboarding_invites")
-    .select("token, email, nome_pre, draft_data, current_step, expires_at, used_at")
-    .eq("token", token)
-    .maybeSingle();
+  const { data: invite, error } = await getOnboardingInviteByToken(admin, token);
 
   if (error) {
     return NextResponse.json({ error: error.message }, { status: 500 });

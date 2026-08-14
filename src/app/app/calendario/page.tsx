@@ -14,6 +14,8 @@ import { useSearchParams } from "next/navigation";
 import Link from "next/link";
 import { LoadingSpinner } from "@/components/ui/LoadingSpinner";
 import { PageError } from "@/components/ui/PageError";
+import { getClientNome } from "@/services/db/clients";
+import { getPostsByClient, updatePost, insertPost, insertPosts, deletePost } from "@/services/db/calendar";
 
 type Post = {
   id: number;
@@ -56,19 +58,11 @@ function CalendarioContent() {
 
       // If browsing via Central de Conteúdos, also fetch client name
       if (clientIdParam && clientIdParam !== client?.id) {
-        const { data: clientInfo } = await db
-          .from("portal_clients")
-          .select("nome")
-          .eq("id", clientIdParam)
-          .single();
+        const { data: clientInfo } = await getClientNome(db, clientIdParam);
         if (clientInfo) setOverrideClientName(clientInfo.nome);
       }
 
-      const { data, error } = await db
-        .from("wanda_posts")
-        .select("id, subject, tipo, published_at, views, likes, engagement_rate")
-        .eq("portal_client_id", targetClientId)
-        .order("published_at", { ascending: false });
+      const { data, error } = await getPostsByClient(db, targetClientId);
       if (error) {
         showError("Erro ao carregar posts");
         console.error("Erro ao carregar posts:", error);
@@ -132,10 +126,7 @@ function CalendarioContent() {
       const sb = supabase.getSupabaseClient();
       try {
         await persistOrThrow(
-          sb.from("wanda_posts")
-            .update(payload as TablesUpdate<"wanda_posts">)
-            .eq("id", selectedPost.id)
-            .select("id"),
+          updatePost(sb, selectedPost.id, payload as TablesUpdate<"wanda_posts">),
           { db: sb, source: "calendario:handleSavePost", metadata: { postId: selectedPost.id, clientId: targetClientId } },
         );
         showSuccess("Post atualizado com sucesso");
@@ -146,10 +137,8 @@ function CalendarioContent() {
         console.error("Erro ao atualizar:", error);
       }
     } else {
-      const { error } = await supabase
-        .getSupabaseClient()
-        .from("wanda_posts")
-        .insert({ ...payload, post_id: `post_${Date.now()}` } as unknown as TablesInsert<"wanda_posts">);
+      const sb2 = supabase.getSupabaseClient();
+      const { error } = await insertPost(sb2, { ...payload, post_id: `post_${Date.now()}` } as unknown as TablesInsert<"wanda_posts">);
       if (error) {
         showError("Erro ao criar post");
         console.error("Erro ao criar:", error);
@@ -169,11 +158,8 @@ function CalendarioContent() {
   const confirmDelete = async () => {
     if (pendingDeleteId == null) return;
     const supabase = await createSPASassClient();
-    const { error } = await supabase
-      .getSupabaseClient()
-      .from("wanda_posts")
-      .delete()
-      .eq("id", pendingDeleteId);
+    const sbDel = supabase.getSupabaseClient();
+    const { error } = await deletePost(sbDel, pendingDeleteId);
     if (error) {
       showError("Erro ao excluir post");
       console.error("Erro ao excluir:", error);
@@ -196,10 +182,8 @@ function CalendarioContent() {
       post_id: `post_${Date.now()}_${idx}`,
       published_at: new Date(p.published_at).toISOString(),
     }));
-    const { error } = await supabase
-      .getSupabaseClient()
-      .from("wanda_posts")
-      .insert(payload as unknown as TablesInsert<"wanda_posts">[]);
+    const sbBulk = supabase.getSupabaseClient();
+    const { error } = await insertPosts(sbBulk, payload as unknown as TablesInsert<"wanda_posts">[]);
     if (error) {
       showError("Erro ao criar posts em massa");
       console.error("Erro ao criar posts:", error);

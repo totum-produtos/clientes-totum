@@ -16,6 +16,8 @@ import { NextResponse } from "next/server";
 import { createClient, type SupabaseClient, type User } from "@supabase/supabase-js";
 import { createSSRClient } from "@/lib/supabase/server";
 import type { Database } from "@/lib/types";
+import { getUserRole, upsertUserRole } from "@/services/db/users";
+import { getClientById, getClientUsersByClient, upsertClientUser } from "@/services/db/clients";
 
 type AdminClient = SupabaseClient<Database>;
 
@@ -40,15 +42,8 @@ async function findAuthUserByEmail(admin: AdminClient, email: string): Promise<U
 
 /** Garante que portal_client_users e user_roles existem para o par (userId, clientId). */
 async function ensureClientLink(admin: AdminClient, userId: string, clientId: string) {
-  await admin
-    .from("user_roles")
-    .upsert({ user_id: userId, role: "cliente" }, { onConflict: "user_id" });
-
-  await admin
-    .from("portal_client_users")
-    .upsert({ user_id: userId, client_id: clientId, role: "cliente" }, {
-      onConflict: "user_id,client_id",
-    });
+  await upsertUserRole(admin, { user_id: userId, role: "cliente" }, "user_id");
+  await upsertClientUser(admin, { user_id: userId, client_id: clientId, role: "cliente" }, "user_id,client_id");
 }
 
 export async function POST(request: Request) {
@@ -73,11 +68,7 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: "Não autenticado" }, { status: 401 });
     }
 
-    const { data: callerRole } = await admin
-      .from("user_roles")
-      .select("role")
-      .eq("user_id", userData.user.id)
-      .maybeSingle();
+    const { data: callerRole } = await getUserRole(admin, userData.user.id);
 
     if (callerRole?.role !== "master") {
       return NextResponse.json(
@@ -87,11 +78,7 @@ export async function POST(request: Request) {
     }
 
     // Busca dados do cliente
-    const { data: client, error: clientErr } = await admin
-      .from("portal_clients")
-      .select("id, email_responsavel, nome")
-      .eq("id", body.clientId)
-      .single();
+    const { data: client, error: clientErr } = await getClientById(admin, body.clientId);
 
     if (clientErr || !client) {
       return NextResponse.json({ error: "Cliente não encontrado" }, { status: 404 });
@@ -163,11 +150,7 @@ export async function POST(request: Request) {
       // 1. Tenta encontrar via portal_client_users
       let userId: string | null = null;
 
-      const { data: link } = await admin
-        .from("portal_client_users")
-        .select("user_id")
-        .eq("client_id", body.clientId)
-        .maybeSingle();
+      const { data: link } = await getClientUsersByClient(admin, body.clientId).maybeSingle();
 
       if (link?.user_id) {
         userId = link.user_id;

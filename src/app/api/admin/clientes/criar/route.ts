@@ -18,6 +18,9 @@
 import { NextResponse } from "next/server";
 import { createClient } from "@supabase/supabase-js";
 import { createSSRClient } from "@/lib/supabase/server";
+import { getUserRole, upsertUserRole } from "@/services/db/users";
+import { insertClient, insertClientUser, deleteClient } from "@/services/db/clients";
+import { insertSystemLog } from "@/services/db/admin";
 
 const SUPABASE_URL = process.env.NEXT_PUBLIC_SUPABASE_URL || "";
 const SERVICE_ROLE_KEY = process.env.PRIVATE_SUPABASE_SERVICE_KEY || "";
@@ -84,11 +87,7 @@ export async function POST(request: Request) {
     }
     const callerId = userData.user.id;
 
-    const { data: callerRole } = await admin
-      .from("user_roles")
-      .select("role")
-      .eq("user_id", callerId)
-      .maybeSingle();
+    const { data: callerRole } = await getUserRole(admin, callerId);
 
     if (callerRole?.role !== "master") {
       return NextResponse.json(
@@ -98,30 +97,26 @@ export async function POST(request: Request) {
     }
 
     // 2. Cria portal_client
-    const { data: client, error: insertErr } = await admin
-      .from("portal_clients")
-      .insert({
-        nome: body.nome,
-        slug: gerarSlug(body.nome),
-        email_responsavel: body.email_responsavel,
-        contato_principal: body.telefone ?? null,
-        status: "active",
-        cnpj: body.cnpj ?? null,
-        nome_responsavel: body.nome_responsavel ?? null,
-        telefone: body.telefone ?? null,
-        site: body.site ?? null,
-        cor_primaria: body.cor_primaria ?? null,
-        cor_secundaria: body.cor_secundaria ?? null,
-        ramo_atuacao: body.ramo_atuacao ?? null,
-        tempo_mercado: body.tempo_mercado ?? null,
-        descricao_negocio: body.descricao_negocio ?? null,
-        produtos_servicos: body.produtos_servicos ?? null,
-        tamanho_empresa: body.tamanho_empresa ?? null,
-        faturamento_mensal: body.faturamento_mensal ?? null,
-        profile_data: body.profile_data ?? {},
-      })
-      .select("id")
-      .single();
+    const { data: client, error: insertErr } = await insertClient(admin, {
+      nome: body.nome,
+      slug: gerarSlug(body.nome),
+      email_responsavel: body.email_responsavel,
+      contato_principal: body.telefone ?? null,
+      status: "active",
+      cnpj: body.cnpj ?? null,
+      nome_responsavel: body.nome_responsavel ?? null,
+      telefone: body.telefone ?? null,
+      site: body.site ?? null,
+      cor_primaria: body.cor_primaria ?? null,
+      cor_secundaria: body.cor_secundaria ?? null,
+      ramo_atuacao: body.ramo_atuacao ?? null,
+      tempo_mercado: body.tempo_mercado ?? null,
+      descricao_negocio: body.descricao_negocio ?? null,
+      produtos_servicos: body.produtos_servicos ?? null,
+      tamanho_empresa: body.tamanho_empresa ?? null,
+      faturamento_mensal: body.faturamento_mensal ?? null,
+      profile_data: body.profile_data ?? {},
+    });
 
     if (insertErr || !client) {
       throw new Error(insertErr?.message || "Falha ao criar portal_client");
@@ -147,15 +142,13 @@ export async function POST(request: Request) {
     const newUserId = authData.user.id;
 
     // 4. Vincula em user_roles + portal_client_users
-    const { error: roleErr } = await admin
-      .from("user_roles")
-      .upsert({ user_id: newUserId, role: "cliente" }, { onConflict: "user_id" });
+    const { error: roleErr } = await upsertUserRole(admin, { user_id: newUserId, role: "cliente" }, "user_id");
 
     if (roleErr) {
       throw new Error(`Falha ao criar user_role: ${roleErr.message}`);
     }
 
-    const { error: linkUserErr } = await admin.from("portal_client_users").insert({
+    const { error: linkUserErr } = await insertClientUser(admin, {
       user_id: newUserId,
       client_id: createdClientId,
       role: "cliente",
@@ -185,7 +178,7 @@ Ao acessar pela primeira vez, o sistema exigirá que você redefina esta senha p
     // sem deixar rastro (era a origem do "criei e sumiu"). Protegido para
     // que uma falha de logging não impeça o rollback.
     try {
-      await admin.from("system_logs").insert({
+      await insertSystemLog(admin, {
         level: "error",
         source: "api/admin/clientes/criar",
         message,
@@ -194,7 +187,7 @@ Ao acessar pela primeira vez, o sistema exigirá que você redefina esta senha p
     } catch { /* logging não deve quebrar o rollback */ }
     // Rollback: se o portal_client foi criado mas algo depois falhou, remove
     if (createdClientId) {
-      await admin.from("portal_clients").delete().eq("id", createdClientId);
+      await deleteClient(admin, createdClientId);
     }
     return NextResponse.json({ error: message }, { status: 500 });
   }

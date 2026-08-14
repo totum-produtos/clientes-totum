@@ -3,6 +3,9 @@ import { createClient } from '@supabase/supabase-js';
 import nodemailer from 'nodemailer';
 import fs from 'fs';
 import path from 'path';
+import { getClientUserRole } from '@/services/db/users';
+import { getClientNome } from '@/services/db/clients';
+import { invalidatePendingInvites, insertInvite } from '@/services/db/onboarding';
 
 type InviteInsert = {
   client_id: string;
@@ -76,12 +79,7 @@ export async function POST(req: NextRequest) {
       userId = user.id;
 
       // Check role
-      const { data: roleData } = await supabase
-        .from('portal_client_users')
-        .select('role')
-        .eq('user_id', user.id)
-        .in('role', ['master', 'admin'])
-        .single();
+      const { data: roleData } = await getClientUserRole(supabase, user.id);
 
       if (!roleData) {
         return NextResponse.json(
@@ -92,23 +90,14 @@ export async function POST(req: NextRequest) {
     }
 
     // Get client info
-    const { data: clientData } = await supabase
-      .from('portal_clients')
-      .select('nome')
-      .eq('id', client_id)
-      .single();
+    const { data: clientData } = await getClientNome(supabase, client_id);
 
     if (!clientData) {
       return NextResponse.json({ error: 'Cliente não encontrado' }, { status: 404 });
     }
 
     // Invalidate previous unused invites
-    await supabase
-      .from('client_invites')
-      .update({ used_at: new Date().toISOString() })
-      .eq('client_id', client_id)
-      .eq('email', email.toLowerCase().trim())
-      .is('used_at', null);
+    await invalidatePendingInvites(supabase, client_id, email.toLowerCase().trim(), new Date().toISOString());
 
     // Generate token
     const token = crypto.randomUUID();
@@ -124,7 +113,7 @@ export async function POST(req: NextRequest) {
       insertData.created_by = userId;
     }
 
-    const { error: insertError } = await supabase.from('client_invites').insert(insertData);
+    const { error: insertError } = await insertInvite(supabase, insertData);
 
     if (insertError) {
       return NextResponse.json({ error: insertError.message }, { status: 500 });

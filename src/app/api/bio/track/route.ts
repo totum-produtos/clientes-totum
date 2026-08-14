@@ -7,6 +7,7 @@ import { NextResponse } from "next/server";
 import { rateLimit } from "@/lib/rate-limit";
 import { logEvent } from "@/lib/log-event";
 import { createBioAdminClient, resolveActiveBioProfile } from "@/lib/bio/resolve-active-profile";
+import { getBioLinkExists, getBioProductActiveExists, insertBioClickEvent } from "@/services/db/bio";
 
 type TrackTargetType = "page_view" | "link" | "product";
 const VALID_TARGET_TYPES: TrackTargetType[] = ["page_view", "link", "product"];
@@ -52,27 +53,15 @@ export async function POST(request: Request) {
 
   if (targetType === "link") {
     if (!targetId) return noContent();
-    const { data: link } = await admin
-      .from("bio_links")
-      .select("id")
-      .eq("id", targetId)
-      .eq("bio_id", profile.id)
-      .eq("is_active", true)
-      .maybeSingle();
+    const { data: link } = await getBioLinkExists(admin, targetId, profile.id);
     if (!link) return noContent();
   } else if (targetType === "product") {
     if (!targetId) return noContent();
-    const { data: product } = await admin
-      .from("bio_products")
-      .select("id")
-      .eq("id", targetId)
-      .eq("bio_id", profile.id)
-      .eq("is_active", true)
-      .maybeSingle();
+    const { data: product } = await getBioProductActiveExists(admin, targetId, profile.id);
     if (!product) return noContent();
   }
 
-  const { error } = await admin.from("bio_click_events").insert({
+  const { error } = await insertBioClickEvent(admin, {
     client_id: client.id,
     target_type: targetType,
     target_id: targetType === "page_view" ? null : targetId,

@@ -10,6 +10,8 @@ import {
   Edit3, Save, X, Clock, CheckCircle, AlertCircle, ChevronDown, ChevronUp,
   ShoppingCart, Megaphone, TrendingUp, Sparkles, Link2, FolderUp, Lock
 } from "lucide-react";
+import { getClientById, updateClientFields } from "@/services/db/clients";
+import { getPendingProfileChangesCount, insertProfileChange } from "@/services/db/admin";
 import type { LucideIcon } from "lucide-react";
 import { LoadingSpinner, PageLoader } from "@/components/ui/LoadingSpinner";
 import { PageError } from "@/components/ui/PageError";
@@ -240,11 +242,8 @@ export default function MeuCadastroPage() {
   async function loadClientData() {
     try {
       const supabase = await createSPASassClient();
-      const { data, error } = await supabase.getSupabaseClient()
-        .from("portal_clients")
-        .select("*")
-        .eq("id", client!.id)
-        .single();
+      const sb = supabase.getSupabaseClient();
+      const { data, error } = await getClientById(sb, client!.id);
       
       if (error) throw error;
       
@@ -262,11 +261,8 @@ export default function MeuCadastroPage() {
   async function loadPendingCount() {
     try {
       const supabase = await createSPASassClient();
-      const { count, error } = await supabase.getSupabaseClient()
-        .from("client_profile_changes")
-        .select("*", { count: "exact", head: true })
-        .eq("portal_client_id", client!.id)
-        .eq("status", "pendente");
+      const sb = supabase.getSupabaseClient();
+      const { count, error } = await getPendingProfileChangesCount(sb, client!.id);
       
       if (error) throw error;
       setPendingCount(count || 0);
@@ -405,7 +401,7 @@ export default function MeuCadastroPage() {
       }
 
       if (pendingRows.length > 0) {
-        const { error: insErr } = await sb.from("client_profile_changes").insert(pendingRows);
+        const { error: insErr } = await insertProfileChange(sb, pendingRows);
         if (insErr) throw insErr;
         created += pendingRows.length;
       }
@@ -417,7 +413,7 @@ export default function MeuCadastroPage() {
         // quando o UPDATE casa 0 linhas (sem permissão / id inexistente), o
         // que antes mostrava "salvo" sem ter salvo nada. persistOrThrow lança.
         await persistOrThrow(
-          sb.from("portal_clients").update(payload).eq("id", client!.id).select("id"),
+          updateClientFields(sb, client!.id, payload),
           { db: sb, source: "meu-cadastro:handleSave", metadata: { clientId: client!.id, userId: user.id } },
         );
         setMessage(`✅ ${directSaves} alteração(ões) salva(s).`);

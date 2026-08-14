@@ -5,6 +5,11 @@ import { Bell, Clock, CheckCircle, XCircle, FileText } from "lucide-react";
 import { createSPASassClient } from "@/lib/supabase/client";
 import { useGlobal } from "@/lib/context/GlobalContext";
 import { useRouter } from "next/navigation";
+import {
+  getNotifications,
+  markNotificationRead,
+  markAllNotificationsRead,
+} from "@/services/db/notifications";
 
 interface Notification {
   id: string;
@@ -45,12 +50,8 @@ export default function NotificationBell() {
     if (!user) return;
     try {
       const supabase = await createSPASassClient();
-      const { data } = await supabase.getSupabaseClient()
-        .from("notifications")
-        .select("*")
-        .eq("user_id", user.id)
-        .order("created_at", { ascending: false })
-        .limit(20);
+      const sb = supabase.getSupabaseClient();
+      const { data } = await getNotifications(sb, user.id);
       setNotifications(data || []);
       setUnreadCount((data || []).filter(n => !n.read).length);
     } catch (err) {
@@ -61,14 +62,16 @@ export default function NotificationBell() {
   async function markAsRead(id: string) {
     if (!user) return;
     const supabase = await createSPASassClient();
-    await supabase.getSupabaseClient().from("notifications").update({ read: true }).eq("id", id).eq("user_id", user.id);
+    const sb = supabase.getSupabaseClient();
+    await markNotificationRead(sb, id, user.id);
     loadNotifications();
   }
 
   async function markAllAsRead() {
     if (!user) return;
     const supabase = await createSPASassClient();
-    await supabase.getSupabaseClient().from("notifications").update({ read: true }).eq("read", false).eq("user_id", user.id);
+    const sb = supabase.getSupabaseClient();
+    await markAllNotificationsRead(sb, user.id);
     loadNotifications();
   }
 

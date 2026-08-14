@@ -8,6 +8,7 @@ import { createSPASassClient } from "@/lib/supabase/client";
 import { persistOrThrow } from "@/lib/persist";
 import { usePlanejamento } from "@/hooks/usePlanejamentos";
 import { PageHeader } from "@/components/ui/PageHeader";
+import { updatePlanContent, updatePlanStatus } from "@/services/db/plans";
 import { LoadingSpinner } from "@/components/ui/LoadingSpinner";
 import { PageError } from "@/components/ui/PageError";
 import { PlanContentRenderer } from "@/components/planejamentos/PlanContentRenderer";
@@ -75,11 +76,7 @@ export default function EditarPlanejamentoPage() {
       const supabase = await createSPASassClient();
       const sb = supabase.getSupabaseClient();
       await persistOrThrow(
-        sb
-          .from("portal_client_plans")
-          .update({ titulo: titulo.trim(), periodo_label: periodoLabel.trim() || null, content: parsed as Json })
-          .eq("id", plan.id)
-          .select("id"),
+        updatePlanContent(sb, plan.id, { titulo: titulo.trim(), periodo_label: periodoLabel.trim() || null, content: parsed as Json }),
         { db: sb, source: "admin/planejamentos/editar:salvar", metadata: { planId: plan.id } },
       );
       await reload();
@@ -99,14 +96,7 @@ export default function EditarPlanejamentoPage() {
       const supabase = await createSPASassClient();
       const sb = supabase.getSupabaseClient();
       await persistOrThrow(
-        sb
-          .from("portal_client_plans")
-          .update({
-            status: newStatus,
-            published_at: newStatus === "publicado" ? new Date().toISOString() : plan.published_at,
-          })
-          .eq("id", plan.id)
-          .select("id"),
+        updatePlanStatus(sb, plan.id, newStatus, newStatus === "publicado" ? new Date().toISOString() : plan.published_at),
         { db: sb, source: "admin/planejamentos/editar:status", metadata: { planId: plan.id, newStatus } },
       );
       await reload();

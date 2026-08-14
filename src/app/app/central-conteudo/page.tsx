@@ -7,6 +7,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { LoadingSpinner } from "@/components/ui/LoadingSpinner";
 import { EmptyState } from "@/components/ui/EmptyState";
+import { getClientsActiveForContent } from "@/services/db/clients";
 
 type PortalClient = {
     id: string;
@@ -34,11 +35,8 @@ export default function CentralConteudoPage() {
 
     async function fetchClients() {
         const supabase = await createSPASassClient();
-        const { data, error } = await supabase.getSupabaseClient()
-            .from('portal_clients')
-            .select('id, nome, slug, status, cor_primaria, cor_secundaria')
-            .eq('status', 'active')
-            .order('nome', { ascending: true });
+        const sb = supabase.getSupabaseClient();
+        const { data, error } = await getClientsActiveForContent(sb);
 
         if (!error && data) {
             setClients(data);

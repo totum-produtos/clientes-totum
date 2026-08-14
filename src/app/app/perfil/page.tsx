@@ -11,6 +11,8 @@ import {
   ChevronDown, ChevronUp, Eye, EyeOff, AlertCircle
 } from "lucide-react";
 import { LoadingSpinner } from "@/components/ui/LoadingSpinner";
+import { upsertProfile } from "@/services/db/users";
+import { uploadAvatar, getAvatarPublicUrl } from "@/services/db/files";
 
 const IDIOMAS = [
   { value: "pt-BR", label: "Português (Brasil)" },
@@ -79,17 +81,15 @@ export default function PerfilPage() {
       const supabase = await createSPASassClient();
       const sb = supabase.getSupabaseClient();
       await persistOrThrow(
-        sb.from("profiles")
-          .upsert({
-            id: user.id,
-            display_name: form.display_name,
-            bio: form.bio,
-            telefone: form.telefone,
-            cargo: form.cargo,
-            timezone: form.timezone,
-            idioma: form.idioma,
-          }, { onConflict: "id" })
-          .select("id"),
+        upsertProfile(sb, {
+          id: user.id,
+          display_name: form.display_name,
+          bio: form.bio,
+          telefone: form.telefone,
+          cargo: form.cargo,
+          timezone: form.timezone,
+          idioma: form.idioma,
+        }),
         { db: sb, source: "perfil:handleSave", metadata: { userId: user.id } },
       );
       setMessage("Perfil atualizado com sucesso!");
@@ -111,16 +111,13 @@ export default function PerfilPage() {
       const sb = supabase.getSupabaseClient();
       const filePath = `${user.id}/avatar-${Date.now()}.${file.name.split('.').pop()}`;
 
-      const { error: uploadError } = await sb.storage.from("avatars").upload(filePath, file, {
-        cacheControl: "3600",
-        upsert: true,
-      });
+      const { error: uploadError } = await uploadAvatar(sb, filePath, file, { cacheControl: "3600", upsert: true });
       if (uploadError) throw uploadError;
 
-      const { data: { publicUrl } } = sb.storage.from("avatars").getPublicUrl(filePath);
+      const { data: { publicUrl } } = getAvatarPublicUrl(sb, filePath);
 
       await persistOrThrow(
-        sb.from("profiles").upsert({ id: user.id, avatar_url: publicUrl }, { onConflict: "id" }).select("id"),
+        upsertProfile(sb, { id: user.id, avatar_url: publicUrl }),
         { db: sb, source: "perfil:handleAvatarUpload", metadata: { userId: user.id } },
       );
 
