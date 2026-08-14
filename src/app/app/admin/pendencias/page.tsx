@@ -5,6 +5,7 @@ import { createSPASassClient } from "@/lib/supabase/client";
 import { AlertCircle, CloudOff, FileWarning, Search } from "lucide-react";
 import Link from "next/link";
 import { LoadingSpinner } from "@/components/ui/LoadingSpinner";
+import { getClientsActiveForPendencias } from "@/services/db/clients";
 
 type ClientePendencia = {
     id: string;
@@ -23,11 +24,8 @@ export default function PendenciasPage() {
         setLoading(true);
         setError(null);
         const supabase = await createSPASassClient();
-        const { data, error: fetchError } = await supabase.getSupabaseClient()
-            .from("portal_clients")
-            .select("id, nome, slug, drive_folder_cliente_id, profile_data")
-            .eq("status", "active")
-            .order("nome");
+        const sb = supabase.getSupabaseClient();
+        const { data, error: fetchError } = await getClientsActiveForPendencias(sb);
 
         if (fetchError) {
             setError("Não foi possível carregar as pendências. Tente novamente.");

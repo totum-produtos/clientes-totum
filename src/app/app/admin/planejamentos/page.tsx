@@ -8,6 +8,8 @@ import { createSPASassClient } from "@/lib/supabase/client";
 import { persistOrThrow } from "@/lib/persist";
 import { usePlanejamentos } from "@/hooks/usePlanejamentos";
 import { PageHeader } from "@/components/ui/PageHeader";
+import { getAllClientsIdNome } from "@/services/db/clients";
+import { insertPlan } from "@/services/db/plans";
 import { LoadingSpinner } from "@/components/ui/LoadingSpinner";
 import { EmptyState } from "@/components/ui/EmptyState";
 
@@ -37,11 +39,8 @@ export default function AdminPlanejamentosPage() {
     setClientesLoading(true);
     try {
       const supabase = await createSPASassClient();
-      const { data } = await supabase
-        .getSupabaseClient()
-        .from("portal_clients")
-        .select("id, nome")
-        .order("nome");
+      const sb = supabase.getSupabaseClient();
+      const { data } = await getAllClientsIdNome(sb);
       setClientes(data || []);
     } catch (err) {
       console.error(err);
@@ -62,10 +61,7 @@ export default function AdminPlanejamentosPage() {
       const supabase = await createSPASassClient();
       const sb = supabase.getSupabaseClient();
       const [row] = await persistOrThrow(
-        sb
-          .from("portal_client_plans")
-          .insert({ client_id: selectedClientId, titulo: novoTitulo.trim(), status: "rascunho" })
-          .select("id"),
+        insertPlan(sb, { client_id: selectedClientId, titulo: novoTitulo.trim(), status: "rascunho" }),
         { db: sb, source: "admin/planejamentos:criar", metadata: { clientId: selectedClientId } },
       );
       setNovoTitulo("");

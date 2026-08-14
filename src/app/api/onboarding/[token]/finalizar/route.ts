@@ -8,6 +8,9 @@ import { NextResponse } from "next/server";
 import { createClient } from "@supabase/supabase-js";
 import { randomBytes } from "crypto";
 import { rateLimit } from "@/lib/rate-limit";
+import { upsertUserRole } from "@/services/db/users";
+import { insertClient, insertClientUser, deleteClient } from "@/services/db/clients";
+import { getOnboardingInviteForFinalize, updateOnboardingInviteUsed } from "@/services/db/onboarding";
 
 const SUPABASE_URL = process.env.NEXT_PUBLIC_SUPABASE_URL || "";
 const SERVICE_ROLE_KEY = process.env.PRIVATE_SUPABASE_SERVICE_KEY || "";
@@ -148,11 +151,7 @@ export async function POST(
   });
 
   // 1. valida convite
-  const { data: invite, error: lookupErr } = await admin
-    .from("client_onboarding_invites")
-    .select("id, email, draft_data, used_at, expires_at")
-    .eq("token", token)
-    .maybeSingle();
+  const { data: invite, error: lookupErr } = await getOnboardingInviteForFinalize(admin, token);
 
   if (lookupErr) {
     return NextResponse.json({ error: lookupErr.message }, { status: 500 });
@@ -202,30 +201,26 @@ export async function POST(
 
   let createdClientId: string | null = null;
   try {
-    const { data: client, error: insertErr } = await admin
-      .from("portal_clients")
-      .insert({
-        nome,
-        slug: gerarSlug(nome),
-        email_responsavel: email,
-        contato_principal: (draft.telefone as string) ?? null,
-        status: "active",
-        cnpj: (draft.cnpj as string) ?? null,
-        nome_responsavel: (draft.nome_responsavel as string) ?? null,
-        telefone: (draft.telefone as string) ?? null,
-        site: (draft.site as string) ?? null,
-        cor_primaria: (draft.cor_primaria as string) ?? null,
-        cor_secundaria: (draft.cor_secundaria as string) ?? null,
-        ramo_atuacao: (draft.ramo_atuacao as string) ?? null,
-        tempo_mercado: (draft.tempo_mercado as string) ?? null,
-        descricao_negocio: (draft.descricao_negocio as string) ?? null,
-        produtos_servicos: (draft.produtos_servicos as string) ?? null,
-        tamanho_empresa: (draft.tamanho_empresa as string) ?? null,
-        faturamento_mensal: (draft.faturamento_mensal as string) ?? null,
-        profile_data: profileData,
-      })
-      .select("id")
-      .single();
+    const { data: client, error: insertErr } = await insertClient(admin, {
+      nome,
+      slug: gerarSlug(nome),
+      email_responsavel: email,
+      contato_principal: (draft.telefone as string) ?? null,
+      status: "active",
+      cnpj: (draft.cnpj as string) ?? null,
+      nome_responsavel: (draft.nome_responsavel as string) ?? null,
+      telefone: (draft.telefone as string) ?? null,
+      site: (draft.site as string) ?? null,
+      cor_primaria: (draft.cor_primaria as string) ?? null,
+      cor_secundaria: (draft.cor_secundaria as string) ?? null,
+      ramo_atuacao: (draft.ramo_atuacao as string) ?? null,
+      tempo_mercado: (draft.tempo_mercado as string) ?? null,
+      descricao_negocio: (draft.descricao_negocio as string) ?? null,
+      produtos_servicos: (draft.produtos_servicos as string) ?? null,
+      tamanho_empresa: (draft.tamanho_empresa as string) ?? null,
+      faturamento_mensal: (draft.faturamento_mensal as string) ?? null,
+      profile_data: profileData,
+    });
 
     if (insertErr || !client) {
       throw new Error(insertErr?.message || "Falha ao criar portal_client");
@@ -249,25 +244,18 @@ export async function POST(
     const newUserId = authData.user.id;
 
     // 5. vincula roles
-    const { error: roleErr } = await admin
-      .from("user_roles")
-      .upsert({ user_id: newUserId, role: "cliente" }, { onConflict: "user_id" });
+    const { error: roleErr } = await upsertUserRole(admin, { user_id: newUserId, role: "cliente" }, "user_id");
     if (roleErr) throw new Error(`Falha ao criar user_role: ${roleErr.message}`);
 
-    const { error: linkErr } = await admin
-      .from("portal_client_users")
-      .insert({ user_id: newUserId, client_id: createdClientId, role: "cliente" });
+    const { error: linkErr } = await insertClientUser(admin, { user_id: newUserId, client_id: createdClientId, role: "cliente" });
     if (linkErr) throw new Error(`Falha ao vincular usuário: ${linkErr.message}`);
 
     // 6. marca convite como usado
-    await admin
-      .from("client_onboarding_invites")
-      .update({
-        used_at: new Date().toISOString(),
-        created_portal_client_id: createdClientId,
-        draft_data: draft,
-      })
-      .eq("id", invite.id);
+    await updateOnboardingInviteUsed(admin, invite.id, {
+      used_at: new Date().toISOString(),
+      created_portal_client_id: createdClientId,
+      draft_data: draft,
+    });
 
     // 7. envia email com credenciais (não derruba a request se falhar)
     const mail = await enviarCredenciais({ nome, email, senha });
@@ -283,7 +271,7 @@ export async function POST(
     });
   } catch (err) {
     if (createdClientId) {
-      await admin.from("portal_clients").delete().eq("id", createdClientId);
+      await deleteClient(admin, createdClientId);
     }
     const message = err instanceof Error ? err.message : "Erro desconhecido";
     return NextResponse.json({ error: message }, { status: 500 });

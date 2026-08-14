@@ -4,6 +4,7 @@ import React, { useEffect, useState } from "react";
 import { useGlobal } from "@/lib/context/GlobalContext";
 import { createSPASassClient } from "@/lib/supabase/client";
 import { ChevronDown, Users } from "lucide-react";
+import { getClientsActive } from "@/services/db/clients";
 
 export default function SpoofingSelector() {
     const { user, client, setSpoofedClient } = useGlobal();
@@ -16,11 +17,8 @@ export default function SpoofingSelector() {
         if (!isMaster || !isOpen) return;
         async function fetchClientes() {
             const supabase = await createSPASassClient();
-            const { data } = await supabase.getSupabaseClient()
-                .from("portal_clients")
-                .select("id, nome")
-                .eq("status", "active")
-                .order("nome");
+            const sb = supabase.getSupabaseClient();
+            const { data } = await getClientsActive(sb);
             if (data) {
                 setClientes(data);
             }

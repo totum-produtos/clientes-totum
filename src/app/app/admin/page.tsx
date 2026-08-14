@@ -6,6 +6,18 @@ import { persistOrThrow } from '@/lib/persist';
 import { Plus, Link2, Users, Building2, Clock, CheckCircle, XCircle, Mail, Loader2, Edit3, Power, PowerOff, Send, Copy, Check } from 'lucide-react';
 import { LoadingSpinner } from '@/components/ui/LoadingSpinner';
 import Link from 'next/link';
+import {
+  getClients,
+  getClientUsers,
+  insertClient,
+  insertClientUser,
+  updateClientStatus,
+  getClientProfileData,
+  updateClientProfileData,
+  updateClientSingleField,
+} from "@/services/db/clients";
+import { getPendingProfileChanges, approveProfileChange } from "@/services/db/admin";
+import { insertNotification } from "@/services/db/notifications";
 import type { Json } from '@/lib/types';
 import type { SupabaseClient } from '@supabase/supabase-js';
 import type { Database } from '@/lib/types';
@@ -65,29 +77,26 @@ function errorMessage(error: unknown) {
 async function applyProfileChange(client: SupabaseClient<Database>, change: ProfileChange, source: string) {
     if (change.field_path.startsWith('profile_data.')) {
         const field = change.field_path.replace('profile_data.', '');
-        const { data: pc } = await client.from('portal_clients').select('profile_data').eq('id', change.portal_client_id).single();
+        const { data: pc } = await getClientProfileData(client, change.portal_client_id);
         const current = (pc?.profile_data || {}) as JsonObject;
         const newVal = parseProfileValue(change.new_value);
         await persistOrThrow(
-            client.from('portal_clients').update({ profile_data: { ...current, [field]: newVal } }).eq('id', change.portal_client_id).select('id'),
+            updateClientProfileData(client, change.portal_client_id, { ...current, [field]: newVal }),
             { db: client, source, metadata: { changeId: change.id, clientId: change.portal_client_id, field: change.field_path } },
         );
     } else {
         await persistOrThrow(
-            client.from('portal_clients').update({ [change.field_path]: change.new_value }).eq('id', change.portal_client_id).select('id'),
+            updateClientSingleField(client, change.portal_client_id, change.field_path, change.new_value),
             { db: client, source, metadata: { changeId: change.id, clientId: change.portal_client_id, field: change.field_path } },
         );
     }
 
     await persistOrThrow(
-        client.from('client_profile_changes').update({
-            status: 'aprovado',
-            reviewed_at: new Date().toISOString()
-        }).eq('id', change.id).select('id'),
+        approveProfileChange(client, change.id, 'aprovado'),
         { db: client, source, metadata: { changeId: change.id } },
     );
 
-    await client.from('notifications').insert({
+    await insertNotification(client, {
         user_id: change.requested_by,
         type: 'alteracao_aprovada',
         title: 'Alteração aprovada',
@@ -166,13 +175,13 @@ export default function AdminPage() {
         const client = supabase.getSupabaseClient();
 
         const [clientsRes, usersRes, authUsersRes, changesRes] = await Promise.all([
-            client.from('portal_clients').select('*').order('created_at', { ascending: false }),
-            client.from('portal_client_users').select('*'),
+            getClients(client).order('created_at', { ascending: false }),
+            getClientUsers(client),
             // Buscar auth users via API route segura (service role server-side)
             fetch('/api/admin/usuarios')
                 .then(res => (res.ok ? res.json() : { users: [] }))
                 .catch(() => ({ users: [] })), // silencia se não autorizado
-            client.from('client_profile_changes').select('*').eq('status', 'pendente').order('created_at', { ascending: false }),
+            getPendingProfileChanges(client).order('created_at', { ascending: false }),
         ]);
 
         setClients((clientsRes.data || []) as PortalClient[]);
@@ -191,7 +200,8 @@ export default function AdminPage() {
         e.preventDefault();
         setMessage('');
         const supabase = await createSPASassClient();
-        const { error } = await supabase.getSupabaseClient().from('portal_clients').insert({
+        const sb = supabase.getSupabaseClient();
+        const { error } = await insertClient(sb, {
             nome: newClient.nome,
             slug: newClient.slug.toLowerCase().replace(/\s+/g, '-'),
             email_responsavel: newClient.email_responsavel,
@@ -211,7 +221,8 @@ export default function AdminPage() {
         e.preventDefault();
         setMessage('');
         const supabase = await createSPASassClient();
-        const { error } = await supabase.getSupabaseClient().from('portal_client_users').insert({
+        const sb2 = supabase.getSupabaseClient();
+        const { error } = await insertClientUser(sb2, {
             user_id: selectedUser,
             client_id: selectedClient,
             role: 'cliente',
@@ -232,7 +243,7 @@ export default function AdminPage() {
             const supabase = await createSPASassClient();
             const sb = supabase.getSupabaseClient();
             await persistOrThrow(
-                sb.from('portal_clients').update({ status: novoStatus }).eq('id', client.id).select('id'),
+                updateClientStatus(sb, client.id, novoStatus),
                 { db: sb, source: 'admin:handleToggleStatus', metadata: { clientId: client.id, novoStatus } },
             );
             setMessage(`Cliente ${novoStatus === 'active' ? 'ativado' : 'inativado'} com sucesso!`);
@@ -327,14 +338,11 @@ export default function AdminPage() {
 
         try {
             await persistOrThrow(
-                client.from('client_profile_changes').update({
-                    status: 'rejeitado',
-                    reviewed_at: new Date().toISOString()
-                }).eq('id', change.id).select('id'),
+                approveProfileChange(client, change.id, 'rejeitado'),
                 { db: client, source: 'admin:handleReject', metadata: { changeId: change.id } },
             );
 
-            await client.from('notifications').insert({
+            await insertNotification(client, {
                 user_id: change.requested_by,
                 type: 'alteracao_rejeitada',
                 title: 'Alteração rejeitada',

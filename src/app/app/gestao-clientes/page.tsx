@@ -23,6 +23,7 @@ import {
 } from 'lucide-react';
 import { LoadingSpinner } from '@/components/ui/LoadingSpinner';
 import { useToast } from '@/components/ui/ToastProvider';
+import { getClientsWithStats, updateClientStatus } from "@/services/db/clients";
 
 type Cliente = {
   id: string;
@@ -70,8 +71,7 @@ export default function GestaoClientesPage() {
     const sb = supabase.getSupabaseClient();
 
     // Uma única query via RPC em vez de N×4 queries (N+1 fix)
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const { data, error: fetchError } = await (sb as any).rpc('get_clientes_com_stats');
+    const { data, error: fetchError } = await getClientsWithStats(sb);
 
     if (fetchError || !data) {
       setError('Não foi possível carregar os clientes. Tente recarregar a página.');
@@ -133,7 +133,7 @@ export default function GestaoClientesPage() {
       const supabase = await createSPASassClient();
       const sb = supabase.getSupabaseClient();
       await persistOrThrow(
-        sb.from('portal_clients').update({ status: novoStatus }).eq('id', cliente.id).select('id'),
+        updateClientStatus(sb, cliente.id, novoStatus),
         { db: sb, source: 'gestao-clientes:handleToggleStatus', metadata: { clientId: cliente.id, novoStatus } },
       );
       showSuccess(`Cliente ${novoStatus === 'active' ? 'ativado' : 'inativado'} com sucesso!`);

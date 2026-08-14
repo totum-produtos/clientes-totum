@@ -4,6 +4,7 @@
 import { useCallback, useEffect, useState } from "react";
 import { createSPASassClient } from "@/lib/supabase/client";
 import { Tables } from "@/lib/types";
+import { getPlansByClient, getPlanById } from "@/services/db/plans";
 
 export type PortalClientPlan = Tables<"portal_client_plans">;
 
@@ -28,18 +29,8 @@ export function usePlanejamentos({ clientId, includeAllStatuses = false }: UsePl
     setError(null);
     try {
       const supabase = await createSPASassClient();
-      let query = supabase
-        .getSupabaseClient()
-        .from("portal_client_plans")
-        .select("*")
-        .eq("client_id", clientId)
-        .order("created_at", { ascending: false });
-
-      if (!includeAllStatuses) {
-        query = query.eq("status", "publicado");
-      }
-
-      const { data, error: err } = await query;
+      const sb = supabase.getSupabaseClient();
+      const { data, error: err } = await getPlansByClient(sb, clientId, includeAllStatuses);
       if (err) throw err;
       setPlans(data || []);
     } catch (err) {
@@ -72,12 +63,8 @@ export function usePlanejamento(id: string | null) {
     setError(null);
     try {
       const supabase = await createSPASassClient();
-      const { data, error: err } = await supabase
-        .getSupabaseClient()
-        .from("portal_client_plans")
-        .select("*")
-        .eq("id", id)
-        .maybeSingle();
+      const sb = supabase.getSupabaseClient();
+      const { data, error: err } = await getPlanById(sb, id);
       if (err) throw err;
       setPlan(data);
     } catch (err) {

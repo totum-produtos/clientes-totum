@@ -8,6 +8,12 @@ import {
 } from "lucide-react";
 import { LoadingSpinner } from "@/components/ui/LoadingSpinner";
 import { EmptyState } from "@/components/ui/EmptyState";
+import {
+  getNotificationsAll,
+  markNotificationRead,
+  markAllNotificationsRead,
+  deleteNotification as deleteNotificationDb,
+} from "@/services/db/notifications";
 import { PageHeader } from "@/components/ui/PageHeader";
 
 interface Notification {
@@ -38,11 +44,8 @@ export default function NotificacoesPage() {
     setLoading(true);
     try {
       const supabase = await createSPASassClient();
-      const { data } = await supabase.getSupabaseClient()
-        .from("notifications")
-        .select("*")
-        .eq("user_id", user.id)
-        .order("created_at", { ascending: false });
+      const sb = supabase.getSupabaseClient();
+      const { data } = await getNotificationsAll(sb, user.id);
       setNotifications(data || []);
     } catch (err) {
       console.error(err);
@@ -54,21 +57,24 @@ export default function NotificacoesPage() {
   async function markAsRead(id: string) {
     if (!user) return;
     const supabase = await createSPASassClient();
-    await supabase.getSupabaseClient().from("notifications").update({ read: true }).eq("id", id).eq("user_id", user.id);
+    const sb = supabase.getSupabaseClient();
+    await markNotificationRead(sb, id, user.id);
     loadNotifications();
   }
 
   async function markAllAsRead() {
     if (!user) return;
     const supabase = await createSPASassClient();
-    await supabase.getSupabaseClient().from("notifications").update({ read: true }).eq("read", false).eq("user_id", user.id);
+    const sb = supabase.getSupabaseClient();
+    await markAllNotificationsRead(sb, user.id);
     loadNotifications();
   }
 
   async function deleteNotification(id: string) {
     if (!user) return;
     const supabase = await createSPASassClient();
-    await supabase.getSupabaseClient().from("notifications").delete().eq("id", id).eq("user_id", user.id);
+    const sb = supabase.getSupabaseClient();
+    await deleteNotificationDb(sb, id, user.id);
     loadNotifications();
   }
 

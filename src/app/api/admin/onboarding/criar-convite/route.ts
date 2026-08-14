@@ -8,6 +8,8 @@ import { NextResponse } from "next/server";
 import { createClient } from "@supabase/supabase-js";
 import { createSSRClient } from "@/lib/supabase/server";
 import { randomUUID } from "crypto";
+import { getUserRole } from "@/services/db/users";
+import { invalidatePendingOnboardingInvites, insertOnboardingInvite } from "@/services/db/onboarding";
 
 const SUPABASE_URL = process.env.NEXT_PUBLIC_SUPABASE_URL || "";
 const SERVICE_ROLE_KEY = process.env.PRIVATE_SUPABASE_SERVICE_KEY || "";
@@ -35,11 +37,7 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: "Não autenticado" }, { status: 401 });
     }
 
-    const { data: callerRole } = await admin
-      .from("user_roles")
-      .select("role")
-      .eq("user_id", userData.user.id)
-      .maybeSingle();
+    const { data: callerRole } = await getUserRole(admin, userData.user.id);
     if (callerRole?.role !== "master" && callerRole?.role !== "admin") {
       return NextResponse.json(
         { error: "Apenas master/admin podem gerar convites" },
@@ -48,26 +46,18 @@ export async function POST(request: Request) {
     }
 
     // Invalida convites pendentes anteriores para esse email.
-    await admin
-      .from("client_onboarding_invites")
-      .update({ used_at: new Date().toISOString() })
-      .eq("email", email)
-      .is("used_at", null);
+    await invalidatePendingOnboardingInvites(admin, email, new Date().toISOString());
 
     const token = randomUUID();
     const expiresAt = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString();
 
-    const { data: invite, error: insertErr } = await admin
-      .from("client_onboarding_invites")
-      .insert({
-        token,
-        email,
-        nome_pre: body.nome_pre?.trim() || null,
-        expires_at: expiresAt,
-        created_by: userData.user.id,
-      })
-      .select("id, token, expires_at")
-      .single();
+    const { data: invite, error: insertErr } = await insertOnboardingInvite(admin, {
+      token,
+      email,
+      nome_pre: body.nome_pre?.trim() || null,
+      expires_at: expiresAt,
+      created_by: userData.user.id,
+    });
 
     if (insertErr || !invite) {
       throw new Error(insertErr?.message || "Falha ao criar convite");

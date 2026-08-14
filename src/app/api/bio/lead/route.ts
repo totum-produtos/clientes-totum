@@ -6,6 +6,9 @@ import { NextResponse } from "next/server";
 import { rateLimit } from "@/lib/rate-limit";
 import { logEvent } from "@/lib/log-event";
 import { createBioAdminClient, resolveActiveBioProfile } from "@/lib/bio/resolve-active-profile";
+import { getBioProductExists, insertBioLead, insertBioClickEvent } from "@/services/db/bio";
+import { getClientUsersByClient } from "@/services/db/clients";
+import { insertNotifications } from "@/services/db/notifications";
 
 interface LeadBody {
   slug?: string;
@@ -64,18 +67,13 @@ export async function POST(request: Request) {
 
   let validProductId: string | null = null;
   if (sourceProductId) {
-    const { data: product } = await admin
-      .from("bio_products")
-      .select("id")
-      .eq("id", sourceProductId)
-      .eq("bio_id", profile.id)
-      .maybeSingle();
+    const { data: product } = await getBioProductExists(admin, sourceProductId, profile.id);
     if (product) validProductId = product.id;
   }
 
   const referrer = request.headers.get("referer") || null;
 
-  const { error: leadError } = await admin.from("bio_leads").insert({
+  const { error: leadError } = await insertBioLead(admin, {
     client_id: client.id,
     nome,
     whatsapp: whatsapp || null,
@@ -88,7 +86,7 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: "Não foi possível enviar. Tente novamente." }, { status: 500 });
   }
 
-  const { error: eventError } = await admin.from("bio_click_events").insert({
+  const { error: eventError } = await insertBioClickEvent(admin, {
     client_id: client.id,
     target_type: "lead_submit",
     target_id: validProductId,
@@ -100,13 +98,11 @@ export async function POST(request: Request) {
     });
   }
 
-  const { data: clientUsers } = await admin
-    .from("portal_client_users")
-    .select("user_id")
-    .eq("client_id", client.id);
+  const { data: clientUsers } = await getClientUsersByClient(admin, client.id);
 
   if (clientUsers && clientUsers.length > 0) {
-    await admin.from("notifications").insert(
+    await insertNotifications(
+      admin,
       clientUsers.map((cu) => ({
         user_id: cu.user_id,
         type: "geral" as const,

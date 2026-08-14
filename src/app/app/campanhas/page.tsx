@@ -9,6 +9,9 @@ import { TrendingUp, Eye, Heart, BarChart3, Megaphone, DollarSign, Target, Mouse
 import { useToast } from "@/components/ui/ToastProvider";
 import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianGrid } from 'recharts';
 import { LoadingSpinner, PageLoader } from '@/components/ui/LoadingSpinner';
+import { getPostsForCampaigns } from "@/services/db/calendar";
+import { getAdCampaigns } from "@/services/db/content";
+import { updateClientMetaAds, updateClientGoogleAds } from "@/services/db/clients";
 
 type Post = {
     id: number;
@@ -63,19 +66,11 @@ export default function CampanhasPage() {
                 const sb = supabase.getSupabaseClient();
 
                 // Posts orgânicos
-                const { data: postsData } = await sb
-                    .from('wanda_posts')
-                    .select('id, subject, tipo, views, likes, engagement_rate, conversion_rate, published_at')
-                    .eq('portal_client_id', client.id)
-                    .order('published_at', { ascending: false });
+                const { data: postsData } = await getPostsForCampaigns(sb, client.id);
                 setPosts(postsData || []);
 
                 // Campanhas pagas
-                const { data: campaignsData } = await sb
-                    .from('ad_campaigns')
-                    .select('*')
-                    .eq('portal_client_id', client.id)
-                    .order('spend', { ascending: false });
+                const { data: campaignsData } = await getAdCampaigns(sb, client.id);
                 setCampaigns(campaignsData || []);
             } catch (error) {
                 console.error("Critical error fetching campaigns data:", error);
@@ -93,13 +88,7 @@ export default function CampanhasPage() {
             const supabase = await createSPASassClient();
             const sb = supabase.getSupabaseClient();
             await persistOrThrow(
-                sb.from('portal_clients')
-                    .update({
-                        meta_ad_account_id: metaAccountId,
-                        meta_access_token: metaToken,
-                    })
-                    .eq('id', client.id)
-                    .select('id'),
+                updateClientMetaAds(sb, client.id, metaAccountId, metaToken),
                 { db: sb, source: 'campanhas:connectMeta', metadata: { clientId: client.id } },
             );
             setMetaAccountId('');
@@ -119,13 +108,7 @@ export default function CampanhasPage() {
             const supabase = await createSPASassClient();
             const sb = supabase.getSupabaseClient();
             await persistOrThrow(
-                sb.from('portal_clients')
-                    .update({
-                        google_customer_id: googleCustomerId,
-                        google_developer_token: googleDevToken,
-                    })
-                    .eq('id', client.id)
-                    .select('id'),
+                updateClientGoogleAds(sb, client.id, googleCustomerId, googleDevToken),
                 { db: sb, source: 'campanhas:connectGoogle', metadata: { clientId: client.id } },
             );
             setGoogleCustomerId('');

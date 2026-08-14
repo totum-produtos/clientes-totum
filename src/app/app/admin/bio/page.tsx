@@ -15,6 +15,21 @@ import {
 import { createSPASassClient } from "@/lib/supabase/client";
 import { persistOrThrow } from "@/lib/persist";
 import { PageHeader } from "@/components/ui/PageHeader";
+import { getAllClientsIdNomeSlug } from "@/services/db/clients";
+import {
+  getBioProfileFull,
+  getBioLinks,
+  getBioProducts,
+  insertBioProfile,
+  updateBioProfile,
+  insertBioLink,
+  updateBioLink,
+  deleteBioLink,
+  insertBioProduct,
+  updateBioProduct,
+  deleteBioProduct,
+} from "@/services/db/bio";
+import { uploadBioAsset as uploadBioAssetService, getBioAssetPublicUrl } from "@/services/db/files";
 import { LoadingSpinner } from "@/components/ui/LoadingSpinner";
 import { EmptyState } from "@/components/ui/EmptyState";
 import type { Tables } from "@/lib/types";
@@ -30,12 +45,9 @@ async function uploadBioAsset(clientId: string, file: File, prefix: string): Pro
   const supabase = await createSPASassClient();
   const sb = supabase.getSupabaseClient();
   const path = `${clientId}/${prefix}-${Date.now()}.${file.name.split(".").pop()}`;
-  const { error: uploadError } = await sb.storage.from("bio_assets").upload(path, file, {
-    cacheControl: "3600",
-    upsert: true,
-  });
+  const { error: uploadError } = await uploadBioAssetService(sb, path, file, { cacheControl: "3600", upsert: true });
   if (uploadError) throw uploadError;
-  const { data } = sb.storage.from("bio_assets").getPublicUrl(path);
+  const { data } = getBioAssetPublicUrl(sb, path);
   return data.publicUrl;
 }
 
@@ -78,7 +90,8 @@ export default function AdminBioPage() {
     setClientesLoading(true);
     try {
       const supabase = await createSPASassClient();
-      const { data } = await supabase.getSupabaseClient().from("portal_clients").select("id, nome, slug").order("nome");
+      const sb = supabase.getSupabaseClient();
+      const { data } = await getAllClientsIdNomeSlug(sb);
       setClientes(data || []);
     } catch (err) {
       console.error(err);
@@ -93,13 +106,13 @@ export default function AdminBioPage() {
     try {
       const supabase = await createSPASassClient();
       const sb = supabase.getSupabaseClient();
-      const { data: profileData } = await sb.from("bio_profiles").select("*").eq("client_id", clientId).maybeSingle();
+      const { data: profileData } = await getBioProfileFull(sb, clientId);
       setProfile(profileData);
 
       if (profileData) {
         const [{ data: linksData }, { data: productsData }] = await Promise.all([
-          sb.from("bio_links").select("*").eq("bio_id", profileData.id).order("ordem"),
-          sb.from("bio_products").select("*").eq("bio_id", profileData.id).order("ordem"),
+          getBioLinks(sb, profileData.id),
+          getBioProducts(sb, profileData.id),
         ]);
         setLinks(linksData || []);
         setProducts(productsData || []);
@@ -136,10 +149,7 @@ export default function AdminBioPage() {
       const supabase = await createSPASassClient();
       const sb = supabase.getSupabaseClient();
       await persistOrThrow(
-        sb
-          .from("bio_profiles")
-          .insert({ client_id: selectedClient.id, display_name: selectedClient.nome })
-          .select("id"),
+        insertBioProfile(sb, { client_id: selectedClient.id, display_name: selectedClient.nome }),
         { db: sb, source: "admin/bio:criar-perfil", metadata: { clientId: selectedClient.id } },
       );
       await loadBioData(selectedClient.id);
@@ -159,7 +169,7 @@ export default function AdminBioPage() {
       const supabase = await createSPASassClient();
       const sb = supabase.getSupabaseClient();
       await persistOrThrow(
-        sb.from("bio_profiles").update(patch).eq("id", profile.id).select("id"),
+        updateBioProfile(sb, profile.id, patch),
         { db: sb, source: "admin/bio:salvar-perfil", metadata: { profileId: profile.id } },
       );
       setProfile({ ...profile, ...patch });
@@ -196,10 +206,7 @@ export default function AdminBioPage() {
     const sb = supabase.getSupabaseClient();
     try {
       await persistOrThrow(
-        sb
-          .from("bio_links")
-          .insert({ bio_id: profile.id, label: "Novo link", url: "https://", ordem: links.length })
-          .select("id"),
+        insertBioLink(sb, { bio_id: profile.id, label: "Novo link", url: "https://", ordem: links.length }),
         { db: sb, source: "admin/bio:add-link", metadata: { bioId: profile.id } },
       );
       await loadBioData(profile.client_id);
@@ -215,7 +222,7 @@ export default function AdminBioPage() {
     setLinks((prev) => prev.map((l) => (l.id === id ? { ...l, ...patch } : l)));
     try {
       await persistOrThrow(
-        sb.from("bio_links").update(patch).eq("id", id).select("id"),
+        updateBioLink(sb, id, patch),
         { db: sb, source: "admin/bio:update-link", metadata: { linkId: id } },
       );
     } catch (err) {
@@ -230,7 +237,7 @@ export default function AdminBioPage() {
     const sb = supabase.getSupabaseClient();
     try {
       await persistOrThrow(
-        sb.from("bio_links").delete().eq("id", id).select("id"),
+        deleteBioLink(sb, id),
         { db: sb, source: "admin/bio:delete-link", metadata: { linkId: id } },
       );
       await loadBioData(profile.client_id);
@@ -257,10 +264,7 @@ export default function AdminBioPage() {
     const sb = supabase.getSupabaseClient();
     try {
       await persistOrThrow(
-        sb
-          .from("bio_products")
-          .insert({ bio_id: profile.id, nome: "Novo produto", ordem: products.length })
-          .select("id"),
+        insertBioProduct(sb, { bio_id: profile.id, nome: "Novo produto", ordem: products.length }),
         { db: sb, source: "admin/bio:add-product", metadata: { bioId: profile.id } },
       );
       await loadBioData(profile.client_id);
@@ -276,7 +280,7 @@ export default function AdminBioPage() {
     setProducts((prev) => prev.map((p) => (p.id === id ? { ...p, ...patch } : p)));
     try {
       await persistOrThrow(
-        sb.from("bio_products").update(patch).eq("id", id).select("id"),
+        updateBioProduct(sb, id, patch),
         { db: sb, source: "admin/bio:update-product", metadata: { productId: id } },
       );
     } catch (err) {
@@ -291,7 +295,7 @@ export default function AdminBioPage() {
     const sb = supabase.getSupabaseClient();
     try {
       await persistOrThrow(
-        sb.from("bio_products").delete().eq("id", id).select("id"),
+        deleteBioProduct(sb, id),
         { db: sb, source: "admin/bio:delete-product", metadata: { productId: id } },
       );
       await loadBioData(profile.client_id);
