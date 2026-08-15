@@ -168,6 +168,126 @@ describe("validatePlanContent", () => {
     expect(result.ok).toBe(true);
   });
 
+  it("valida status_comercial do diagnostico_comercial", () => {
+    expect(
+      validatePlanContent({ diagnostico_comercial: { status_comercial: "ativo" } }).ok,
+    ).toBe(true);
+    expect(
+      validatePlanContent({ diagnostico_comercial: { status_comercial: "vip" } }).ok,
+    ).toBe(false);
+  });
+
+  it("valida os quatro scores do diagnostico_comercial entre 0 e 100", () => {
+    const valido = validatePlanContent({
+      diagnostico_comercial: {
+        scores: { fitGeral: 95, urgencia: 90, potencialReceita: 85, maturidadeDigital: 60 },
+      },
+    });
+    expect(valido.ok).toBe(true);
+
+    const foraDaFaixa = validatePlanContent({
+      diagnostico_comercial: {
+        scores: { fitGeral: 150, urgencia: 90, potencialReceita: 85, maturidadeDigital: 60 },
+      },
+    });
+    expect(foraDaFaixa.ok).toBe(false);
+
+    const incompleto = validatePlanContent({
+      diagnostico_comercial: { scores: { fitGeral: 95 } },
+    });
+    expect(incompleto.ok).toBe(false);
+  });
+
+  it("exige entrada em produto_recomendado do diagnostico_comercial", () => {
+    expect(
+      validatePlanContent({
+        diagnostico_comercial: { produto_recomendado: { entrada: "Site Essencial" } },
+      }).ok,
+    ).toBe(true);
+    expect(
+      validatePlanContent({ diagnostico_comercial: { produto_recomendado: {} } }).ok,
+    ).toBe(false);
+  });
+
+  it("valida plano_semanal do diagnostico_comercial", () => {
+    const valido = validatePlanContent({
+      diagnostico_comercial: {
+        plano_semanal: [{ semana: 1, titulo: "Centralizar pipeline", acoes: ["Mapear etapas"] }],
+      },
+    });
+    expect(valido.ok).toBe(true);
+
+    const semAcoes = validatePlanContent({
+      diagnostico_comercial: { plano_semanal: [{ semana: 1, titulo: "X" }] },
+    });
+    expect(semAcoes.ok).toBe(false);
+    expect(
+      semAcoes.errors.some((e) => e.includes("plano_semanal[0].acoes")),
+    ).toBe(true);
+
+    const semanaNaoNumerica = validatePlanContent({
+      diagnostico_comercial: { plano_semanal: [{ semana: "um", titulo: "X", acoes: [] }] },
+    });
+    expect(semanaNaoNumerica.ok).toBe(false);
+  });
+
+  it("valida metricas_comerciais do diagnostico_comercial", () => {
+    expect(
+      validatePlanContent({
+        diagnostico_comercial: {
+          metricas_comerciais: [{ nome: "Leads no pipeline", meta: "100%" }],
+        },
+      }).ok,
+    ).toBe(true);
+    expect(
+      validatePlanContent({
+        diagnostico_comercial: { metricas_comerciais: [{ nome: "Leads no pipeline" }] },
+      }).ok,
+    ).toBe(false);
+  });
+
+  it("exige gaps do diagnostico_comercial como lista", () => {
+    expect(
+      validatePlanContent({ diagnostico_comercial: { gaps: ["Manual em aberto"] } }).ok,
+    ).toBe(true);
+    expect(
+      validatePlanContent({ diagnostico_comercial: { gaps: "não-lista" } }).ok,
+    ).toBe(false);
+  });
+
+  it("aceita um diagnostico_comercial completo de exemplo", () => {
+    const result = validatePlanContent({
+      diagnostico_comercial: {
+        data_analise: "2026-06-25",
+        status_comercial: "piloto",
+        perfil: {
+          timeSizeComercial: 2,
+          timeSizeOperacional: 3,
+          faturamentoAtual: "R$20k-R$30k",
+          canaisEntrada: ["indicação", "WhatsApp"],
+        },
+        spin: {
+          situacao: "...",
+          problemas: ["Leads se perdem depois do primeiro contato"],
+          implicacoes: ["Estimativa de 10-30 leads perdidos/mês"],
+          necessidades: ["Pipeline único com etapas claras"],
+        },
+        scores: { fitGeral: 95, urgencia: 90, potencialReceita: 85, maturidadeDigital: 60 },
+        produto_recomendado: {
+          entrada: "Site Essencial ou LP Pro",
+          precoEntrada: "R$987-R$2.997",
+        },
+        plano_semanal: [
+          { semana: 1, titulo: "Centralizar pipeline", acoes: ["Mapear etapas do pipeline"] },
+        ],
+        metricas_comerciais: [{ nome: "Leads 100% no pipeline", meta: "100%" }],
+        gaps: ["Manual de Processos com perguntas em aberto"],
+        observacoes: "Piloto interno.",
+      },
+    });
+    expect(result.ok).toBe(true);
+  });
+
   it("rejeita conteúdo maior que 2MB", () => {
     const gigante = { resumo_executivo: { texto: "x".repeat(3 * 1024 * 1024) } };
     const result = validatePlanContent(gigante);

@@ -111,6 +111,65 @@ export interface CtaAnalise {
   conversao: number;
 }
 
+export interface PerfilComercial {
+  timeSizeComercial?: number;
+  timeSizeOperacional?: number;
+  faturamentoAtual?: string;
+  metaFaturamento?: string;
+  ticketMedio?: string;
+  modelo?: string;
+  canaisEntrada?: string[];
+  volumeLeadsMes?: string;
+  crmAtual?: string;
+}
+
+export interface Spin {
+  situacao?: string;
+  problemas?: string[];
+  implicacoes?: string[];
+  necessidades?: string[];
+}
+
+export interface ScoresComerciais {
+  fitGeral: number;
+  urgencia: number;
+  potencialReceita: number;
+  maturidadeDigital: number;
+}
+
+export interface ProdutoRecomendado {
+  entrada: string;
+  precoEntrada?: string;
+  upsell?: string;
+  precoUpsell?: string;
+  justificativa?: string;
+}
+
+export interface SemanaPlano {
+  semana: number;
+  titulo: string;
+  acoes: string[];
+}
+
+export interface MetricaComercial {
+  nome: string;
+  meta: string;
+  como?: string;
+}
+
+export interface DiagnosticoComercial {
+  data_analise?: string;
+  status_comercial?: "ativo" | "piloto" | "prospecto";
+  perfil?: PerfilComercial;
+  spin?: Spin;
+  scores?: ScoresComerciais;
+  produto_recomendado?: ProdutoRecomendado;
+  plano_semanal?: SemanaPlano[];
+  metricas_comerciais?: MetricaComercial[];
+  gaps?: string[];
+  observacoes?: string;
+}
+
 export interface PlanContent {
   resumo_executivo?: {
     texto: string;
@@ -165,6 +224,7 @@ export interface PlanContent {
     diagnostico?: string;
     plano_crescimento?: string[];
   };
+  diagnostico_comercial?: DiagnosticoComercial;
 }
 
 export interface ValidationResult {
@@ -187,6 +247,7 @@ const KNOWN_SECTIONS: (keyof PlanContent)[] = [
   "collabs",
   "metricas",
   "performance",
+  "diagnostico_comercial",
 ];
 
 // Validação estrutural leve (sem lib externa, mesmo estilo de src/lib/persist.ts):
@@ -325,6 +386,101 @@ export function validatePlanContent(input: unknown): ValidationResult {
     const metricas = content.metricas as Record<string, unknown> | undefined;
     if (!metricas || !Array.isArray(metricas.kpis)) {
       errors.push('"metricas.kpis" precisa ser uma lista.');
+    }
+  }
+
+  if ("diagnostico_comercial" in content) {
+    const dc = content.diagnostico_comercial;
+    if (typeof dc !== "object" || dc === null || Array.isArray(dc)) {
+      errors.push('"diagnostico_comercial" precisa ser um objeto.');
+    } else {
+      const bloco = dc as Record<string, unknown>;
+
+      if ("status_comercial" in bloco) {
+        const status = bloco.status_comercial;
+        if (!["ativo", "piloto", "prospecto"].includes(status as string)) {
+          errors.push(
+            '"diagnostico_comercial.status_comercial" precisa ser "ativo", "piloto" ou "prospecto".',
+          );
+        }
+      }
+
+      if ("scores" in bloco) {
+        const scores = bloco.scores;
+        const campos = ["fitGeral", "urgencia", "potencialReceita", "maturidadeDigital"] as const;
+        if (typeof scores !== "object" || scores === null || Array.isArray(scores)) {
+          errors.push('"diagnostico_comercial.scores" precisa ser um objeto.');
+        } else {
+          for (const campo of campos) {
+            const valor = (scores as Record<string, unknown>)[campo];
+            if (typeof valor !== "number" || valor < 0 || valor > 100) {
+              errors.push(
+                `"diagnostico_comercial.scores.${campo}" precisa ser um número entre 0 e 100.`,
+              );
+            }
+          }
+        }
+      }
+
+      if ("produto_recomendado" in bloco) {
+        const pr = bloco.produto_recomendado;
+        if (
+          typeof pr !== "object" ||
+          pr === null ||
+          Array.isArray(pr) ||
+          typeof (pr as Record<string, unknown>).entrada !== "string" ||
+          !(pr as Record<string, unknown>).entrada
+        ) {
+          errors.push('"diagnostico_comercial.produto_recomendado.entrada" é obrigatório.');
+        }
+      }
+
+      if ("plano_semanal" in bloco) {
+        if (!Array.isArray(bloco.plano_semanal)) {
+          errors.push('"diagnostico_comercial.plano_semanal" precisa ser uma lista.');
+        } else {
+          (bloco.plano_semanal as unknown[]).forEach((item, i) => {
+            const semana = item as Record<string, unknown>;
+            if (!item || typeof item !== "object" || Array.isArray(item)) {
+              errors.push(`"diagnostico_comercial.plano_semanal[${i}]" precisa ser um objeto.`);
+              return;
+            }
+            if (typeof semana.semana !== "number") {
+              errors.push(`"diagnostico_comercial.plano_semanal[${i}].semana" precisa ser um número.`);
+            }
+            if (typeof semana.titulo !== "string" || !semana.titulo) {
+              errors.push(`"diagnostico_comercial.plano_semanal[${i}].titulo" é obrigatório.`);
+            }
+            if (!Array.isArray(semana.acoes)) {
+              errors.push(`"diagnostico_comercial.plano_semanal[${i}].acoes" precisa ser uma lista.`);
+            }
+          });
+        }
+      }
+
+      if ("metricas_comerciais" in bloco) {
+        if (!Array.isArray(bloco.metricas_comerciais)) {
+          errors.push('"diagnostico_comercial.metricas_comerciais" precisa ser uma lista.');
+        } else {
+          (bloco.metricas_comerciais as unknown[]).forEach((item, i) => {
+            const metrica = item as Record<string, unknown>;
+            if (!item || typeof item !== "object" || Array.isArray(item)) {
+              errors.push(`"diagnostico_comercial.metricas_comerciais[${i}]" precisa ser um objeto.`);
+              return;
+            }
+            if (typeof metrica.nome !== "string" || !metrica.nome) {
+              errors.push(`"diagnostico_comercial.metricas_comerciais[${i}].nome" é obrigatório.`);
+            }
+            if (typeof metrica.meta !== "string" || !metrica.meta) {
+              errors.push(`"diagnostico_comercial.metricas_comerciais[${i}].meta" é obrigatório.`);
+            }
+          });
+        }
+      }
+
+      if ("gaps" in bloco && !Array.isArray(bloco.gaps)) {
+        errors.push('"diagnostico_comercial.gaps" precisa ser uma lista.');
+      }
     }
   }
 
