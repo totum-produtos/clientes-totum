@@ -2,9 +2,8 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import Link from "next/link";
-import { createSPASassClient } from "@/lib/supabase/client";
-import { SignInPage } from "@/components/ui/sign-in";
+import { createSPAClient, createSPASassClient } from "@/lib/supabase/client";
+import { LoginScreen } from "@/components/login-screen";
 
 export default function LoginPage() {
   const [email, setEmail] = useState("");
@@ -13,6 +12,14 @@ export default function LoginPage() {
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
   const router = useRouter();
+
+  const [googleLoading, setGoogleLoading] = useState(false);
+  const [googleError, setGoogleError] = useState("");
+
+  const [magicLinkEmail, setMagicLinkEmail] = useState("");
+  const [magicLinkLoading, setMagicLinkLoading] = useState(false);
+  const [magicLinkError, setMagicLinkError] = useState("");
+  const [magicLinkSent, setMagicLinkSent] = useState(false);
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -41,9 +48,46 @@ export default function LoginPage() {
     }
   };
 
+  const handleGoogleClick = async () => {
+    setGoogleError("");
+    setGoogleLoading(true);
+
+    try {
+      const supabase = createSPAClient();
+      const { error: oauthError } = await supabase.auth.signInWithOAuth({
+        provider: "google",
+        options: { redirectTo: `${window.location.origin}/api/auth/callback?next=/app` },
+      });
+      if (oauthError) throw oauthError;
+      // signInWithOAuth navigates away on success; no need to clear loading here.
+    } catch (err) {
+      setGoogleError(err instanceof Error ? err.message : "Ocorreu um erro inesperado");
+      setGoogleLoading(false);
+    }
+  };
+
+  const handleMagicLinkSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    setMagicLinkError("");
+    setMagicLinkLoading(true);
+
+    try {
+      const client = await createSPASassClient();
+      const { error: otpError } = await client.loginMagicLink(
+        magicLinkEmail,
+        `${window.location.origin}/api/auth/callback?next=/app`
+      );
+      if (otpError) throw otpError;
+      setMagicLinkSent(true);
+    } catch (err) {
+      setMagicLinkError(err instanceof Error ? err.message : "Ocorreu um erro inesperado");
+    } finally {
+      setMagicLinkLoading(false);
+    }
+  };
+
   return (
-    <SignInPage
-      brandTagline="Marketing para Resultados"
+    <LoginScreen
       email={email}
       password={password}
       showPassword={showPassword}
@@ -54,21 +98,19 @@ export default function LoginPage() {
       onTogglePassword={() => setShowPassword((v) => !v)}
       onSubmit={handleSubmit}
       onResetPassword={() => router.push("/auth/forgot-password")}
-      footer={
-        <div className="text-center text-sm text-muted-soft space-y-2">
-          <div>
-            <Link href="/auth/magic-link" className="text-totum-secondary hover:text-totum-secondary/80 font-medium transition-colors">
-              Entrar sem senha (Magic Link)
-            </Link>
-          </div>
-          <div>
-            Não tem acesso?{" "}
-            <Link href="/auth/register" className="text-rausch hover:text-rausch-light font-medium transition-colors">
-              Falar com a Totum
-            </Link>
-          </div>
-        </div>
-      }
+      onGoogleClick={handleGoogleClick}
+      googleLoading={googleLoading}
+      googleError={googleError}
+      magicLinkEmail={magicLinkEmail}
+      onMagicLinkEmailChange={setMagicLinkEmail}
+      onMagicLinkSubmit={handleMagicLinkSubmit}
+      magicLinkLoading={magicLinkLoading}
+      magicLinkError={magicLinkError}
+      magicLinkSent={magicLinkSent}
+      onMagicLinkReset={() => {
+        setMagicLinkSent(false);
+        setMagicLinkError("");
+      }}
     />
   );
 }
