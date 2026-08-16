@@ -20,7 +20,8 @@ import {
     Bell,
     LayoutGrid,
     Target,
-    Link2
+    Link2,
+    Brain
 } from 'lucide-react';
 import { useGlobal } from "@/lib/context/GlobalContext";
 import { createSPASassClient } from "@/lib/supabase/client";
@@ -88,6 +89,7 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
             adminOnly: true,
             items: [
                 { name: 'Central de Clientes', href: '/app/gestao-clientes', icon: Building2, clientOnly: false },
+                { name: 'Inteligência Comercial', href: '/app/inteligencia', icon: Brain, clientOnly: false },
                 { name: 'Admin', href: '/app/admin', icon: User, clientOnly: false },
                 { name: 'Pendências', href: '/app/admin/pendencias', icon: List, clientOnly: false },
                 { name: 'Planejamentos (Gestão)', href: '/app/admin/planejamentos', icon: Target, clientOnly: false },
