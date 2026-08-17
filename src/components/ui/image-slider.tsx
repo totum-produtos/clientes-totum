@@ -12,11 +12,10 @@ export interface SliderImage {
 interface ImageSliderProps extends React.HTMLAttributes<HTMLDivElement> {
   images: SliderImage[];
   interval?: number;
-  overlayText?: string;
 }
 
 const ImageSlider = React.forwardRef<HTMLDivElement, ImageSliderProps>(
-  ({ images, interval = 4000, overlayText, className, ...props }, ref) => {
+  ({ images, interval = 4000, className, ...props }, ref) => {
     const [currentIndex, setCurrentIndex] = React.useState(0);
 
     React.useEffect(() => {
@@ -42,20 +41,14 @@ const ImageSlider = React.forwardRef<HTMLDivElement, ImageSliderProps>(
             priority={index === 0}
             sizes="(min-width: 1024px) 50vw, 0px"
             className={cn(
-              "object-cover transition-opacity duration-[900ms] ease-in-out",
+              "object-cover transition-opacity duration-[2000ms] ease-in-out",
               index === currentIndex ? "opacity-100" : "opacity-0"
             )}
           />
         ))}
 
-        {/* Véu escuro — garante contraste do texto sobre imagens claras */}
-        <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-canvas from-5% via-canvas/60 via-45% to-transparent" />
-
-        {overlayText ? (
-          <p className="absolute bottom-16 left-8 right-8 text-[20px] font-light leading-[1.25] text-white-soft">
-            {overlayText}
-          </p>
-        ) : null}
+        {/* Véu escuro — leve, só o suficiente pra sustentar os dots no rodapé */}
+        <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-canvas/20 from-5% via-canvas/12 via-45% to-transparent" />
 
         <div className="absolute bottom-6 left-8 flex gap-2">
           {images.map((_, index) => (
