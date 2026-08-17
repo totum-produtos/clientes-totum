@@ -14,9 +14,6 @@ const SLIDER_IMAGES: SliderImage[] = [
   { src: "/login/slide-03.jpg", alt: "Acompanhamento em tempo real" },
 ];
 
-const SLIDER_OVERLAY_TEXTO =
-  "Seus projetos e entregas da Totum, acompanhados em tempo real.";
-
 const pillButton =
   "inline-flex items-center justify-center gap-2 rounded-full text-[16px] font-normal transition-all duration-300 outline-offset-2 focus-visible:outline focus-visible:outline-1 focus-visible:outline-rausch disabled:pointer-events-none disabled:opacity-50";
 
@@ -84,11 +81,11 @@ export function LoginScreen({
   const [mode, setMode] = React.useState<"password" | "magic-link">("password");
 
   return (
-    <div className="fixed inset-0 flex items-center justify-center bg-white p-4">
-      <div className="grid h-[680px] w-full max-w-5xl grid-cols-1 overflow-hidden rounded-[24px] bg-navy-card shadow-[inset_0_0_0_1px_hsla(0,0%,100%,0.1),inset_0_1px_0_0_hsla(0,0%,100%,0.1)] lg:grid-cols-2">
+    <div className="fixed inset-0 flex items-center justify-center bg-[#1b1728] p-4">
+      <div className="grid h-[680px] w-full max-w-5xl grid-cols-1 overflow-hidden rounded-[24px] bg-[#272333] shadow-[inset_0_0_0_1px_hsla(0,0%,100%,0.1),inset_0_1px_0_0_hsla(0,0%,100%,0.1)] lg:grid-cols-2">
         {/* Slider */}
         <div className="hidden lg:block">
-          <ImageSlider images={SLIDER_IMAGES} interval={4000} overlayText={SLIDER_OVERLAY_TEXTO} />
+          <ImageSlider images={SLIDER_IMAGES} interval={10000} />
         </div>
 
         {/* Formulário */}
@@ -107,7 +104,7 @@ export function LoginScreen({
               Bem-vindo de volta
             </h1>
             <p className="animate-element animate-delay-300 mb-8 text-[20px] font-light leading-[1.25] text-white-soft">
-              Acesse o portal para acompanhar seus projetos.
+              Seus projetos e entregas da Totum, acompanhados em tempo real.
             </p>
 
             {magicLinkSent ? (
@@ -170,7 +167,7 @@ export function LoginScreen({
                     <span className="h-px w-full bg-white/10" />
                   </div>
                   <div className="relative flex justify-center">
-                    <span className="bg-navy-card px-3 text-[12px] text-muted-soft">
+                    <span className="bg-[#272333] px-3 text-[12px] text-muted-soft">
                       {mode === "password" ? "ou continue com e-mail" : "vamos enviar um link de acesso"}
                     </span>
                   </div>
