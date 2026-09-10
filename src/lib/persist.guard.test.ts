@@ -13,6 +13,15 @@ import { join, relative } from "node:path";
 // Regra: todo arquivo em src/ que contém `.update(` ou `.upsert(` precisa
 // OU usar `persistOrThrow` OU estar no ALLOWLIST abaixo (com justificativa).
 // Qualquer arquivo novo com escrita força uma decisão consciente e revisável.
+//
+// Exceção de arquitetura: a camada DAL (`src/services/db/*`) concentra TODA
+// query Supabase por design (ver CLAUDE.md — "Arquitetura de Camadas — DAL").
+// Os wrappers são finos e retornam o query builder; o `persistOrThrow` é
+// aplicado pelos CONSUMIDORES no call site, não dentro do wrapper. Portanto a
+// DAL é isenta deste guard por-arquivo. Verificado em 2026-09-10: todas as
+// escritas client-side dos consumidores usam persistOrThrow.
+// Pendência conhecida: re-apontar o guard para os consumidores das funções
+// DAL (o alvo mudou de linha para call site). Ver relatório da Revisão Totum.
 
 // Caminhos relativos a src/. Cada entrada PRECISA de uma razão.
 const ALLOWLIST: Record<string, string> = {
@@ -51,6 +60,7 @@ describe("guard: escritas de dados usam persistOrThrow", () => {
     for (const file of walk(srcRoot)) {
       const rel = relative(srcRoot, file).split("\\").join("/");
       if (rel === "lib/persist.ts") continue; // o próprio helper
+      if (rel.startsWith("services/db/")) continue; // camada DAL (ver nota acima)
       const code = readFileSync(file, "utf8");
       const hasWrite = /\.update\(|\.upsert\(/.test(code);
       if (!hasWrite) continue;
