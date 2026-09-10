@@ -29,10 +29,8 @@ const nextConfig: NextConfig = {
   images: {
     unoptimized: true,
   },
-  eslint: {
-    // Lint volta a rodar no build — erros de lint barram o deploy.
-    ignoreDuringBuilds: false,
-  },
+  // Next 16 desacoplou o ESLint do build (a chave `eslint` foi removida).
+  // Lint roda via `npm run lint` / CI. Erros de tipo continuam barrando o build.
   typescript: {
     ignoreBuildErrors: false,
   },
