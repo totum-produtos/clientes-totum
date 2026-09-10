@@ -16,16 +16,25 @@ function supabaseOrigins(): { https: string; wss: string } {
 const supabase = supabaseOrigins();
 
 const nextConfig: NextConfig = {
-  output: 'standalone',
-  outputFileTracingRoot: process.cwd(),
-  outputFileTracingExcludes: {
-    "*": [
-      ".claude/**/*",
-      "clientes-totum/**/*",
-      "coverage/**/*",
-      "out/**/*",
-    ],
-  },
+  // `output: 'standalone'` (e o output file tracing) servem ao deploy
+  // Docker/Hostinger planejado. Na Vercel sao desnecessarios e quebram o
+  // build do Next 16 com `ENOENT: .next/next-server.js.nft.json` no passo
+  // de tracing do standalone. Habilita apenas FORA da Vercel (VERCEL=1 e
+  // definido automaticamente no build da Vercel).
+  ...(process.env.VERCEL
+    ? {}
+    : {
+        output: 'standalone' as const,
+        outputFileTracingRoot: process.cwd(),
+        outputFileTracingExcludes: {
+          "*": [
+            ".claude/**/*",
+            "clientes-totum/**/*",
+            "coverage/**/*",
+            "out/**/*",
+          ],
+        },
+      }),
   images: {
     unoptimized: true,
   },
