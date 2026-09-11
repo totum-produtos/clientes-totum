@@ -10,18 +10,21 @@ import { join, relative } from "node:path";
 // foi o bug que perdeu cadastros. Este teste falha o CI se alguém reintroduzir
 // o padrão inseguro.
 //
-// Regra: todo arquivo em src/ que contém `.update(` ou `.upsert(` precisa
-// OU usar `persistOrThrow` OU estar no ALLOWLIST abaixo (com justificativa).
-// Qualquer arquivo novo com escrita força uma decisão consciente e revisável.
+// Duas regras (ambas aceitam `persistOrThrow` no arquivo OU entrada no
+// ALLOWLIST abaixo, com justificativa):
 //
-// Exceção de arquitetura: a camada DAL (`src/services/db/*`) concentra TODA
-// query Supabase por design (ver CLAUDE.md — "Arquitetura de Camadas — DAL").
-// Os wrappers são finos e retornam o query builder; o `persistOrThrow` é
-// aplicado pelos CONSUMIDORES no call site, não dentro do wrapper. Portanto a
-// DAL é isenta deste guard por-arquivo. Verificado em 2026-09-10: todas as
-// escritas client-side dos consumidores usam persistOrThrow.
-// Pendência conhecida: re-apontar o guard para os consumidores das funções
-// DAL (o alvo mudou de linha para call site). Ver relatório da Revisão Totum.
+// 1. ESCRITA CRUA — arquivo fora da DAL que contém `.update(` ou `.upsert(`.
+//    Toda query deveria estar em `src/services/db/*` (CLAUDE.md — DAL), mas se
+//    alguém escrever direto, o guard exige a confirmação de linhas.
+//
+// 2. CHAMADA DE ESCRITA DA DAL — arquivo que importa de `@/services/db/*` e
+//    chama uma função de escrita da DAL. Os wrappers da DAL são finos e
+//    retornam o query builder; quem confirma as linhas é o CONSUMIDOR, no call
+//    site. As funções de escrita são descobertas automaticamente: toda
+//    `export function` de `src/services/db/*` cujo corpo tem `.update(` ou
+//    `.upsert(`. Nova função de escrita na DAL entra no guard sem manutenção.
+//
+// A própria DAL não é checada: ela só monta a query.
 
 // Caminhos relativos a src/. Cada entrada PRECISA de uma razão.
 const ALLOWLIST: Record<string, string> = {
@@ -52,27 +55,58 @@ function walk(dir: string, acc: string[] = []): string[] {
   return acc;
 }
 
+const WRITE = /\.update\(|\.upsert\(/;
+const srcRoot = join(process.cwd(), "src");
+const dalRoot = join(srcRoot, "services", "db");
+
+// Nomes das funções exportadas pela DAL que fazem .update/.upsert.
+function dalWriteFunctions(): string[] {
+  const names: string[] = [];
+  for (const file of walk(dalRoot)) {
+    const code = readFileSync(file, "utf8");
+    for (const chunk of code.split(/(?=export (?:async )?function )/)) {
+      const m = chunk.match(/^export (?:async )?function (\w+)/);
+      if (m && WRITE.test(chunk)) names.push(m[1]);
+    }
+  }
+  return names;
+}
+
 describe("guard: escritas de dados usam persistOrThrow", () => {
-  it("nenhum .update()/.upsert() inseguro fora do allowlist", () => {
-    const srcRoot = join(process.cwd(), "src");
+  const writeFns = dalWriteFunctions();
+  const callRes = writeFns.map((n) => ({ name: n, re: new RegExp(`\\b${n}\\s*\\(`) }));
+
+  it("descobre as funções de escrita da DAL (sanidade do próprio guard)", () => {
+    // Se a detecção quebrar (ex.: refactor da DAL muda o padrão de export),
+    // a regra 2 ficaria vazia e passaria sempre. Isto impede o falso verde.
+    expect(writeFns.length).toBeGreaterThan(0);
+  });
+
+  it("nenhuma escrita insegura fora do allowlist (crua ou via DAL)", () => {
     const offenders: string[] = [];
 
     for (const file of walk(srcRoot)) {
       const rel = relative(srcRoot, file).split("\\").join("/");
       if (rel === "lib/persist.ts") continue; // o próprio helper
-      if (rel.startsWith("services/db/")) continue; // camada DAL (ver nota acima)
+      if (rel.startsWith("services/db/")) continue; // a DAL só monta a query
+
       const code = readFileSync(file, "utf8");
-      const hasWrite = /\.update\(|\.upsert\(/.test(code);
-      if (!hasWrite) continue;
-      const isSafe = code.includes("persistOrThrow");
-      const isAllowed = rel in ALLOWLIST;
-      if (!isSafe && !isAllowed) offenders.push(rel);
+      if (code.includes("persistOrThrow") || rel in ALLOWLIST) continue;
+
+      if (WRITE.test(code)) {
+        offenders.push(`${rel} (escrita crua)`);
+        continue;
+      }
+      if (/from ["']@\/services\/db\//.test(code)) {
+        const called = callRes.filter(({ re }) => re.test(code)).map(({ name }) => name);
+        if (called.length) offenders.push(`${rel} (DAL: ${called.join(", ")})`);
+      }
     }
 
     expect(
       offenders,
-      `Escrita insegura (.update/.upsert sem persistOrThrow). Use persistOrThrow ` +
-        `de @/lib/persist, ou adicione ao ALLOWLIST em persist.guard.test.ts com ` +
+      `Escrita sem persistOrThrow. Envolva a chamada em persistOrThrow ` +
+        `(@/lib/persist) ou adicione ao ALLOWLIST em persist.guard.test.ts com ` +
         `justificativa. Arquivos:\n  ${offenders.join("\n  ")}`,
     ).toEqual([]);
   });
