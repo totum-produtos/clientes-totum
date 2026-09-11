@@ -97,13 +97,16 @@ file_size_limit = "50MiB"
 enabled = true
 # The base URL of your website. Used as an allow-list for redirects and for constructing URLs used
 # in emails.
-# ATENÇÃO: ao rodar `supabase start` na VPS, troque para o domínio real onde o app roda
-# (ex: "https://cliente.grupototum.com"), senão os links de magic link/reset apontam para localhost.
-site_url = "http://localhost:3000"
-# A list of *exact* URLs that auth providers are permitted to redirect to post authentication.
-# Inclua aqui o domínio da VPS + /api/auth/callback (ex: "https://cliente.grupototum.com/**")
-# antes de usar este stack para servir tráfego real.
-additional_redirect_urls = ["https://127.0.0.1:3000/**", "http://localhost:3000/**", "https://localhost:3000/**"]
+# Canonical production domain for magic links, recovery and OAuth callbacks.
+site_url = "https://cliente.grupototum.com"
+# Allowed post-authentication redirect destinations.
+additional_redirect_urls = [
+  "https://cliente.grupototum.com/**",
+  "https://cliente-totum.vercel.app/**",
+  "https://127.0.0.1:3000/**",
+  "http://localhost:3000/**",
+  "https://localhost:3000/**",
+]
 # How long tokens are valid for, in seconds. Defaults to 3600 (1 hour), maximum 604,800 (1 week).
 jwt_expiry = 3600
 # If disabled, the refresh token will never expire.
