@@ -5,6 +5,13 @@ import { useRouter } from "next/navigation";
 import { createSPAClient, createSPASassClient } from "@/lib/supabase/client";
 import { LoginScreen } from "@/components/login-screen";
 
+// SSO do zap: se chegamos com ?redirect_to=<url>, o pós-login volta para /login,
+// que emite o zap_token e redireciona. A validação do domínio fica em /login.
+function postLoginPath(): string {
+  const redirectTo = new URLSearchParams(window.location.search).get("redirect_to");
+  return redirectTo ? `/login?redirect_to=${encodeURIComponent(redirectTo)}` : "/app";
+}
+
 export default function LoginPage() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -39,7 +46,7 @@ export default function LoginPage() {
       if (mfaData.nextLevel === "aal2" && mfaData.nextLevel !== mfaData.currentLevel) {
         router.push("/auth/2fa");
       } else {
-        router.push("/app");
+        router.push(postLoginPath());
       }
     } catch (err) {
       setError(err instanceof Error ? err.message : "Ocorreu um erro inesperado");
@@ -56,7 +63,7 @@ export default function LoginPage() {
       const supabase = createSPAClient();
       const { error: oauthError } = await supabase.auth.signInWithOAuth({
         provider: "google",
-        options: { redirectTo: `${window.location.origin}/api/auth/callback?next=/app` },
+        options: { redirectTo: `${window.location.origin}/api/auth/callback?next=${encodeURIComponent(postLoginPath())}` },
       });
       if (oauthError) throw oauthError;
       // signInWithOAuth navigates away on success; no need to clear loading here.
@@ -75,7 +82,7 @@ export default function LoginPage() {
       const client = await createSPASassClient();
       const { error: otpError } = await client.loginMagicLink(
         magicLinkEmail,
-        `${window.location.origin}/api/auth/callback?next=/app`
+        `${window.location.origin}/api/auth/callback?next=${encodeURIComponent(postLoginPath())}`
       );
       if (otpError) throw otpError;
       setMagicLinkSent(true);
