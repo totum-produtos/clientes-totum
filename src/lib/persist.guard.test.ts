@@ -44,6 +44,8 @@ const ALLOWLIST: Record<string, string> = {
   "components/NotificationBell.tsx": "read-flag de notificação (cosmético)",
   // Template/demo, não grava dados de cliente.
   "lib/supabase/unified.ts": "demo todo_list do template",
+  // Falso positivo: `createHmac(...).update(...)` do node:crypto. Não toca banco.
+  "lib/zap-token.ts": "Hmac.update do node:crypto (assinatura JWT), não é escrita no Supabase",
 };
 
 function walk(dir: string, acc: string[] = []): string[] {
